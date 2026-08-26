@@ -13,11 +13,11 @@
     select, input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
     .btn { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
     .btn:active { background: #218838; }
-    .btn-danger { background: #dc3545; margin-top: 5px; padding: 6px; font-size: 14px; }
+    .btn-danger { background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 12px; }
     .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
     .btn-add { background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
     .resumen { margin-top: 10px; background: #e9ecef; padding: 10px; border-radius: 5px; }
-    .resumen-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+    .resumen-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -83,16 +83,8 @@
     <button class="btn" onclick="enviarComanda()">🚀 ENVIAR A COCINA</button>
   </div>
 
-  <!-- Conexión a la librería Socket.io en tiempo real -->
+  <!-- Conexión a Socket.io y al archivo JS -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
-<!-- Conexión a Socket.io y al script de eventos -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js"></script>
-</body>
-// Agrega esta línea dentro de tu función de enviar pedido en index.html
-if (typeof socket !== 'undefined') {
-    socket.emit('nuevo-pedido', datosDelPedido);
-}
-  
+</html>
