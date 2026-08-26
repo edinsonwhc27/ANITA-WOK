@@ -11,9 +11,7 @@ const io = new Server(server);
 
 const ARCHIVO_VENTAS = path.join(__dirname, 'ventas.json');
 
-// --- FUNCIONES PARA LEER Y GUARDAR EN ARCHIVO JSON ---
-
-// Función para cargar las ventas desde el archivo si existe
+// --- LEER Y GUARDAR VENTAS EN ARCHIVO JSON ---
 function cargarVentas() {
     try {
         if (fs.existsSync(ARCHIVO_VENTAS)) {
@@ -26,7 +24,6 @@ function cargarVentas() {
     return [];
 }
 
-// Función para guardar las ventas en el archivo json
 function guardarVentasEnArchivo(listaVentas) {
     try {
         fs.writeFileSync(ARCHIVO_VENTAS, JSON.stringify(listaVentas, null, 2), 'utf8');
@@ -35,10 +32,10 @@ function guardarVentasEnArchivo(listaVentas) {
     }
 }
 
-// Inicializar la variable de ventas cargando lo guardado en disco
+// Cargar ventas existentes al arrancar
 let ventas = cargarVentas();
 
-// Función auxiliar para obtener la fecha de Perú (YYYY-MM-DD)
+// Fecha en Perú (YYYY-MM-DD)
 function obtenerFechaPeru() {
     const opciones = { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' };
     const [dia, mes, anio] = new Intl.DateTimeFormat('es-PE', opciones).format(new Date()).split('/');
@@ -47,39 +44,34 @@ function obtenerFechaPeru() {
 
 app.use(express.static('public'));
 
-// --- SOCKET.IO: NUEVOS PEDIDOS ---
+// --- SOCKET.IO: RECEPCIÓN Y ENVÍO EN TIEMPO REAL ---
 io.on('connection', (socket) => {
-    console.log('Cliente conectado');
-
     socket.on('nuevo-pedido', (pedido) => {
         const fechaHoy = obtenerFechaPeru();
         const horaActual = new Date().toLocaleTimeString('es-PE', { timeZone: 'America/Lima', hour12: true });
 
         const ventaRegistrada = {
             id: pedido.id || Date.now(),
-            mesa: pedido.mesa,
-            platos: pedido.platos,
-            total: pedido.total,
+            mesa: pedido.mesa || 'Sin mesa',
+            platos: pedido.platos || [],
+            total: parseFloat(pedido.total || 0),
             fecha: fechaHoy,
-            hora: horaActual
+            hora: pedido.hora || horaActual
         };
 
-        // Se agrega a la lista en memoria
+        // Guardar en memoria y en archivo JSON
         ventas.push(ventaRegistrada);
-
-        // PERSISTENCIA: Se guarda inmediatamente en el archivo ventas.json
         guardarVentasEnArchivo(ventas);
 
-        console.log(`[VENTA REGISTRADA] ${pedido.mesa} - Total: S/ ${pedido.total}`);
+        console.log(`[PEDIDO RECIBIDO] ${ventaRegistrada.mesa} - Total: S/ ${ventaRegistrada.total}`);
 
-        // Reenviar a cocina
-        io.emit('pedido-cocina', ventaRegistrada);
+        // Reenviar a la pantalla de cocina usando EL MISMO NOMBRE de evento: nuevo-pedido
+        io.emit('nuevo-pedido', ventaRegistrada);
     });
 });
 
 // --- RUTA: DESCARGAR CIERRE EN EXCEL ---
 app.get('/descargar-cierre', async (req, res) => {
-    // Nos aseguramos de leer los datos actualizados del archivo
     ventas = cargarVentas();
     
     const fechaHoy = obtenerFechaPeru();
@@ -100,9 +92,9 @@ app.get('/descargar-cierre', async (req, res) => {
     let totalGeneral = 0;
 
     ventasHoy.forEach((v) => {
-        const detallePlatos = v.platos
-            .map(p => `${p.cantidad || 1}x ${p.nombre || p.titulo}${p.observacion ? ` (${p.observacion})` : ''}`)
-            .join(', ');
+        const detallePlatos = Array.isArray(v.platos) 
+            ? v.platos.map(p => `${p.cantidad || 1}x ${p.nombre || p.titulo}${p.observacion ? ` (${p.observacion})` : ''}`).join(' | ')
+            : String(v.platos);
 
         worksheet.addRow({
             id: v.id,
@@ -116,10 +108,9 @@ app.get('/descargar-cierre', async (req, res) => {
         totalGeneral += Number(v.total);
     });
 
-    // Fila del Total General
     worksheet.addRow({});
     const filaTotal = worksheet.addRow({
-        mesa: 'TOTAL GENERAL',
+        detalle: `TOTAL GENERAL EN CAJA (${ventasHoy.length} pedidos):`,
         total: totalGeneral
     });
     filaTotal.font = { bold: true };
@@ -133,5 +124,5 @@ app.get('/descargar-cierre', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+    console.log(`Servidor activo en el puerto ${PORT}`);
 });
