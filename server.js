@@ -12,9 +12,9 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-const EXCEL_PATH = path.join(__dirname, 'ventas.xlsx');
+const DB_PATH = path.join(__dirname, 'ventas_db.json');
 
-// Formato de fecha estandarizado AAAA-MM-DD ajustado a Peru (UTC-5)
+// Obtener fecha actual en zona horaria de Peru (AAAA-MM-DD)
 function obtenerFechaPeru() {
     const ahora = new Date();
     const opciones = { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -25,143 +25,126 @@ function obtenerFechaPeru() {
     return `${anio}-${mes}-${dia}`;
 }
 
-// Formato de hora de Peru
+// Obtener hora actual en Peru
 function obtenerHoraPeru() {
     return new Date().toLocaleTimeString('es-PE', { timeZone: 'America/Lima', hour12: true });
 }
 
-// Inicializar base de datos Excel si no existe
-async function inicializarExcel() {
-    if (!fs.existsSync(EXCEL_PATH)) {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Ventas');
-        worksheet.columns = [
-            { header: 'ID Pedido', key: 'id', width: 15 },
-            { header: 'Fecha', key: 'fecha', width: 15 },
-            { header: 'Hora', key: 'hora', width: 12 },
-            { header: 'Mesa / Tipo', key: 'mesa', width: 15 },
-            { header: 'Detalle de Platos', key: 'platos', width: 45 },
-            { header: 'Total (S/)', key: 'total', width: 12 }
-        ];
-        await workbook.xlsx.writeFile(EXCEL_PATH);
+// Cargar pedidos guardados
+function cargarVentas() {
+    if (!fs.existsSync(DB_PATH)) {
+        return [];
     }
-}
-inicializarExcel();
-
-// Guardar cada comanda que envia el mozo
-async function guardarPedidoEnExcel(pedido) {
     try {
-        await inicializarExcel();
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(EXCEL_PATH);
-        const worksheet = workbook.getWorksheet('Ventas');
-
-        const fechaHoy = obtenerFechaPeru();
-        const horaHoy = obtenerHoraPeru();
-        
-        const detallePlatos = (pedido.platos || []).map(p => {
-            const obs = p.observacion ? ` (${p.observacion})` : '';
-            return `${p.cantidad || 1}x ${p.nombre || p.titulo}${obs}`;
-        }).join(' | ');
-
-        worksheet.addRow({
-            id: pedido.id || Date.now(),
-            fecha: fechaHoy,
-            hora: pedido.hora || horaHoy,
-            mesa: pedido.mesa || 'Sin mesa',
-            platos: detallePlatos,
-            total: parseFloat(pedido.total || 0)
-        });
-
-        await workbook.xlsx.writeFile(EXCEL_PATH);
-    } catch (error) {
-        console.error('Error al guardar comanda en Excel:', error);
+        const data = fs.readFileSync(DB_PATH, 'utf8');
+        return JSON.parse(data || '[]');
+    } catch (e) {
+        return [];
     }
 }
 
-// Comunicacion en tiempo real con Socket.io
+// Guardar lista de pedidos
+function guardarVentas(ventas) {
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify(ventas, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Error guardando JSON:', e);
+    }
+}
+
+// Guardar nueva comanda recibida
+function registrarPedido(pedido) {
+    const ventas = cargarVentas();
+    const fechaHoy = obtenerFechaPeru();
+    const horaHoy = obtenerHoraPeru();
+
+    const detallePlatos = (pedido.platos || []).map(p => {
+        const obs = p.observacion ? ` (${p.observacion})` : '';
+        return `${p.cantidad || 1}x ${p.nombre || p.titulo}${obs}`;
+    }).join(' | ');
+
+    const nuevoRegistro = {
+        id: pedido.id || Date.now(),
+        fecha: fechaHoy,
+        hora: pedido.hora || horaHoy,
+        mesa: pedido.mesa || 'Sin ubicación',
+        platos: detallePlatos || 'Sin detalle',
+        total: parseFloat(pedido.total || 0)
+    };
+
+    ventas.push(nuevoRegistro);
+    guardarVentas(ventas);
+    console.log(`[OK] Pedido guardado en memoria. ID: ${nuevoRegistro.id} | Total: S/ ${nuevoRegistro.total}`);
+}
+
+// WebSockets para tiempo real
 io.on('connection', (socket) => {
-    socket.on('nuevo-pedido', async (datos) => {
-        await guardarPedidoEnExcel(datos);
+    socket.on('nuevo-pedido', (datos) => {
+        registrarPedido(datos);
         io.emit('nuevo-pedido', datos);
     });
 });
 
-// Ruta para descargar el Cierre de Caja del dia
+// Descarga directa de Excel de Cierre de Caja
 app.get('/descargar-cierre', async (req, res) => {
     try {
-        if (!fs.existsSync(EXCEL_PATH)) {
-            return res.status(404).send('No hay registros de ventas guardados aun.');
-        }
-
-        const workbookLectura = new ExcelJS.Workbook();
-        await workbookLectura.xlsx.readFile(EXCEL_PATH);
-        const worksheetLectura = workbookLectura.getWorksheet('Ventas');
-
+        const ventas = cargarVentas();
         const fechaHoy = obtenerFechaPeru();
 
-        const workbookCierre = new ExcelJS.Workbook();
-        const sheetCierre = workbookCierre.addWorksheet('Cierre del Dia');
+        // Filtrar pedidos del dia actual
+        const ventasHoy = ventas.filter(v => v.fecha === fechaHoy);
 
-        sheetCierre.columns = [
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Cierre del Dia');
+
+        sheet.columns = [
             { header: 'ID Pedido', key: 'id', width: 15 },
             { header: 'Fecha', key: 'fecha', width: 15 },
-            { header: 'Hora', key: 'hora', width: 12 },
-            { header: 'Mesa / Tipo', key: 'mesa', width: 15 },
-            { header: 'Detalle de Platos', key: 'platos', width: 45 },
-            { header: 'Total (S/)', key: 'total', width: 12 }
+            { header: 'Hora', key: 'hora', width: 15 },
+            { header: 'Mesa / Tipo', key: 'mesa', width: 18 },
+            { header: 'Detalle de Platos', key: 'platos', width: 50 },
+            { header: 'Total (S/)', key: 'total', width: 15 }
         ];
 
-        let sumaTotalDia = 0;
-        let cantidadPedidos = 0;
+        let sumaTotal = 0;
 
-        worksheetLectura.eachRow((row, rowNumber) => {
-            if (rowNumber > 1) {
-                const fechaFila = String(row.getCell(2).value).trim();
-                
-                if (fechaFila === fechaHoy || fechaFila.includes(fechaHoy)) {
-                    const totalFila = parseFloat(row.getCell(6).value) || 0;
-                    sumaTotalDia += totalFila;
-                    cantidadPedidos++;
-
-                    sheetCierre.addRow({
-                        id: row.getCell(1).value,
-                        fecha: fechaFila,
-                        hora: row.getCell(3).value,
-                        mesa: row.getCell(4).value,
-                        platos: row.getCell(5).value,
-                        total: totalFila
-                    });
-                }
-            }
+        ventasHoy.forEach(v => {
+            sumaTotal += v.total;
+            sheet.addRow({
+                id: v.id,
+                fecha: v.fecha,
+                hora: v.hora,
+                mesa: v.mesa,
+                platos: v.platos,
+                total: v.total
+            });
         });
 
-        // Fila final de resumen
-        sheetCierre.addRow({});
-        const filaTotal = sheetCierre.addRow({
-            platos: `TOTAL GENERAL DEL DIA (${cantidadPedidos} pedidos):`,
-            total: sumaTotalDia
+        sheet.addRow({});
+        const filaResumen = sheet.addRow({
+            platos: `TOTAL GENERAL EN CAJA (${ventasHoy.length} pedidos):`,
+            total: sumaTotal
         });
-        filaTotal.font = { bold: true };
+        filaResumen.font = { bold: true };
 
         const nombreArchivo = `Cierre_Caja_${fechaHoy}.xlsx`;
-        const rutaTemporal = path.join(__dirname, nombreArchivo);
+        const rutaArchivo = path.join(__dirname, nombreArchivo);
 
-        await workbookCierre.xlsx.writeFile(rutaTemporal);
+        await workbook.xlsx.writeFile(rutaArchivo);
 
-        res.download(rutaTemporal, nombreArchivo, () => {
-            if (fs.existsSync(rutaTemporal)) {
-                fs.unlinkSync(rutaTemporal);
+        res.download(rutaArchivo, nombreArchivo, () => {
+            if (fs.existsSync(rutaArchivo)) {
+                fs.unlinkSync(rutaArchivo);
             }
         });
 
     } catch (error) {
-        console.error('Error al generar cierre:', error);
-        res.status(500).send('Error al generar el reporte.');
+        console.error('Error al generar Excel de Cierre:', error);
+        res.status(500).send('Error interno al generar el cierre de caja.');
     }
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Servidor activo en puerto ${PORT}`);
+    console.log(`Servidor de comanda activo en el puerto ${PORT}`);
 });
