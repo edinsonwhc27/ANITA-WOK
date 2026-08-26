@@ -1,150 +1,137 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const ExcelJS = require('exceljs');
-const path = require('path');
+const exceljs = require('exceljs');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+const ARCHIVO_VENTAS = path.join(__dirname, 'ventas.json');
 
-const DB_PATH = path.join(__dirname, 'ventas_db.json');
+// --- FUNCIONES PARA LEER Y GUARDAR EN ARCHIVO JSON ---
 
-// Obtener fecha actual en zona horaria de Peru (AAAA-MM-DD)
+// Función para cargar las ventas desde el archivo si existe
+function cargarVentas() {
+    try {
+        if (fs.existsSync(ARCHIVO_VENTAS)) {
+            const data = fs.readFileSync(ARCHIVO_VENTAS, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('Error al leer el archivo de ventas:', error);
+    }
+    return [];
+}
+
+// Función para guardar las ventas en el archivo json
+function guardarVentasEnArchivo(listaVentas) {
+    try {
+        fs.writeFileSync(ARCHIVO_VENTAS, JSON.stringify(listaVentas, null, 2), 'utf8');
+    } catch (error) {
+        console.error('Error al guardar el archivo de ventas:', error);
+    }
+}
+
+// Inicializar la variable de ventas cargando lo guardado en disco
+let ventas = cargarVentas();
+
+// Función auxiliar para obtener la fecha de Perú (YYYY-MM-DD)
 function obtenerFechaPeru() {
-    const ahora = new Date();
     const opciones = { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' };
-    const partes = new Intl.DateTimeFormat('en-CA', opciones).formatToParts(ahora);
-    const anio = partes.find(p => p.type === 'year').value;
-    const mes = partes.find(p => p.type === 'month').value;
-    const dia = partes.find(p => p.type === 'day').value;
+    const [dia, mes, anio] = new Intl.DateTimeFormat('es-PE', opciones).format(new Date()).split('/');
     return `${anio}-${mes}-${dia}`;
 }
 
-// Obtener hora actual en Peru
-function obtenerHoraPeru() {
-    return new Date().toLocaleTimeString('es-PE', { timeZone: 'America/Lima', hour12: true });
-}
+app.use(express.static('public'));
 
-// Cargar pedidos guardados
-function cargarVentas() {
-    if (!fs.existsSync(DB_PATH)) {
-        return [];
-    }
-    try {
-        const data = fs.readFileSync(DB_PATH, 'utf8');
-        return JSON.parse(data || '[]');
-    } catch (e) {
-        return [];
-    }
-}
-
-// Guardar lista de pedidos
-function guardarVentas(ventas) {
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify(ventas, null, 2), 'utf8');
-    } catch (e) {
-        console.error('Error guardando JSON:', e);
-    }
-}
-
-// Guardar nueva comanda recibida
-function registrarPedido(pedido) {
-    const ventas = cargarVentas();
-    const fechaHoy = obtenerFechaPeru();
-    const horaHoy = obtenerHoraPeru();
-
-    const detallePlatos = (pedido.platos || []).map(p => {
-        const obs = p.observacion ? ` (${p.observacion})` : '';
-        return `${p.cantidad || 1}x ${p.nombre || p.titulo}${obs}`;
-    }).join(' | ');
-
-    const nuevoRegistro = {
-        id: pedido.id || Date.now(),
-        fecha: fechaHoy,
-        hora: pedido.hora || horaHoy,
-        mesa: pedido.mesa || 'Sin ubicación',
-        platos: detallePlatos || 'Sin detalle',
-        total: parseFloat(pedido.total || 0)
-    };
-
-    ventas.push(nuevoRegistro);
-    guardarVentas(ventas);
-    console.log(`[OK] Pedido guardado en memoria. ID: ${nuevoRegistro.id} | Total: S/ ${nuevoRegistro.total}`);
-}
-
-// WebSockets para tiempo real
+// --- SOCKET.IO: NUEVOS PEDIDOS ---
 io.on('connection', (socket) => {
-    socket.on('nuevo-pedido', (datos) => {
-        registrarPedido(datos);
-        io.emit('nuevo-pedido', datos);
+    console.log('Cliente conectado');
+
+    socket.on('nuevo-pedido', (pedido) => {
+        const fechaHoy = obtenerFechaPeru();
+        const horaActual = new Date().toLocaleTimeString('es-PE', { timeZone: 'America/Lima', hour12: true });
+
+        const ventaRegistrada = {
+            id: pedido.id || Date.now(),
+            mesa: pedido.mesa,
+            platos: pedido.platos,
+            total: pedido.total,
+            fecha: fechaHoy,
+            hora: horaActual
+        };
+
+        // Se agrega a la lista en memoria
+        ventas.push(ventaRegistrada);
+
+        // PERSISTENCIA: Se guarda inmediatamente en el archivo ventas.json
+        guardarVentasEnArchivo(ventas);
+
+        console.log(`[VENTA REGISTRADA] ${pedido.mesa} - Total: S/ ${pedido.total}`);
+
+        // Reenviar a cocina
+        io.emit('pedido-cocina', ventaRegistrada);
     });
 });
 
-// Descarga directa de Excel de Cierre de Caja
+// --- RUTA: DESCARGAR CIERRE EN EXCEL ---
 app.get('/descargar-cierre', async (req, res) => {
-    try {
-        const ventas = cargarVentas();
-        const fechaHoy = obtenerFechaPeru();
+    // Nos aseguramos de leer los datos actualizados del archivo
+    ventas = cargarVentas();
+    
+    const fechaHoy = obtenerFechaPeru();
+    const ventasHoy = ventas.filter(v => v.fecha === fechaHoy);
 
-        // Filtrar pedidos del dia actual
-        const ventasHoy = ventas.filter(v => v.fecha === fechaHoy);
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('Cierre de Caja');
 
-        const workbook = new ExcelJS.Workbook();
-        const sheet = workbook.addWorksheet('Cierre del Dia');
+    worksheet.columns = [
+        { header: 'ID Pedido', key: 'id', width: 15 },
+        { header: 'Fecha', key: 'fecha', width: 15 },
+        { header: 'Hora', key: 'hora', width: 15 },
+        { header: 'Ubicación / Mesa', key: 'mesa', width: 20 },
+        { header: 'Detalle de Platos', key: 'detalle', width: 45 },
+        { header: 'Total (S/)', key: 'total', width: 15 }
+    ];
 
-        sheet.columns = [
-            { header: 'ID Pedido', key: 'id', width: 15 },
-            { header: 'Fecha', key: 'fecha', width: 15 },
-            { header: 'Hora', key: 'hora', width: 15 },
-            { header: 'Mesa / Tipo', key: 'mesa', width: 18 },
-            { header: 'Detalle de Platos', key: 'platos', width: 50 },
-            { header: 'Total (S/)', key: 'total', width: 15 }
-        ];
+    let totalGeneral = 0;
 
-        let sumaTotal = 0;
+    ventasHoy.forEach((v) => {
+        const detallePlatos = v.platos
+            .map(p => `${p.cantidad || 1}x ${p.nombre || p.titulo}${p.observacion ? ` (${p.observacion})` : ''}`)
+            .join(', ');
 
-        ventasHoy.forEach(v => {
-            sumaTotal += v.total;
-            sheet.addRow({
-                id: v.id,
-                fecha: v.fecha,
-                hora: v.hora,
-                mesa: v.mesa,
-                platos: v.platos,
-                total: v.total
-            });
+        worksheet.addRow({
+            id: v.id,
+            fecha: v.fecha,
+            hora: v.hora,
+            mesa: v.mesa,
+            detalle: detallePlatos,
+            total: Number(v.total)
         });
 
-        sheet.addRow({});
-        const filaResumen = sheet.addRow({
-            platos: `TOTAL GENERAL EN CAJA (${ventasHoy.length} pedidos):`,
-            total: sumaTotal
-        });
-        filaResumen.font = { bold: true };
+        totalGeneral += Number(v.total);
+    });
 
-        const nombreArchivo = `Cierre_Caja_${fechaHoy}.xlsx`;
-        const rutaArchivo = path.join(__dirname, nombreArchivo);
+    // Fila del Total General
+    worksheet.addRow({});
+    const filaTotal = worksheet.addRow({
+        mesa: 'TOTAL GENERAL',
+        total: totalGeneral
+    });
+    filaTotal.font = { bold: true };
 
-        await workbook.xlsx.writeFile(rutaArchivo);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=Cierre_Caja_${fechaHoy}.xlsx`);
 
-        res.download(rutaArchivo, nombreArchivo, () => {
-            if (fs.existsSync(rutaArchivo)) {
-                fs.unlinkSync(rutaArchivo);
-            }
-        });
-
-    } catch (error) {
-        console.error('Error al generar Excel de Cierre:', error);
-        res.status(500).send('Error interno al generar el cierre de caja.');
-    }
+    await workbook.xlsx.write(res);
+    res.end();
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Servidor de comanda activo en el puerto ${PORT}`);
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
