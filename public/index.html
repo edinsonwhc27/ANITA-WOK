@@ -1,1 +1,89 @@
-public/index.html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comandas - Mozos</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f4f4f9; padding: 15px; }
+    h1 { text-align: center; color: #333; margin-bottom: 15px; font-size: 22px; }
+    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+    select, input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+    .btn { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .btn:active { background: #218838; }
+    .btn-danger { background: #dc3545; margin-top: 5px; padding: 6px; font-size: 14px; }
+    .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .btn-add { background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    .resumen { margin-top: 10px; background: #e9ecef; padding: 10px; border-radius: 5px; }
+    .resumen-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <h1>📱 Tomar Comanda</h1>
+
+  <!-- Selección de Mesa -->
+  <div class="card">
+    <label for="mesa">Número de Mesa:</label>
+    <select id="mesa">
+      <option value="Mesa 1">Mesa 1</option>
+      <option value="Mesa 2">Mesa 2</option>
+      <option value="Mesa 3">Mesa 3</option>
+      <option value="Mesa 4">Mesa 4</option>
+      <option value="Mesa 5">Mesa 5</option>
+      <option value="Mesa 6">Mesa 6</option>
+      <option value="Mesa 7">Mesa 7</option>
+      <option value="Mesa 8">Mesa 8</option>
+      <option value="Mesa 9">Mesa 9</option>
+      <option value="Mesa 10">Mesa 10</option>
+      <option value="Mesa 11">Mesa 11</option>
+      <option value="Mesa 12">Mesa 12</option>
+      <option value="Mesa 13">Mesa 13</option>
+      <option value="Mesa 14">Mesa 14</option>
+      <option value="Mesa 15">Mesa 15</option>
+      <option value="Llevar">Para Llevar</option>
+    </select>
+  </div>
+
+  <!-- Menú de Platos -->
+  <div class="card">
+    <label>Menú de Platos / Bebidas:</label>
+    
+    <div class="menu-item">
+      <span>Ceviche Simple</span>
+      <button class="btn-add" onclick="agregarAlPedido('Ceviche Simple')">+ Agregar</button>
+    </div>
+    <div class="menu-item">
+      <span>Lomo Saltado</span>
+      <button class="btn-add" onclick="agregarAlPedido('Lomo Saltado')">+ Agregar</button>
+    </div>
+    <div class="menu-item">
+      <span>Arroz con Pollo</span>
+      <button class="btn-add" onclick="agregarAlPedido('Arroz con Pollo')">+ Agregar</button>
+    </div>
+    <div class="menu-item">
+      <span>Inca Kola 1L</span>
+      <button class="btn-add" onclick="agregarAlPedido('Inca Kola 1L')">+ Agregar</button>
+    </div>
+    <div class="menu-item">
+      <span>Chicha Morada 1L</span>
+      <button class="btn-add" onclick="agregarAlPedido('Chicha Morada 1L')">+ Agregar</button>
+    </div>
+  </div>
+
+  <!-- Resumen del Pedido -->
+  <div class="card">
+    <label>Resumen del Pedido Actual:</label>
+    <div id="lista-pedido" class="resumen">
+      <p style="color: #777; text-align: center;">No hay platos agregados</p>
+    </div>
+    <br>
+    <button class="btn" onclick="enviarComanda()">🚀 ENVIAR A COCINA</button>
+  </div>
+
+  <!-- Conexión a la librería Socket.io en tiempo real -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
