@@ -25,10 +25,8 @@
     .btn-add { background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
     .btn-send { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
     .btn-cierre { background: #d32f2f; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .btn-danger { background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 12px; }
     
     .resumen { background: #e9ecef; padding: 10px; border-radius: 5px; }
-    .resumen-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -77,10 +75,9 @@
     <button class="btn-send" onclick="enviarComanda()">🚀 ENVIAR A COCINA</button>
   </div>
 
-  <!-- CONTROL DE CAJA DEL DIA -->
   <div class="card" style="text-align: center; background: #fff3cd; border: 2px solid #ffeeba;">
     <label style="color: #856404; font-size: 16px;">📊 CONTROL DE CAJA DEL DÍA</label>
-    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Descarga la hoja de Excel con todas las ventas registradas el día de hoy.</p>
+    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Presiona el botón para descargar el Excel con las comandas registradas el día de hoy.</p>
     <button class="btn-cierre" onclick="descargarCierre()">🔒 CERRAR CAJA Y DESCARGAR EXCEL</button>
   </div>
 
