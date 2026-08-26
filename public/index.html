@@ -12,15 +12,10 @@
     label { font-weight: bold; display: block; margin-bottom: 5px; color: #333; }
     select, input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 15px; }
     
-    /* Categorías / Pestañas */
     .tabs { display: flex; gap: 5px; overflow-x: auto; margin-bottom: 10px; padding-bottom: 5px; }
     .tab-btn { background: #e0e0e0; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; white-space: nowrap; }
     .tab-btn.active { background: #d32f2f; color: white; }
-    
-    .category-section { display: none; }
-    .category-section.active { display: block; }
 
-    /* Grilla de Platos */
     .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
     .menu-card { border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px; text-align: center; background: #fafafa; display: flex; flex-direction: column; justify-content: space-between; }
     .menu-card img { width: 100%; height: 80px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; background: #eee; }
@@ -28,21 +23,18 @@
     .menu-card-price { font-size: 14px; font-weight: bold; color: #28a745; margin-bottom: 6px; }
     
     .btn-add { background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-    .btn-add:active { background: #0056b3; }
-    
     .btn-send { background: #28a745; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .btn-cierre { background: #d32f2f; color: white; border: none; padding: 12px; width: 100%; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
     .btn-danger { background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 12px; }
     
     .resumen { background: #e9ecef; padding: 10px; border-radius: 5px; }
     .resumen-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 14px; }
-    .obs-text { font-size: 11px; color: #d32f2f; display: block; }
   </style>
 </head>
 <body>
 
   <h1>🥢 ANITA-WOK</h1>
 
-  <!-- Selección de Tipo / Mesa -->
   <div class="card">
     <label for="mesa">Tipo de Pedido / Ubicación:</label>
     <select id="mesa" onchange="cambiarTipoPedido()">
@@ -65,7 +57,6 @@
     </select>
   </div>
 
-  <!-- Pestañas de Categorías -->
   <div class="tabs">
     <button class="tab-btn active" onclick="verCategoria('chifa')">Chifa y Criollo</button>
     <button class="tab-btn" onclick="verCategoria('compartir')">Compartidos</button>
@@ -73,12 +64,10 @@
     <button class="tab-btn" onclick="verCategoria('extras')">Extras</button>
   </div>
 
-  <!-- Contenedor del Menú -->
   <div class="card">
     <div id="contenedor-menu"></div>
   </div>
 
-  <!-- Resumen del Pedido -->
   <div class="card">
     <label>Resumen del Pedido:</label>
     <div id="lista-pedido" class="resumen">
@@ -88,7 +77,19 @@
     <button class="btn-send" onclick="enviarComanda()">🚀 ENVIAR A COCINA</button>
   </div>
 
+  <!-- BOTÓN CIERRE DE CAJA -->
+  <div class="card" style="text-align: center; background: #fff3cd; border: 2px solid #ffeeba;">
+    <label style="color: #856404; font-size: 16px;">📊 CONTROL DE CAJA DEL DÍA</label>
+    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Al finalizar el turno, presiona el botón para descargar la hoja de Excel con el total vendido hoy.</p>
+    <button class="btn-cierre" onclick="descargarCierre()">🔒 CERRAR CAJA Y DESCARGAR EXCEL</button>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
+  <script>
+    function descargarCierre() {
+      window.location.href = '/descargar-cierre';
+    }
+  </script>
 </body>
 </html>
