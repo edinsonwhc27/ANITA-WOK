@@ -91,3 +91,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
 </body>
+// Agrega esta línea dentro de tu función de enviar pedido en index.html
+if (typeof socket !== 'undefined') {
+    socket.emit('nuevo-pedido', datosDelPedido);
+}
+  
