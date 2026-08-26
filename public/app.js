@@ -4,20 +4,18 @@ const socket = io();
 // Lista para guardar el pedido en memoria
 let pedido = [];
 
-// 1. Agregar plato o sumar cantidad
+// --- LÓGICA MOZOS (index.html) ---
+
 function agregarAlPedido(nombrePlato) {
     const platoExistente = pedido.find(item => item.nombre === nombrePlato);
-
     if (platoExistente) {
         platoExistente.cantidad += 1;
     } else {
         pedido.push({ nombre: nombrePlato, cantidad: 1 });
     }
-
     actualizarResumenHTML();
 }
 
-// 2. Dibujar la lista de platos en el resumen
 function actualizarResumenHTML() {
     const contenedorResumen = document.getElementById('lista-pedido');
     if (!contenedorResumen) return;
@@ -40,13 +38,11 @@ function actualizarResumenHTML() {
     contenedorResumen.innerHTML = html;
 }
 
-// 3. Quitar plato de la lista
 function eliminarDelPedido(index) {
     pedido.splice(index, 1);
     actualizarResumenHTML();
 }
 
-// 4. Enviar la comanda a Socket.io / Cocina
 function enviarComanda() {
     const selectorMesa = document.getElementById('mesa');
     const mesaSeleccionada = selectorMesa ? selectorMesa.value : 'Mesa Sin Definir';
@@ -57,22 +53,24 @@ function enviarComanda() {
     }
 
     const datosPedido = {
+        id: Date.now(), // ID único para identificar la comanda
         mesa: mesaSeleccionada,
         platos: pedido,
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Emitir el evento hacia el servidor
     socket.emit('nuevo-pedido', datosPedido);
 
-    // Resetear el pedido actual
     pedido = [];
     actualizarResumenHTML();
     alert(`¡Pedido enviado a la cocina con éxito para la ${mesaSeleccionada}!`);
 }
 
-// 5. Escuchar pedidos en la pantalla de Cocina (cocina.html)
+
+// --- LÓGICA COCINA (cocina.html) ---
+
 const contenedorComandas = document.getElementById('contenedor-comandas');
+
 if (contenedorComandas) {
     socket.on('nuevo-pedido', (datos) => {
         const mensajeVacio = contenedorComandas.querySelector('p');
@@ -82,6 +80,7 @@ if (contenedorComandas) {
 
         const tarjeta = document.createElement('div');
         tarjeta.className = 'comanda-card';
+        tarjeta.id = `comanda-${datos.id}`;
 
         let itemsHtml = '';
         if (datos.platos && Array.isArray(datos.platos)) {
@@ -96,12 +95,33 @@ if (contenedorComandas) {
                 ${itemsHtml}
             </ul>
             <div class="acciones">
-                <button class="btn btn-preparar">En Preparación</button>
-                <button class="btn btn-listo">Listo</button>
-                <button class="btn btn-entregado">Entregado</button>
+                <button class="btn btn-preparar" onclick="cambiarEstado(this, 'preparando')">En Preparación</button>
+                <button class="btn btn-listo" onclick="cambiarEstado(this, 'listo')">Listo</button>
+                <button class="btn btn-entregado" onclick="eliminarComanda(this)">Entregado / Borrar</button>
             </div>
         `;
 
         contenedorComandas.appendChild(tarjeta);
     });
+}
+
+// Funciones para interactuar con la comanda en la cocina
+function cambiarEstado(boton, estado) {
+    const tarjeta = boton.closest('.comanda-card');
+    if (estado === 'preparando') {
+        tarjeta.style.border = '2px solid #ffc107';
+    } else if (estado === 'listo') {
+        tarjeta.style.border = '2px solid #28a745';
+        tarjeta.style.opacity = '0.7';
+    }
+}
+
+function eliminarComanda(boton) {
+    const tarjeta = boton.closest('.comanda-card');
+    tarjeta.remove();
+
+    // Si no quedan más comandas, muestra el mensaje por defecto
+    if (contenedorComandas.children.length === 0) {
+        contenedorComandas.innerHTML = '<p style="color: #aaa; text-align: center; width: 100%; margin-top: 30px;">Esperando comandas...</p>';
+    }
 }
