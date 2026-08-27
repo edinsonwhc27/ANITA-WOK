@@ -1,14 +1,13 @@
 // ==========================================
 // ANITA-WOK - SISTEMA DE COMANDAS & CARTA COMPLETA
-// Lógica de Precios Dinámicos (Mesa / Llevar / Delivery)
 // ==========================================
 
 const socket = io();
 
-// Array de ventas registradas en la sesión activa para el Cierre de Caja
+// Array de ventas acumuladas
 let historialVentas = [];
 
-// Base de Datos Oficial con Tarifas Diferenciadas (Mesa y Llevar/Delivery)
+// Base de Datos Oficial (47 Productos)
 const productos = [
   // 1. CHIFA Y CRIOLLO
   { id: 1, cat: 'chifa', nombre: 'Chaufa de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Arroz salteado al wok, trozos de pollo, huevo, sillao y cebollita china.', img: 'https://cdn.blog.paulinacocina.net/wp-content/uploads/2021/12/arroz-chaufa-peruano-receta.jpg' },
@@ -64,17 +63,15 @@ const productos = [
   { id: 47, cat: 'extras', nombre: 'Chorizo Frito', mesa: 4.00, llevar: 4.00, desc: 'Porción de chorizo ahumado frito al wok.', img: 'https://i.blogs.es/3a13ea/chorizo-frito-arguinano/1200_630.jpeg' }
 ];
 
-// Estado global
 let pedido = [];
 let categoriaActual = 'chifa';
 
-// Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   renderMenu();
   actualizarResumenHTML();
 });
 
-// 1. Renderizar Menú de Platos (Grid de 3 Columnas)
+// Renderizar Menú de Platos
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
   if (!contenedor) return;
@@ -85,11 +82,6 @@ function renderMenu() {
 
   const productosFiltrados = productos.filter(p => p.cat === categoriaActual);
   contenedor.innerHTML = '';
-
-  if (productosFiltrados.length === 0) {
-    contenedor.innerHTML = '<div class="col-12 text-center text-muted py-4">No hay productos en esta categoría.</div>';
-    return;
-  }
 
   productosFiltrados.forEach(p => {
     const precio = esLlevarODelivery ? p.llevar : p.mesa;
@@ -111,7 +103,7 @@ function renderMenu() {
   });
 }
 
-// 2. Filtro de Categorías
+// Filtro de Categorías
 function verCategoria(cat, btnElement) {
   categoriaActual = cat;
   if (btnElement) {
@@ -125,12 +117,19 @@ function verCategoria(cat, btnElement) {
   renderMenu();
 }
 
-// 3. Cambiar Tipo de Pedido (Mesa / Llevar / Delivery)
+// Opciones de Ubicación (Mesa / Llevar / Delivery)
 function cambiarTipoPedido() {
   const selectorMesa = document.getElementById('mesa');
+  const contenedorDelivery = document.getElementById('contenedor-recargo-delivery');
   const opcion = selectorMesa ? selectorMesa.value : '';
-  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
+  if (opcion === 'Delivery') {
+    contenedorDelivery.classList.remove('d-none');
+  } else {
+    contenedorDelivery.classList.add('d-none');
+  }
+
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
   pedido.forEach(item => {
     const prod = productos.find(p => p.id === item.id);
     if (prod) {
@@ -142,7 +141,7 @@ function cambiarTipoPedido() {
   actualizarResumenHTML();
 }
 
-// 4. Agregar Plato a la Comanda
+// Agregar Plato al Pedido
 function agregarAlPedido(idProd) {
   const selectorMesa = document.getElementById('mesa');
   const opcion = selectorMesa ? selectorMesa.value : '';
@@ -169,7 +168,6 @@ function agregarAlPedido(idProd) {
   actualizarResumenHTML();
 }
 
-// 5. Cambiar Cantidad desde la Comanda
 function cambiarCantidad(index, cambio) {
   if (pedido[index]) {
     pedido[index].cantidad += cambio;
@@ -180,17 +178,19 @@ function cambiarCantidad(index, cambio) {
   actualizarResumenHTML();
 }
 
-// 6. Actualizar Observación por Plato
 function actualizarObservacion(index, texto) {
   if (pedido[index]) {
     pedido[index].observacion = texto;
   }
 }
 
-// 7. Renderizar Panel Lateral (Comanda Activa)
+// Actualizar Comanda Activa
 function actualizarResumenHTML() {
   const contenedorResumen = document.getElementById('lista-pedido');
   const badgeTotal = document.getElementById('badge-total-items');
+  const selectorMesa = document.getElementById('mesa');
+  const selectorDelivery = document.getElementById('recargo-delivery');
+
   if (!contenedorResumen) return;
 
   const totalCantidad = pedido.reduce((sum, item) => sum + item.cantidad, 0);
@@ -202,18 +202,18 @@ function actualizarResumenHTML() {
   }
 
   let html = '<div class="d-flex flex-column gap-2">';
-  let totalGeneral = 0;
+  let subtotalPlatos = 0;
 
   pedido.forEach((item, index) => {
-    const subtotal = item.precio * item.cantidad;
-    totalGeneral += subtotal;
+    const sub = item.precio * item.cantidad;
+    subtotalPlatos += sub;
 
     html += `
       <div class="bg-white p-2 rounded border shadow-sm">
         <div class="d-flex justify-content-between align-items-center">
           <div style="flex: 1; padding-right: 5px;">
             <div class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.1;">${item.nombre}</div>
-            <small class="text-danger fw-bold" style="font-size: 0.78rem;">S/ ${subtotal.toFixed(2)}</small>
+            <small class="text-danger fw-bold" style="font-size: 0.78rem;">S/ ${sub.toFixed(2)}</small>
           </div>
           <div class="d-flex align-items-center gap-1">
             <button class="btn btn-sm btn-outline-danger px-2 py-0" onclick="cambiarCantidad(${index}, -1)">-</button>
@@ -230,6 +230,19 @@ function actualizarResumenHTML() {
     `;
   });
 
+  let recargoDelivery = 0;
+  if (selectorMesa && selectorMesa.value === 'Delivery' && selectorDelivery) {
+    recargoDelivery = parseFloat(selectorDelivery.value) || 0;
+    html += `
+      <div class="d-flex justify-content-between align-items-center text-warning fw-bold small px-1 mt-1">
+        <span>Recargo Delivery:</span>
+        <span>+ S/ ${recargoDelivery.toFixed(2)}</span>
+      </div>
+    `;
+  }
+
+  const totalGeneral = subtotalPlatos + recargoDelivery;
+
   html += `
     </div>
     <div class="d-flex justify-content-between align-items-center border-top mt-3 pt-2">
@@ -241,28 +254,36 @@ function actualizarResumenHTML() {
   contenedorResumen.innerHTML = html;
 }
 
-// 8. Enviar Comanda a Cocina
+// Enviar Comanda a Cocina
 function enviarComanda() {
   const selectorMesa = document.getElementById('mesa');
-  const mesaSeleccionada = selectorMesa ? selectorMesa.value : 'Mesa 1';
+  const selectorDelivery = document.getElementById('recargo-delivery');
+  let mesaSeleccionada = selectorMesa ? selectorMesa.value : 'Mesa 1';
 
   if (pedido.length === 0) {
     alert('Debes agregar al menos un plato antes de enviar.');
     return;
   }
 
-  let totalGeneral = 0;
-  pedido.forEach(item => totalGeneral += (item.precio * item.cantidad));
+  let subtotal = 0;
+  pedido.forEach(item => subtotal += (item.precio * item.cantidad));
+
+  let recargo = 0;
+  if (mesaSeleccionada === 'Delivery' && selectorDelivery) {
+    recargo = parseFloat(selectorDelivery.value) || 0;
+    mesaSeleccionada = `Delivery (S/ ${recargo.toFixed(2)})`;
+  }
+
+  const totalFinal = subtotal + recargo;
 
   const datosPedido = {
     id: Date.now(),
     mesa: mesaSeleccionada,
-    platos: pedido,
-    total: totalGeneral.toFixed(2),
+    platos: [...pedido],
+    total: totalFinal.toFixed(2),
     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   };
 
-  // Guardar en el historial local para el Resumen de Cierre de Caja
   historialVentas.push(datosPedido);
 
   if (typeof socket !== 'undefined') {
@@ -274,11 +295,10 @@ function enviarComanda() {
   alert(`🚀 ¡Comanda enviada a cocina para ${mesaSeleccionada}!`);
 }
 
-// 9. Abrir Modal de Cierre de Caja
+// Cierre de Caja Modal
 function cerrarCaja() {
   const modalElement = document.getElementById('modalCaja');
   const cuerpoModal = document.getElementById('cuerpo-modal-caja');
-  
   if (!modalElement || !cuerpoModal) return;
 
   const totalVentas = historialVentas.reduce((sum, v) => sum + parseFloat(v.total), 0);
@@ -286,12 +306,12 @@ function cerrarCaja() {
 
   let desgloseHtml = '';
   if (historialVentas.length === 0) {
-    desgloseHtml = '<p class="text-center text-muted my-3">No hay comandas registradas en este turno aún.</p>';
+    desgloseHtml = '<p class="text-center text-muted my-3">No hay comandas registradas en el día.</p>';
   } else {
     desgloseHtml = `<ul class="list-group list-group-flush mb-3" style="max-height: 200px; overflow-y: auto;">`;
     historialVentas.forEach((v, idx) => {
       desgloseHtml += `
-        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1 style="font-size: 0.85rem;">
+        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1" style="font-size: 0.85rem;">
           <span><strong>#${idx + 1}</strong> ${v.mesa} <small class="text-muted">(${v.hora})</small></span>
           <span class="badge bg-success">S/ ${v.total}</span>
         </li>
@@ -307,10 +327,10 @@ function cerrarCaja() {
         <span class="badge bg-primary fs-6">${totalPedidos}</span>
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-        <span class="fw-bold text-secondary">Recaudado:</span>
+        <span class="fw-bold text-secondary">Recaudado del Día:</span>
         <strong class="text-danger fs-4">S/ ${totalVentas.toFixed(2)}</strong>
       </div>
-      <h6 class="fw-bold text-dark mb-2">Detalle de Comandas:</h6>
+      <h6 class="fw-bold text-dark mb-2">Pedidos Realizados:</h6>
       ${desgloseHtml}
     </div>
   `;
@@ -319,55 +339,24 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Escuchar Comandas en Vista Cocina
-const contenedorComandas = document.getElementById('contenedor-comandas');
-if (contenedorComandas) {
-  socket.on('nuevo-pedido', (datos) => {
-    const mensajeVacio = contenedorComandas.querySelector('p');
-    if (mensajeVacio) mensajeVacio.remove();
+// Descargar Excel (.CSV compatible)
+function descargarExcelVentas() {
+  if (historialVentas.length === 0) {
+    alert('No hay ventas registradas hoy para exportar.');
+    return;
+  }
 
-    const tarjeta = document.createElement('div');
-    tarjeta.className = 'comanda-card';
-    tarjeta.id = `comanda-${datos.id}`;
+  let csvContent = "data:text/csv;charset=utf-8,ID Pedido,Ubicación,Hora,Total (S/)\n";
 
-    let itemsHtml = '';
-    if (datos.platos && Array.isArray(datos.platos)) {
-      datos.platos.forEach(item => {
-        const obs = item.observacion ? `<br><small style="color: #d32f2f; font-weight: bold;">⚠️ ${item.observacion}</small>` : '';
-        itemsHtml += `<li style="margin-bottom: 6px;"><b>${item.cantidad}x</b> ${item.nombre} ${obs}</li>`;
-      });
-    }
-
-    tarjeta.innerHTML = `
-      <h3>${datos.mesa} <small>(${datos.hora || ''})</small></h3>
-      <ul class="lista-items">${itemsHtml}</ul>
-      <div style="margin: 10px 0; font-weight: bold; color: #28a745; font-size: 16px;">
-        TOTAL: S/ ${datos.total || '0.00'}
-      </div>
-      <div class="acciones">
-        <button class="btn btn-preparar" onclick="cambiarEstado(this, 'preparando')">En Preparación</button>
-        <button class="btn btn-listo" onclick="cambiarEstado(this, 'listo')">Listo</button>
-        <button class="btn btn-entregado" onclick="eliminarComanda(this)">Entregado / Borrar</button>
-      </div>
-    `;
-
-    contenedorComandas.appendChild(tarjeta);
+  historialVentas.forEach(v => {
+    csvContent += `${v.id},"${v.mesa}",${v.hora},${v.total}\n`;
   });
-}
 
-function cambiarEstado(boton, estado) {
-  const tarjeta = boton.closest('.comanda-card');
-  if (estado === 'preparando') tarjeta.style.borderLeft = '6px solid #ffc107';
-  else if (estado === 'listo') {
-    tarjeta.style.borderLeft = '6px solid #28a745';
-    tarjeta.style.opacity = '0.75';
-  }
-}
-
-function eliminarComanda(boton) {
-  const tarjeta = boton.closest('.comanda-card');
-  tarjeta.remove();
-  if (contenedorComandas && contenedorComandas.children.length === 0) {
-    contenedorComandas.innerHTML = '<p style="color: #aaa; text-align: center; width: 100%; grid-column: 1/-1; margin-top: 50px;">Esperando comandas...</p>';
-  }
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Ventas_AnitaWok_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
