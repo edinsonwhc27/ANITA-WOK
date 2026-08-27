@@ -185,7 +185,11 @@ function actualizarObservacion(index, texto) {
 // 7. Renderizar Panel Lateral (Comanda Activa)
 function actualizarResumenHTML() {
   const contenedorResumen = document.getElementById('lista-pedido');
+  const badgeTotal = document.getElementById('badge-total-items');
   if (!contenedorResumen) return;
+
+  const totalCantidad = pedido.reduce((sum, item) => sum + item.cantidad, 0);
+  if (badgeTotal) badgeTotal.textContent = `${totalCantidad} ítems`;
 
   if (pedido.length === 0) {
     contenedorResumen.innerHTML = '<p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>';
@@ -300,9 +304,9 @@ if (contenedorComandas) {
 
 function cambiarEstado(boton, estado) {
   const tarjeta = boton.closest('.comanda-card');
-  if (estado === 'preparando') tarjeta.style.border = '3px solid #ffc107';
+  if (estado === 'preparando') tarjeta.style.borderLeft = '6px solid #ffc107';
   else if (estado === 'listo') {
-    tarjeta.style.border = '3px solid #28a745';
+    tarjeta.style.borderLeft = '6px solid #28a745';
     tarjeta.style.opacity = '0.75';
   }
 }
@@ -311,6 +315,6 @@ function eliminarComanda(boton) {
   const tarjeta = boton.closest('.comanda-card');
   tarjeta.remove();
   if (contenedorComandas && contenedorComandas.children.length === 0) {
-    contenedorComandas.innerHTML = '<p style="color: #aaa; text-align: center; width: 100%; margin-top: 30px;">Esperando comandas...</p>';
+    contenedorComandas.innerHTML = '<p style="color: #aaa; text-align: center; width: 100%; grid-column: 1/-1; margin-top: 50px;">Esperando comandas...</p>';
   }
 }
