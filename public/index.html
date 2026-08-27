@@ -124,8 +124,8 @@
   <!-- Encabezado con Fondo Beige y Letras Rojas -->
   <header class="brand-header d-flex justify-content-between align-items-center mb-3">
     <div class="d-flex align-items-center gap-2">
-      <!-- Cambia 'logo.png' por el nombre real de tu archivo de imagen -->
-      <img src="logo.png" alt="Logo Anita Wok" class="brand-logo" onerror="this.src='https://via.placeholder.com/150x50/f5f5dc/d32f2f?text=ANITA-WOK'">
+      <!-- Ruta del logo apuntando a img/logo.png -->
+      <img src="img/logo.png" alt="Logo Anita Wok" class="brand-logo" onerror="this.src='https://via.placeholder.com/150x50/f5f5dc/d32f2f?text=ANITA-WOK'">
       <h1 class="h4 mb-0 fw-bold text-danger">ANITA-WOK</h1>
     </div>
 
@@ -137,7 +137,7 @@
   <div class="container-fluid px-3">
     <div class="row g-3">
 
-      <!-- Columna Principal: Selección de Mesas y Menú -->
+      <!-- Columna Principal: Selección de Mesas (1 al 10) y Menú -->
       <div class="col-lg-8 col-md-7">
 
         <!-- Ubicación / Tipo / Delivery -->
@@ -154,6 +154,10 @@
                 <option value="Mesa 4">Mesa 4</option>
                 <option value="Mesa 5">Mesa 5</option>
                 <option value="Mesa 6">Mesa 6</option>
+                <option value="Mesa 7">Mesa 7</option>
+                <option value="Mesa 8">Mesa 8</option>
+                <option value="Mesa 9">Mesa 9</option>
+                <option value="Mesa 10">Mesa 10</option>
                 <option value="Llevar">Para Llevar (Empaque + S/ 0.50)</option>
                 <option value="Delivery">Delivery</option>
               </select>
@@ -220,7 +224,7 @@
 
   <!-- Modal para Cierre de Caja -->
   <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">
           <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2"></i>Resumen de Cierre de Caja</h5>
