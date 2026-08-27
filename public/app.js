@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarResumenHTML();
 });
 
-// Renderizar Menú de Platos
+// Renderizar Menú
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
   if (!contenedor) return;
@@ -103,7 +103,7 @@ function renderMenu() {
   });
 }
 
-// Filtro de Categorías
+// Filtro por Categorías
 function verCategoria(cat, btnElement) {
   categoriaActual = cat;
   if (btnElement) {
@@ -117,7 +117,7 @@ function verCategoria(cat, btnElement) {
   renderMenu();
 }
 
-// Opciones de Ubicación (Mesa / Llevar / Delivery)
+// Opciones de Ubicación (Mesa 1-10 / Llevar / Delivery)
 function cambiarTipoPedido() {
   const selectorMesa = document.getElementById('mesa');
   const contenedorDelivery = document.getElementById('contenedor-recargo-delivery');
@@ -254,7 +254,7 @@ function actualizarResumenHTML() {
   contenedorResumen.innerHTML = html;
 }
 
-// Enviar Comanda a Cocina
+// Enviar Comanda
 function enviarComanda() {
   const selectorMesa = document.getElementById('mesa');
   const selectorDelivery = document.getElementById('recargo-delivery');
@@ -275,13 +275,15 @@ function enviarComanda() {
   }
 
   const totalFinal = subtotal + recargo;
+  const hoy = new Date();
 
   const datosPedido = {
-    id: Date.now(),
+    id: Date.now().toString().slice(-6), // ID corto de 6 dígitos
+    fecha: hoy.toLocaleDateString(),
+    hora: hoy.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     mesa: mesaSeleccionada,
     platos: [...pedido],
-    total: totalFinal.toFixed(2),
-    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    total: totalFinal.toFixed(2)
   };
 
   historialVentas.push(datosPedido);
@@ -308,29 +310,52 @@ function cerrarCaja() {
   if (historialVentas.length === 0) {
     desgloseHtml = '<p class="text-center text-muted my-3">No hay comandas registradas en el día.</p>';
   } else {
-    desgloseHtml = `<ul class="list-group list-group-flush mb-3" style="max-height: 200px; overflow-y: auto;">`;
-    historialVentas.forEach((v, idx) => {
+    desgloseHtml = `
+      <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-dark small">
+            <tr>
+              <th>ID</th>
+              <th>Hora</th>
+              <th>Ubicación</th>
+              <th>Detalle</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody class="small">
+    `;
+
+    historialVentas.forEach(v => {
+      const resumenPlatos = v.platos.map(p => `${p.cantidad}x ${p.nombre}${p.observacion ? ' ('+p.observacion+')' : ''}`).join(', ');
       desgloseHtml += `
-        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1" style="font-size: 0.85rem;">
-          <span><strong>#${idx + 1}</strong> ${v.mesa} <small class="text-muted">(${v.hora})</small></span>
-          <span class="badge bg-success">S/ ${v.total}</span>
-        </li>
+        <tr>
+          <td><strong>#${v.id}</strong></td>
+          <td>${v.hora}</td>
+          <td><span class="badge bg-secondary">${v.mesa}</span></td>
+          <td class="text-truncate" style="max-width: 250px;">${resumenPlatos}</td>
+          <td class="text-end fw-bold text-danger">S/ ${v.total}</td>
+        </tr>
       `;
     });
-    desgloseHtml += `</ul>`;
+
+    desgloseHtml += `
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   cuerpoModal.innerHTML = `
     <div class="p-1">
       <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-        <span class="fw-bold text-secondary">Total Pedidos:</span>
+        <span class="fw-bold text-secondary">Total de Pedidos hoy:</span>
         <span class="badge bg-primary fs-6">${totalPedidos}</span>
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
         <span class="fw-bold text-secondary">Recaudado del Día:</span>
         <strong class="text-danger fs-4">S/ ${totalVentas.toFixed(2)}</strong>
       </div>
-      <h6 class="fw-bold text-dark mb-2">Pedidos Realizados:</h6>
+      <h6 class="fw-bold text-dark mb-2">Detalle de Comandas:</h6>
       ${desgloseHtml}
     </div>
   `;
@@ -339,23 +364,40 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Excel (.CSV compatible)
+// Descargar Excel (.CSV Estructurado con Separador ';' para Excel en Español)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas hoy para exportar.');
     return;
   }
 
-  let csvContent = "data:text/csv;charset=utf-8,ID Pedido,Ubicación,Hora,Total (S/)\n";
+  // Encabezado con punto y coma (;) para abrir directo ordenado en Excel
+  let csvContent = "\uFEFF"; // UTF-8 BOM para soporte correcto de tildes y caracteres especiales
+  csvContent += "ID Pedido;Fecha;Hora;Ubicacion/Tipo;Detalle del Pedido;Total (S/)\n";
+
+  let sumaTotal = 0;
 
   historialVentas.forEach(v => {
-    csvContent += `${v.id},"${v.mesa}",${v.hora},${v.total}\n`;
+    const detallePlatos = v.platos.map(p => {
+      const obs = p.observacion ? ` [Notas: ${p.observacion}]` : '';
+      return `${p.cantidad}x ${p.nombre}${obs}`;
+    }).join(' | ');
+
+    csvContent += `"#${v.id}";"${v.fecha}";"${v.hora}";"${v.mesa}";"${detallePlatos}";"${v.total}"\n`;
+    sumaTotal += parseFloat(v.total);
   });
 
-  const encodedUri = encodeURI(csvContent);
+  // Fila final con el gran total
+  csvContent += `;;;;"TOTAL ACUMULADO DEL DIA:";"${sumaTotal.toFixed(2)}"\n`;
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `Ventas_AnitaWok_${new Date().toISOString().slice(0,10)}.csv`);
+  
+  const hoyStr = new Date().toISOString().slice(0, 10);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Cierre_Caja_AnitaWok_${hoyStr}.csv`);
+  
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
