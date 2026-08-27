@@ -18,23 +18,23 @@
       --dark-bg: #121212;
       --card-bg-light: #ffffff;
       --text-main: #212529;
-      --overlay-light: rgba(248, 249, 250, 0.92);
-      --overlay-dark: rgba(18, 18, 18, 0.94);
+      --overlay-light: rgba(248, 249, 250, 0.95);
+      --overlay-dark: rgba(18, 18, 18, 0.95);
     }
 
     body {
       font-family: 'Poppins', sans-serif;
       min-height: 100vh;
-      /* Fondo configurable de la página */
+      /* Fondo neutro con marca de agua discreta de tu logo */
       background: linear-gradient(var(--overlay-light), var(--overlay-light)),
-                  url('https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat fixed;
+                  url('img/logo.png') center/300px no-repeat fixed;
       color: var(--text-main);
       transition: background 0.3s ease, color 0.3s ease;
     }
 
     body.dark-mode {
       background: linear-gradient(var(--overlay-dark), var(--overlay-dark)),
-                  url('https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat fixed;
+                  url('img/logo.png') center/300px no-repeat fixed;
       color: #f8f9fa;
     }
 
@@ -59,11 +59,8 @@
 
     .brand-logo {
       height: 48px;
-      width: 48px;
+      width: auto;
       object-fit: contain;
-      border-radius: 8px;
-      background: var(--primary-red);
-      padding: 4px;
     }
 
     .brand-title {
@@ -78,78 +75,60 @@
       color: #ff5252;
     }
 
-    /* Tarjeta de Plato */
+    /* Tarjeta de Plato sin imagen */
     .dish-card {
-      border: none;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 16px;
-      overflow: hidden;
       background: var(--card-bg-light);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       height: 100%;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
     }
 
     body.dark-mode .dish-card {
       background: #1e1e24;
+      border-color: rgba(255, 255, 255, 0.08);
       box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     }
 
     .dish-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
 
-    .dish-img-container {
-      position: relative;
-      height: 140px;
-      overflow: hidden;
-    }
-
-    .dish-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .dish-card:hover .dish-img {
-      transform: scale(1.05);
-    }
-
-    .dish-price-badge {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.8);
-      color: var(--accent-gold);
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      backdrop-filter: blur(4px);
-    }
-
-    .dish-body {
-      padding: 14px;
-      flex-grow: 1;
+    .dish-header {
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
     }
 
     .dish-name {
       font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
+      font-size: 1.05rem;
+      margin: 0;
+    }
+
+    .dish-price-badge {
+      background: var(--primary-red);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      white-space: nowrap;
     }
 
     .dish-desc {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: #6c757d;
-      margin-bottom: 12px;
-      line-height: 1.3;
+      margin-bottom: 14px;
+      line-height: 1.35;
     }
 
     body.dark-mode .dish-desc {
@@ -186,12 +165,13 @@
       font-size: 0.88rem;
     }
 
-    /* Botón Flotante / Acciones Rápidas */
+    /* Botones de acción */
     .btn-red {
       background-color: var(--primary-red);
       color: white;
       font-weight: 600;
       border-radius: 12px;
+      border: none;
     }
 
     .btn-red:hover {
@@ -202,12 +182,11 @@
 </head>
 <body>
 
-  <!-- NAVBAR PRINCIPAL CON LOGO -->
+  <!-- NAVBAR PRINCIPAL CON LOGO OFICIAL -->
   <nav class="navbar navbar-expand-lg navbar-custom sticky-top py-2">
     <div class="container-fluid px-4">
       <a class="brand-logo-container" href="#">
-        <!-- Si tienes el archivo de tu logo, reemplaza 'src' por la ruta de tu imagen, ej: '/images/logo.png' -->
-        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081920.png" alt="Anita Wok Logo" class="brand-logo" id="logo-img">
+        <img src="img/logo.png" alt="Anita Wok Logo" class="brand-logo" id="logo-img" onerror="this.style.display='none'">
         <div>
           <h1 class="brand-title">ANITA-WOK</h1>
           <small class="text-muted d-block" style="font-size: 0.72rem; margin-top:-4px;">SISTEMA DE COMANDAS</small>
@@ -215,8 +194,8 @@
       </a>
 
       <div class="d-flex align-items-center gap-2 ms-auto">
-        <a href="/cocina.html" class="btn btn-outline-danger btn-sm rounded-pill font-weight-bold px-3">
-          <i class="fa-solid fa-utensils me-1"></i> Vista Cocina
+        <a href="cocina.html" class="btn btn-outline-danger btn-sm rounded-pill font-weight-bold px-3">
+          <i class="fa-solid fa-fire me-1"></i> Vista Cocina
         </a>
         <button id="btn-excel" class="btn btn-outline-success btn-sm rounded-pill px-3">
           <i class="fa-solid fa-file-excel me-1"></i> Reporte Hoy
@@ -232,7 +211,7 @@
   <div class="container-fluid px-4 my-4">
     <div class="row g-4">
 
-      <!-- COLUMNA IZQUIERDA: CATÁLOGO VISUAL DE PLATOS Y BEBIDAS -->
+      <!-- COLUMNA IZQUIERDA: CATÁLOGO DE PLATOS Y BEBIDAS -->
       <div class="col-lg-7 col-xl-8">
         
         <!-- Filtro por Categorías -->
@@ -244,120 +223,102 @@
           <button class="btn btn-outline-secondary category-btn" data-category="bebidas">Bebidas</button>
         </div>
 
-        <!-- Grid de Platos con Fotos -->
+        <!-- Grid de Platos (Sin imágenes) -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="dishes-grid">
           
           <!-- PLATO 1 -->
           <div class="col dish-item" data-category="woks">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=600&auto=format&fit=crop" class="dish-img" alt="Arroz Chaufa Especial">
-                <span class="dish-price-badge">S/ 22.00</span>
-              </div>
-              <div class="dish-body">
-                <div>
+              <div>
+                <div class="dish-header">
                   <h3 class="dish-name">Chaufa Especial Wok</h3>
-                  <p class="dish-desc">Arroz salteado a fuego alto con pollo, cerdo asado, huevo y cebollín.</p>
+                  <span class="dish-price-badge">S/ 22.00</span>
                 </div>
-                <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="1" data-name="Chaufa Especial Wok" data-price="22.00">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
+                <p class="dish-desc">Arroz salteado a fuego alto con pollo, cerdo asado, huevo y cebollín.</p>
               </div>
+              <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="1" data-name="Chaufa Especial Wok" data-price="22.00">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
           <!-- PLATO 2 -->
           <div class="col dish-item" data-category="tallarines">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=600&auto=format&fit=crop" class="dish-img" alt="Tallarín Saltado">
-                <span class="dish-price-badge">S/ 24.00</span>
-              </div>
-              <div class="dish-body">
-                <div>
+              <div>
+                <div class="dish-header">
                   <h3 class="dish-name">Tallarín Saltado Carne</h3>
-                  <p class="dish-desc">Fideos salteados al wok con lomo, tomate, cebolla roja y salsa de soya.</p>
+                  <span class="dish-price-badge">S/ 24.00</span>
                 </div>
-                <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="2" data-name="Tallarín Saltado Carne" data-price="24.00">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
+                <p class="dish-desc">Fideos salteados al wok con lomo, tomate, cebolla roja y salsa de soya.</p>
               </div>
+              <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="2" data-name="Tallarín Saltado Carne" data-price="24.00">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
           <!-- PLATO 3 -->
           <div class="col dish-item" data-category="entradas">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=600&auto=format&fit=crop" class="dish-img" alt="Wantan Frito">
-                <span class="dish-price-badge">S/ 14.00</span>
-              </div>
-              <div class="dish-body">
-                <div>
+              <div>
+                <div class="dish-header">
                   <h3 class="dish-name">Wantan Frito (6 uds)</h3>
-                  <p class="dish-desc">Crujientes wantanes rellenos de pollo, acompañados de salsa tamarindo.</p>
+                  <span class="dish-price-badge">S/ 14.00</span>
                 </div>
-                <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="3" data-name="Wantan Frito (6 uds)" data-price="14.00">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
+                <p class="dish-desc">Crujientes wantanes rellenos de pollo, acompañados de salsa tamarindo.</p>
               </div>
+              <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="3" data-name="Wantan Frito (6 uds)" data-price="14.00">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
           <!-- PLATO 4 -->
           <div class="col dish-item" data-category="woks">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=600&auto=format&fit=crop" class="dish-img" alt="Aeropuerto Wok">
-                <span class="dish-price-badge">S/ 25.00</span>
-              </div>
-              <div class="dish-body">
-                <div>
+              <div>
+                <div class="dish-header">
                   <h3 class="dish-name">Aeropuerto Anita Wok</h3>
-                  <p class="dish-desc">Mezcla perfecta de chaufa, tallarín frito y frijolito chino al fuego directo.</p>
+                  <span class="dish-price-badge">S/ 25.00</span>
                 </div>
-                <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="4" data-name="Aeropuerto Anita Wok" data-price="25.00">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
+                <p class="dish-desc">Mezcla perfecta de chaufa, tallarín frito y frijolito chino al fuego directo.</p>
               </div>
+              <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="4" data-name="Aeropuerto Anita Wok" data-price="25.00">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
           <!-- BEBIDA 1 -->
           <div class="col dish-item" data-category="bebidas">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=600&auto=format&fit=crop" class="dish-img" alt="Chicha Morada">
-                <span class="dish-price-badge">S/ 8.00</span>
-              </div>
-              <div class="dish-body">
-                <div>
+              <div>
+                <div class="dish-header">
                   <h3 class="dish-name">Chicha Morada (1L)</h3>
-                  <p class="dish-desc">Chicha artesanal heladita con toques de piña, manzana y canela.</p>
+                  <span class="dish-price-badge">S/ 8.00</span>
                 </div>
-                <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="5" data-name="Chicha Morada (1L)" data-price="8.00">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
+                <p class="dish-desc">Chicha artesanal heladita con toques de piña, manzana y canela.</p>
               </div>
+              <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="5" data-name="Chicha Morada (1L)" data-price="8.00">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
           <!-- BEBIDA 2 -->
           <div class="col dish-item" data-category="bebidas">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1629203851122-3726ecdf080e?q=80&w=600&auto=format&fit=crop" class="dish-img" alt="Gaseosa Inca Kola">
-                <span class="dish-price-badge">S/ 6.00</span>
-              </div>
-              <div class="dish-body">
-                <div>
+              <div>
+                <div class="dish-header">
                   <h3 class="dish-name">Inca Kola 500ml</h3>
-                  <p class="dish-desc">Gaseosa personal bien helada.</p>
+                  <span class="dish-price-badge">S/ 6.00</span>
                 </div>
-                <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="6" data-name="Inca Kola 500ml" data-price="6.00">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
+                <p class="dish-desc">Gaseosa personal bien helada.</p>
               </div>
+              <button class="btn btn-red btn-sm w-100 mt-2 btn-add-dish" data-id="6" data-name="Inca Kola 500ml" data-price="6.00">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
@@ -398,7 +359,7 @@
           <!-- Contenedor Dinámico de Platos Agregados -->
           <div id="lista-platos" class="my-2" style="max-height: 320px; overflow-y: auto;">
             <div class="text-center text-muted py-4" id="empty-state">
-              <i class="fa-solid fa-bowl-food fa-2x mb-2 opacity-50"></i>
+              <i class="fa-solid fa-utensils fa-2x mb-2 opacity-50"></i>
               <p class="mb-0 small">No hay platos agregados a la comanda.</p>
             </div>
           </div>
@@ -423,7 +384,6 @@
 
   <!-- SCRIPT DE INTERACTIVIDAD -->
   <script>
-    // Estado global de la comanda
     let currentOrder = [];
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -463,13 +423,12 @@
         });
       });
 
-      // 3. Evento para Agregar Plato desde las Tarjetas
+      // 3. Agregar Plato desde las Tarjetas
       document.querySelectorAll('.btn-add-dish').forEach(btn => {
         btn.addEventListener('click', () => {
           const name = btn.getAttribute('data-name');
           const price = parseFloat(btn.getAttribute('data-price'));
 
-          // Buscar si ya existe en la comanda
           const existing = currentOrder.find(item => item.name === name);
           if (existing) {
             existing.qty += 1;
@@ -496,7 +455,7 @@
         if (currentOrder.length === 0) {
           listContainer.innerHTML = `
             <div class="text-center text-muted py-4" id="empty-state">
-              <i class="fa-solid fa-bowl-food fa-2x mb-2 opacity-50"></i>
+              <i class="fa-solid fa-utensils fa-2x mb-2 opacity-50"></i>
               <p class="mb-0 small">No hay platos agregados a la comanda.</p>
             </div>`;
           totalText.innerText = 'S/ 0.00';
@@ -539,7 +498,7 @@
         totalText.innerText = `S/ ${total.toFixed(2)}`;
         badgeCount.innerText = `${itemCount} Item(s)`;
 
-        // Listeners para modificar cantidad / notas / eliminar
+        // Listeners para botones de cantidad y borrado
         document.querySelectorAll('.btn-qty').forEach(b => {
           b.addEventListener('click', (e) => {
             const idx = e.target.getAttribute('data-index');
@@ -595,7 +554,6 @@
           }
         } catch (err) {
           console.error(err);
-          // Fallback de demostración si la API aún no responde
           alert(`✅ Comanda registrada localmente para ${ubicacion}`);
           currentOrder = [];
           renderOrder();
