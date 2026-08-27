@@ -20,8 +20,15 @@
     .brand-header {
       background: linear-gradient(135deg, #d32f2f, #b71c1c);
       color: white;
-      padding: 12px 20px;
+      padding: 10px 20px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .brand-logo {
+      height: 45px;
+      width: auto;
+      object-fit: contain;
+      border-radius: 4px;
     }
     
     /* Tarjeta de plato */
@@ -32,7 +39,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify: space-between;
+      justify-content: space-between;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
       border: 1px solid #e9ecef;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -113,15 +120,22 @@
 </head>
 <body>
 
-  <!-- Encabezado -->
+  <!-- Encabezado con LOGO y Botón CERRAR CAJA -->
   <header class="brand-header d-flex justify-content-between align-items-center mb-3">
     <div class="d-flex align-items-center gap-2">
-      <i class="fa-solid fa-fire-burner fs-3"></i>
-      <h1 class="h4 mb-0 fw-bold">ANITA-WOK</h1>
+      <!-- Reemplazar src con la ruta de tu logo -->
+      <img src="https://via.placeholder.com/150x50/d32f2f/ffffff?text=ANITA-WOK" alt="Anita Wok Logo" class="brand-logo">
+      <h1 class="h4 mb-0 fw-bold d-none d-sm-inline">ANITA-WOK</h1>
     </div>
-    <a href="/cocina.html" class="btn btn-outline-light btn-sm fw-bold">
-      <i class="fa-solid fa-utensils me-1"></i> Ir a Cocina
-    </a>
+    
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-warning btn-sm fw-bold text-dark" onclick="cerrarCaja()">
+        <i class="fa-solid fa-cash-register me-1"></i> Cerrar Caja
+      </button>
+      <a href="/cocina.html" class="btn btn-outline-light btn-sm fw-bold">
+        <i class="fa-solid fa-utensils me-1"></i> Cocina
+      </a>
+    </div>
   </header>
 
   <div class="container-fluid px-3">
@@ -130,13 +144,13 @@
       <!-- Columna Principal: Selección de Categorías y Grid de Platos -->
       <div class="col-lg-8 col-md-7">
         
-        <!-- Selección de Mesa / Llevar -->
+        <!-- Selección de Mesa / Llevar / Delivery -->
         <div class="card p-2 mb-3 shadow-sm border-0">
           <div class="row align-items-center g-2">
             <div class="col-auto">
               <label for="mesa" class="fw-bold text-secondary small mb-0">Ubicación / Tipo:</label>
             </div>
-            <div class="col-md-4 col-sm-6">
+            <div class="col-md-5 col-sm-7">
               <select id="mesa" class="form-select form-select-sm fw-bold border-danger" onchange="cambiarTipoPedido()">
                 <option value="Mesa 1">Mesa 1</option>
                 <option value="Mesa 2">Mesa 2</option>
@@ -144,11 +158,8 @@
                 <option value="Mesa 4">Mesa 4</option>
                 <option value="Mesa 5">Mesa 5</option>
                 <option value="Mesa 6">Mesa 6</option>
-                 <option value="Mesa 7">Mesa 7</option>
-                 <option value="Mesa 8">Mesa 8</option>
-                 <option value="Mesa 9">Mesa 9</option>
-                 <option value="Mesa 10">Mesa 10</option>
                 <option value="Llevar">Para Llevar (Empaque + S/ 0.50)</option>
+                <option value="Delivery">Delivery / Pedido por Teléfono</option>
               </select>
             </div>
           </div>
@@ -164,7 +175,7 @@
 
         <!-- Grilla de 3 Columnas para los Platos -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2" id="contenedor-menu">
-          <!-- Se renderiza dinámicamente con app.js -->
+          <!-- Se renderiza dinámicamente -->
         </div>
 
       </div>
@@ -194,7 +205,25 @@
     </div>
   </div>
 
-  <!-- Socket.io & Lógica JS -->
+  <!-- Modal para Cierre de Caja -->
+  <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2"></i>Resumen de Cierre de Caja</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="cuerpo-modal-caja">
+          <p class="text-center text-muted">Cargando ventas del día...</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
