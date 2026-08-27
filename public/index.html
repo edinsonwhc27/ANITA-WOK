@@ -3,361 +3,199 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ANITA-WOK | Comandas</title>
+  <title>ANITA-WOK - Sistema de Comandas</title>
+  
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    :root {
-      --primary-red: #D32F2F;
-      --dark-black: #1A1A1A;
-      --soft-beige: #FDFBF7;
-      --card-bg-light: #FFFFFF;
-      --overlay-light: rgba(253, 251, 247, 0.96);
-      --overlay-dark: rgba(18, 18, 18, 0.96);
-    }
-
     body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(var(--overlay-light), var(--overlay-light)),
-                  url('img/logo.png') center/300px no-repeat fixed;
-      color: var(--dark-black);
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
-    body.dark-mode {
-      background: linear-gradient(var(--overlay-dark), var(--overlay-dark)),
-                  url('img/logo.png') center/300px no-repeat fixed;
-      color: #f8f9fa;
+    
+    /* Header estilizado */
+    .brand-header {
+      background: linear-gradient(135deg, #d32f2f, #b71c1c);
+      color: white;
+      padding: 12px 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-
-    /* Navbar */
-    .navbar-custom {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      border-bottom: 3px solid var(--primary-red);
-    }
-
-    body.dark-mode .navbar-custom {
-      background: rgba(24, 24, 27, 0.95);
-    }
-
-    .brand-logo {
-      height: 45px;
-      width: auto;
-      object-fit: contain;
-    }
-
-    .brand-title {
-      font-weight: 800;
-      font-size: 1.4rem;
-      color: var(--primary-red);
-      margin: 0;
-    }
-
-    /* Pestañas */
-    .category-btn {
-      border-radius: 20px;
-      font-weight: 600;
-      padding: 6px 16px;
-      font-size: 0.85rem;
-    }
-
-    /* Tarjetas de Menú (Beige, Negro y Rojo) */
+    
+    /* Tarjeta de plato */
     .dish-card {
-      border: 2px solid var(--dark-black);
-      border-radius: 12px;
-      background-color: var(--soft-beige);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 12px;
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      justify: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    body.dark-mode .dish-card {
-      background-color: #1e1e24;
-      border-color: rgba(255,255,255,0.2);
-    }
-
+    
     .dish-card:hover {
       transform: translateY(-3px);
-      border-color: var(--primary-red);
-    }
-
-    .dish-name {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--dark-black);
-      margin-bottom: 6px;
-      text-align: center;
-      min-height: 2.4em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    body.dark-mode .dish-name {
-      color: #ffffff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
     .dish-img {
       width: 100%;
       height: 110px;
       object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 6px;
       margin-bottom: 8px;
-      background: #e0e0e0;
+    }
+
+    .dish-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #2c3e50;
+      margin-bottom: 4px;
+      line-height: 1.2;
     }
 
     .dish-desc {
-      font-size: 0.75rem;
-      color: #555;
+      font-size: 0.72rem;
+      color: #6c757d;
+      flex-grow: 1;
       margin-bottom: 8px;
-      line-height: 1.25;
-      text-align: center;
-      min-height: 2.5em;
-    }
-
-    body.dark-mode .dish-desc {
-      color: #aaa;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .dish-price {
       font-weight: 800;
-      font-size: 1rem;
-      color: var(--primary-red);
-      text-align: center;
-      margin-bottom: 8px;
+      color: #d32f2f;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
     }
 
     .btn-add-dish {
-      background-color: var(--primary-red);
+      background-color: #2e7d32;
       color: white;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 8px;
       border: none;
-      border-radius: 8px;
-      padding: 8px;
+      border-radius: 5px;
       width: 100%;
-      font-size: 0.85rem;
     }
 
     .btn-add-dish:hover {
-      background-color: #b71c1c;
-      color: white;
-    }
-
-    /* Columna Derecha Totalmente Fija */
-    .panel-lateral-fijo {
-      position: sticky;
-      top: 80px;
-    }
-
-    .order-summary-card {
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,0.1);
-      background: var(--card-bg-light);
-    }
-
-    body.dark-mode .order-summary-card {
-      background: #1e1e24;
-      border-color: rgba(255,255,255,0.1);
-    }
-
-    .btn-send-main {
-      background-color: var(--primary-red);
-      color: white;
-      font-weight: 700;
-      border: none;
-      border-radius: 8px;
-    }
-
-    .btn-send-main:hover {
-      background-color: #b71c1c;
-    }
-
-    .btn-excel-cierre {
-      background-color: #2e7d32;
-      color: white;
-      font-weight: 700;
-      border: none;
-      border-radius: 8px;
-    }
-
-    .btn-excel-cierre:hover {
       background-color: #1b5e20;
+      color: white;
+    }
+
+    /* Panel Lateral de Comanda */
+    .sidebar-comanda {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 15px;
+    }
+    
+    .category-btn {
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      padding: 5px 15px;
     }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-custom sticky-top py-2">
-    <div class="container-fluid px-3">
-      <a class="d-flex align-items-center gap-2 text-decoration-none" href="#">
-        <img src="img/logo.png" alt="Logo Anita Wok" class="brand-logo" onerror="this.style.display='none'">
-        <h1 class="brand-title">ANITA-WOK</h1>
-      </a>
-
-      <div class="d-flex align-items-center gap-2 ms-auto">
-        <a href="cocina.html" class="btn btn-outline-danger btn-sm rounded-pill font-weight-bold px-3">
-          <i class="fa-solid fa-fire me-1"></i> Cocina
-        </a>
-        <button id="btn-theme-toggle" class="btn btn-light btn-sm rounded-circle p-2 shadow-sm">
-          <i class="fa-solid fa-moon text-dark"></i>
-        </button>
-      </div>
+  <!-- Encabezado -->
+  <header class="brand-header d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="fa-solid fa-fire-burner fs-3"></i>
+      <h1 class="h4 mb-0 fw-bold">ANITA-WOK</h1>
     </div>
-  </nav>
+    <a href="/cocina.html" class="btn btn-outline-light btn-sm fw-bold">
+      <i class="fa-solid fa-utensils me-1"></i> Ir a Cocina
+    </a>
+  </header>
 
-  <!-- CONTENIDO -->
-  <div class="container-fluid px-3 my-3">
+  <div class="container-fluid px-3">
     <div class="row g-3">
-
-      <!-- COLUMNA IZQUIERDA: MENÚ EN TRES COLUMNAS HORIZONTALES (row-cols-3) -->
-      <div class="col-lg-7 col-xl-8">
+      
+      <!-- Columna Principal: Selección de Categorías y Grid de Platos -->
+      <div class="col-lg-8 col-md-7">
         
-        <!-- Categorías -->
-        <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="category-filters">
+        <!-- Selección de Mesa / Llevar -->
+        <div class="card p-2 mb-3 shadow-sm border-0">
+          <div class="row align-items-center g-2">
+            <div class="col-auto">
+              <label for="mesa" class="fw-bold text-secondary small mb-0">Ubicación / Tipo:</label>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <select id="mesa" class="form-select form-select-sm fw-bold border-danger" onchange="cambiarTipoPedido()">
+                <option value="Mesa 1">Mesa 1</option>
+                <option value="Mesa 2">Mesa 2</option>
+                <option value="Mesa 3">Mesa 3</option>
+                <option value="Mesa 4">Mesa 4</option>
+                <option value="Mesa 5">Mesa 5</option>
+                <option value="Mesa 6">Mesa 6</option>
+                 <option value="Mesa 7">Mesa 7</option>
+                 <option value="Mesa 8">Mesa 8</option>
+                 <option value="Mesa 9">Mesa 9</option>
+                 <option value="Mesa 10">Mesa 10</option>
+                <option value="Llevar">Para Llevar (Empaque + S/ 0.50)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros de Categorías -->
+        <div class="d-flex gap-2 mb-3 overflow-auto pb-1">
           <button class="btn btn-danger category-btn active" onclick="verCategoria('chifa', this)">Chifa y Criollo</button>
-          <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('compartir', this)">Compartidos</button>
+          <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('compartir', this)">Para Compartir</button>
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('bebidas', this)">Bebidas</button>
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('extras', this)">Extras</button>
         </div>
 
-        <!-- GRID DE 3 PLATOS POR FILA -->
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="contenedor-menu">
-          
-          <!-- EJEMPLO DE TARJETA 1 -->
-          <div class="col">
-            <div class="dish-card">
-              <div class="dish-name">Chaufa de Pollo</div>
-              <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop" class="dish-img" alt="Chaufa de Pollo">
-              <div class="dish-desc">Arroz salteado al wok, trozos de pollo, huevo, sillao y cebolla china.</div>
-              <div class="dish-price">S/ 18.00</div>
-              <button class="btn btn-add-dish" onclick="agregarAlPedido('Chaufa de Pollo', 18.00)">
-                <i class="fa-solid fa-plus me-1"></i> Agregar
-              </button>
-            </div>
-          </div>
-
-          <!-- EJEMPLO DE TARJETA 2 -->
-          <div class="col">
-            <div class="dish-card">
-              <div class="dish-name">Lomo Saltado</div>
-              <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=400&auto=format&fit=crop" class="dish-img" alt="Lomo Saltado">
-              <div class="dish-desc">Lomo de res, cebolla, tomate, ají amarillo y papas fritas crocantes.</div>
-              <div class="dish-price">S/ 26.00</div>
-              <button class="btn btn-add-dish" onclick="agregarAlPedido('Lomo Saltado', 26.00)">
-                <i class="fa-solid fa-plus me-1"></i> Agregar
-              </button>
-            </div>
-          </div>
-
-          <!-- EJEMPLO DE TARJETA 3 -->
-          <div class="col">
-            <div class="dish-card">
-              <div class="dish-name">Wantan Frito (6 uds)</div>
-              <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop" class="dish-img" alt="Wantan Frito">
-              <div class="dish-desc">Láminas crocantes rellenas de pollo picado con salsa tamarindo.</div>
-              <div class="dish-price">S/ 12.00</div>
-              <button class="btn btn-add-dish" onclick="agregarAlPedido('Wantan Frito', 12.00)">
-                <i class="fa-solid fa-plus me-1"></i> Agregar
-              </button>
-            </div>
-          </div>
-
+        <!-- Grilla de 3 Columnas para los Platos -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2" id="contenedor-menu">
+          <!-- Se renderiza dinámicamente con app.js -->
         </div>
+
       </div>
 
-      <!-- COLUMNA DERECHA: PANEL LATERAL FIJO (Sin colisión) -->
-      <div class="col-lg-5 col-xl-4">
-        <div class="panel-lateral-fijo">
-          
-          <!-- Comanda Activa -->
-          <div class="card order-summary-card p-3 mb-3">
-            <h2 class="h6 font-weight-bold mb-2 text-uppercase"><i class="fa-solid fa-receipt text-danger me-2"></i>Comanda Activa</h2>
-
-            <div class="mb-2">
-              <label for="mesa" class="form-label font-weight-bold text-muted small mb-1">UBICACIÓN / MESA</label>
-              <select class="form-select form-select-sm" id="mesa" onchange="cambiarTipoPedido()">
-                <option value="Mesa 1" selected> Mesa 1</option>
-                <option value="Mesa 2"> Mesa 2</option>
-                <option value="Mesa 3"> Mesa 3</option>
-                <option value="Mesa 4"> Mesa 4</option>
-                <option value="Mesa 5"> Mesa 5</option>
-                <option value="Mesa 6"> Mesa 6</option>
-                <option value="Mesa 7"> Mesa 7</option>
-                <option value="Mesa 8"> Mesa 8</option>
-                <option value="Mesa 9"> Mesa 9</option>
-                <option value="Mesa 10"> Mesa 10</option>
-                <option value="Llevar"> Para Llevar</option>
-              </select>
-            </div>
-
-            <label class="form-label font-weight-bold text-muted small mb-1">RESUMEN DEL PEDIDO</label>
-            <div id="lista-pedido" class="p-2 border rounded bg-light mb-3" style="min-height: 120px; max-height: 200px; overflow-y: auto;">
-              <p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>
-            </div>
-
-            <button class="btn btn-send-main w-100 py-2 shadow-sm fs-6" onclick="enviarComanda()">
-               ENVIAR A COCINA
-            </button>
+      <!-- Columna Lateral: Comanda Activa -->
+      <div class="col-lg-4 col-md-5">
+        <div class="sidebar-comanda p-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+            <h2 class="h6 mb-0 fw-bold text-uppercase text-danger">
+              <i class="fa-solid fa-receipt me-1"></i> Comanda Activa
+            </h2>
+            <span class="badge bg-secondary" id="badge-total-items">0 ítems</span>
           </div>
 
-          <!-- Control de Caja -->
-          <div class="card order-summary-card p-3 text-center border-warning" style="background-color: rgba(255, 193, 7, 0.08);">
-            <h6 class="fw-bold text-warning-emphasis mb-1"><i class="fa-solid fa-chart-line me-1"></i> CONTROL DE CAJA DEL DÍA</h6>
-            <p class="text-muted small mb-2" style="font-size: 0.75rem;">Descarga el reporte en Excel y cierra las ventas de hoy.</p>
-            <button class="btn btn-excel-cierre w-100 py-2 shadow-sm fs-6" onclick="descargarCierre()">
-               CERRAR CAJA Y DESCARGAR EXCEL
-            </button>
+          <!-- Contenedor de la Lista de Platos Seleccionados -->
+          <div id="lista-pedido" style="max-height: 55vh; overflow-y: auto;">
+            <p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>
           </div>
 
+          <!-- Botón de Envío -->
+          <button class="btn btn-danger w-100 mt-3 fw-bold py-2 shadow-sm" onclick="enviarComanda()">
+            <i class="fa-solid fa-paper-plane me-2"></i> ENVIAR A COCINA
+          </button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- SCRIPTS -->
+  <!-- Socket.io & Lógica JS -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
-  <script>
-    function descargarCierre() {
-      window.location.href = '/descargar-cierre';
-    }
-
-    // Cambiar Tema
-    document.getElementById('btn-theme-toggle').addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const icon = document.querySelector('#btn-theme-toggle i');
-      icon.className = document.body.classList.contains('dark-mode') ? 'fa-solid fa-sun text-warning' : 'fa-solid fa-moon text-dark';
-    });
-
-    // Filtros
-    const oldVerCategoria = window.verCategoria;
-    window.verCategoria = function(cat, btnElement) {
-      if (btnElement) {
-        document.querySelectorAll('.category-btn').forEach(b => {
-          b.classList.remove('btn-danger', 'active');
-          b.classList.add('btn-outline-secondary');
-        });
-        btnElement.classList.remove('btn-outline-secondary');
-        btnElement.classList.add('btn-danger', 'active');
-      }
-      if (typeof oldVerCategoria === 'function') {
-        oldVerCategoria(cat);
-      }
-    };
-  </script>
 </body>
 </html>
