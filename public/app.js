@@ -1,11 +1,14 @@
 // ==========================================
 // ANITA-WOK - SISTEMA DE COMANDAS & CARTA COMPLETA
-// Lógica de Precios Dinámicos (Mesa / Llevar)
+// Lógica de Precios Dinámicos (Mesa / Llevar / Delivery)
 // ==========================================
 
 const socket = io();
 
-// Base de Datos Oficial con Tarifas Diferenciadas (Mesa y Llevar)
+// Array de ventas registradas en la sesión activa para el Cierre de Caja
+let historialVentas = [];
+
+// Base de Datos Oficial con Tarifas Diferenciadas (Mesa y Llevar/Delivery)
 const productos = [
   // 1. CHIFA Y CRIOLLO
   { id: 1, cat: 'chifa', nombre: 'Chaufa de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Arroz salteado al wok, trozos de pollo, huevo, sillao y cebollita china.', img: 'https://cdn.blog.paulinacocina.net/wp-content/uploads/2021/12/arroz-chaufa-peruano-receta.jpg' },
@@ -71,13 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarResumenHTML();
 });
 
-// 1. Renderizar Menú de Platos (Grid de 3 Columnas Horizontal)
+// 1. Renderizar Menú de Platos (Grid de 3 Columnas)
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
   if (!contenedor) return;
 
   const selectorMesa = document.getElementById('mesa');
-  const esLlevar = selectorMesa ? selectorMesa.value === 'Llevar' : false;
+  const opcion = selectorMesa ? selectorMesa.value : '';
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
   const productosFiltrados = productos.filter(p => p.cat === categoriaActual);
   contenedor.innerHTML = '';
@@ -88,7 +92,7 @@ function renderMenu() {
   }
 
   productosFiltrados.forEach(p => {
-    const precio = esLlevar ? p.llevar : p.mesa;
+    const precio = esLlevarODelivery ? p.llevar : p.mesa;
     const col = document.createElement('div');
     col.className = 'col';
 
@@ -97,7 +101,7 @@ function renderMenu() {
         <div class="dish-name">${p.nombre}</div>
         <img src="${p.img}" class="dish-img" alt="${p.nombre}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250?text=ANITA-WOK'">
         <div class="dish-desc">${p.desc}</div>
-        <div class="dish-price">S/ ${precio.toFixed(2)} ${esLlevar ? '<small style="font-size:0.65rem;" class="text-danger">(Llevar)</small>' : ''}</div>
+        <div class="dish-price">S/ ${precio.toFixed(2)} ${esLlevarODelivery ? '<small style="font-size:0.65rem;" class="text-danger">(Llevar/Deliv.)</small>' : ''}</div>
         <button class="btn btn-add-dish" onclick="agregarAlPedido(${p.id})">
           <i class="fa-solid fa-plus me-1"></i> Agregar
         </button>
@@ -121,16 +125,16 @@ function verCategoria(cat, btnElement) {
   renderMenu();
 }
 
-// 3. Cambiar Tipo de Pedido (Recalcula Tarifas Mesa vs. Llevar)
+// 3. Cambiar Tipo de Pedido (Mesa / Llevar / Delivery)
 function cambiarTipoPedido() {
   const selectorMesa = document.getElementById('mesa');
-  const esLlevar = selectorMesa ? selectorMesa.value === 'Llevar' : false;
+  const opcion = selectorMesa ? selectorMesa.value : '';
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
-  // Actualizar los precios del pedido actual
   pedido.forEach(item => {
     const prod = productos.find(p => p.id === item.id);
     if (prod) {
-      item.precio = esLlevar ? prod.llevar : prod.mesa;
+      item.precio = esLlevarODelivery ? prod.llevar : prod.mesa;
     }
   });
 
@@ -141,12 +145,13 @@ function cambiarTipoPedido() {
 // 4. Agregar Plato a la Comanda
 function agregarAlPedido(idProd) {
   const selectorMesa = document.getElementById('mesa');
-  const esLlevar = selectorMesa ? selectorMesa.value === 'Llevar' : false;
+  const opcion = selectorMesa ? selectorMesa.value : '';
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
   const prod = productos.find(p => p.id === idProd);
   if (!prod) return;
 
-  const precio = esLlevar ? prod.llevar : prod.mesa;
+  const precio = esLlevarODelivery ? prod.llevar : prod.mesa;
   const itemExistente = pedido.find(p => p.id === idProd && !p.observacion);
 
   if (itemExistente) {
@@ -175,7 +180,7 @@ function cambiarCantidad(index, cambio) {
   actualizarResumenHTML();
 }
 
-// 6. Actualizar Observación por Plato (ej. Sin Cebolla China, Sin Frejol)
+// 6. Actualizar Observación por Plato
 function actualizarObservacion(index, texto) {
   if (pedido[index]) {
     pedido[index].observacion = texto;
@@ -257,6 +262,9 @@ function enviarComanda() {
     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   };
 
+  // Guardar en el historial local para el Resumen de Cierre de Caja
+  historialVentas.push(datosPedido);
+
   if (typeof socket !== 'undefined') {
     socket.emit('nuevo-pedido', datosPedido);
   }
@@ -264,6 +272,51 @@ function enviarComanda() {
   pedido = [];
   actualizarResumenHTML();
   alert(`🚀 ¡Comanda enviada a cocina para ${mesaSeleccionada}!`);
+}
+
+// 9. Abrir Modal de Cierre de Caja
+function cerrarCaja() {
+  const modalElement = document.getElementById('modalCaja');
+  const cuerpoModal = document.getElementById('cuerpo-modal-caja');
+  
+  if (!modalElement || !cuerpoModal) return;
+
+  const totalVentas = historialVentas.reduce((sum, v) => sum + parseFloat(v.total), 0);
+  const totalPedidos = historialVentas.length;
+
+  let desgloseHtml = '';
+  if (historialVentas.length === 0) {
+    desgloseHtml = '<p class="text-center text-muted my-3">No hay comandas registradas en este turno aún.</p>';
+  } else {
+    desgloseHtml = `<ul class="list-group list-group-flush mb-3" style="max-height: 200px; overflow-y: auto;">`;
+    historialVentas.forEach((v, idx) => {
+      desgloseHtml += `
+        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1 style="font-size: 0.85rem;">
+          <span><strong>#${idx + 1}</strong> ${v.mesa} <small class="text-muted">(${v.hora})</small></span>
+          <span class="badge bg-success">S/ ${v.total}</span>
+        </li>
+      `;
+    });
+    desgloseHtml += `</ul>`;
+  }
+
+  cuerpoModal.innerHTML = `
+    <div class="p-1">
+      <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <span class="fw-bold text-secondary">Total Pedidos:</span>
+        <span class="badge bg-primary fs-6">${totalPedidos}</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <span class="fw-bold text-secondary">Recaudado:</span>
+        <strong class="text-danger fs-4">S/ ${totalVentas.toFixed(2)}</strong>
+      </div>
+      <h6 class="fw-bold text-dark mb-2">Detalle de Comandas:</h6>
+      ${desgloseHtml}
+    </div>
+  `;
+
+  const modal = new bootstrap.Modal(modalElement);
+  modal.show();
 }
 
 // Escuchar Comandas en Vista Cocina
