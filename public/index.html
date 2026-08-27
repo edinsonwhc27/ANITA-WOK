@@ -14,11 +14,9 @@
   <style>
     :root {
       --primary-red: #D32F2F;
-      --accent-gold: #FFB300;
       --dark-black: #1A1A1A;
       --soft-beige: #FDFBF7;
       --card-bg-light: #FFFFFF;
-      --text-main: #212529;
       --overlay-light: rgba(253, 251, 247, 0.96);
       --overlay-dark: rgba(18, 18, 18, 0.96);
     }
@@ -28,8 +26,7 @@
       min-height: 100vh;
       background: linear-gradient(var(--overlay-light), var(--overlay-light)),
                   url('img/logo.png') center/300px no-repeat fixed;
-      color: var(--text-main);
-      transition: background 0.3s ease, color 0.3s ease;
+      color: var(--dark-black);
     }
 
     body.dark-mode {
@@ -38,11 +35,11 @@
       color: #f8f9fa;
     }
 
-    /* Navbar y Logo */
+    /* Navbar */
     .navbar-custom {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       border-bottom: 3px solid var(--primary-red);
     }
 
@@ -50,143 +47,123 @@
       background: rgba(24, 24, 27, 0.95);
     }
 
-    .brand-logo-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
-
     .brand-logo {
-      height: 48px;
+      height: 45px;
       width: auto;
       object-fit: contain;
     }
 
     .brand-title {
       font-weight: 800;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       color: var(--primary-red);
-      letter-spacing: -0.5px;
       margin: 0;
     }
 
-    body.dark-mode .brand-title {
-      color: #ff5252;
-    }
-
-    /* Pestañas de categoría */
+    /* Pestañas */
     .category-btn {
-      border-radius: 25px;
+      border-radius: 20px;
       font-weight: 600;
-      padding: 8px 20px;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
+      padding: 6px 16px;
+      font-size: 0.85rem;
     }
 
-    /* Tarjetas de Platos (Grid Horizontal Rojo / Beige / Negro) */
+    /* Tarjetas de Menú (Beige, Negro y Rojo) */
     .dish-card {
       border: 2px solid var(--dark-black);
-      border-radius: 16px;
-      background: var(--soft-beige);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border-radius: 12px;
+      background-color: var(--soft-beige);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       height: 100%;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      justify-content: space-between;
+      padding: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
     body.dark-mode .dish-card {
-      background: #1e1e24;
-      border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+      background-color: #1e1e24;
+      border-color: rgba(255,255,255,0.2);
     }
 
     .dish-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 22px rgba(211, 47, 47, 0.15);
+      transform: translateY(-3px);
       border-color: var(--primary-red);
-    }
-
-    .dish-img-container {
-      width: 100%;
-      height: 130px;
-      overflow: hidden;
-      position: relative;
-      background: #e0e0e0;
-    }
-
-    .dish-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-
-    .dish-card:hover .dish-img {
-      transform: scale(1.06);
-    }
-
-    .dish-body {
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex-grow: 1;
-    }
-
-    .dish-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 6px;
-      margin-bottom: 6px;
     }
 
     .dish-name {
       font-weight: 700;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       color: var(--dark-black);
-      margin: 0;
-      line-height: 1.25;
+      margin-bottom: 6px;
+      text-align: center;
+      min-height: 2.4em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     body.dark-mode .dish-name {
       color: #ffffff;
     }
 
-    .dish-price-badge {
-      background: var(--primary-red);
-      color: #ffffff;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 0.82rem;
-      white-space: nowrap;
+    .dish-img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+      background: #e0e0e0;
     }
 
     .dish-desc {
-      font-size: 0.78rem;
-      color: #555555;
-      margin-bottom: 12px;
-      line-height: 1.3;
+      font-size: 0.75rem;
+      color: #555;
+      margin-bottom: 8px;
+      line-height: 1.25;
+      text-align: center;
+      min-height: 2.5em;
     }
 
     body.dark-mode .dish-desc {
-      color: #b0b0b0;
+      color: #aaa;
     }
 
-    /* Columna Derecha Fija (Sticky Panel) */
-    .sticky-right-column {
+    .dish-price {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--primary-red);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .btn-add-dish {
+      background-color: var(--primary-red);
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      padding: 8px;
+      width: 100%;
+      font-size: 0.85rem;
+    }
+
+    .btn-add-dish:hover {
+      background-color: #b71c1c;
+      color: white;
+    }
+
+    /* Columna Derecha Totalmente Fija */
+    .panel-lateral-fijo {
       position: sticky;
-      top: 85px;
+      top: 80px;
     }
 
     .order-summary-card {
-      border-radius: 18px;
-      border: 1px solid rgba(0,0,0,0.08);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.1);
       background: var(--card-bg-light);
     }
 
@@ -195,66 +172,60 @@
       border-color: rgba(255,255,255,0.1);
     }
 
-    /* Botones */
-    .btn-red {
+    .btn-send-main {
       background-color: var(--primary-red);
       color: white;
-      font-weight: 600;
-      border-radius: 10px;
+      font-weight: 700;
       border: none;
+      border-radius: 8px;
     }
 
-    .btn-red:hover {
+    .btn-send-main:hover {
       background-color: #b71c1c;
-      color: white;
     }
 
-    .btn-excel {
+    .btn-excel-cierre {
       background-color: #2e7d32;
       color: white;
-      font-weight: 600;
-      border-radius: 10px;
+      font-weight: 700;
       border: none;
+      border-radius: 8px;
     }
 
-    .btn-excel:hover {
+    .btn-excel-cierre:hover {
       background-color: #1b5e20;
-      color: white;
     }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR PRINCIPAL CON LOGO -->
+  <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-custom sticky-top py-2">
-    <div class="container-fluid px-4">
-      <a class="brand-logo-container" href="#">
-        <img src="img/logo.png" alt="Anita Wok Logo" class="brand-logo" id="logo-img" onerror="this.style.display='none'">
-        <div>
-          <h1 class="brand-title">ANITA-WOK</h1>
-          <small class="text-muted d-block" style="font-size: 0.72rem; margin-top:-4px;">SISTEMA DE COMANDAS</small>
-        </div>
+    <div class="container-fluid px-3">
+      <a class="d-flex align-items-center gap-2 text-decoration-none" href="#">
+        <img src="img/logo.png" alt="Logo Anita Wok" class="brand-logo" onerror="this.style.display='none'">
+        <h1 class="brand-title">ANITA-WOK</h1>
       </a>
 
       <div class="d-flex align-items-center gap-2 ms-auto">
         <a href="cocina.html" class="btn btn-outline-danger btn-sm rounded-pill font-weight-bold px-3">
-          <i class="fa-solid fa-fire me-1"></i> Vista Cocina
+          <i class="fa-solid fa-fire me-1"></i> Cocina
         </a>
-        <button id="btn-theme-toggle" class="btn btn-light btn-sm rounded-circle p-2 shadow-sm" title="Cambiar Tema">
+        <button id="btn-theme-toggle" class="btn btn-light btn-sm rounded-circle p-2 shadow-sm">
           <i class="fa-solid fa-moon text-dark"></i>
         </button>
       </div>
     </div>
   </nav>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <div class="container-fluid px-4 my-4">
-    <div class="row g-4">
+  <!-- CONTENIDO -->
+  <div class="container-fluid px-3 my-3">
+    <div class="row g-3">
 
-      <!-- COLUMNA IZQUIERDA: CATÁLOGO DE PLATOS (Grid de Izquierda a Derecha) -->
+      <!-- COLUMNA IZQUIERDA: MENÚ EN TRES COLUMNAS HORIZONTALES (row-cols-3) -->
       <div class="col-lg-7 col-xl-8">
         
-        <!-- Pestañas de Categoría -->
+        <!-- Categorías -->
         <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="category-filters">
           <button class="btn btn-danger category-btn active" onclick="verCategoria('chifa', this)">Chifa y Criollo</button>
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('compartir', this)">Compartidos</button>
@@ -262,131 +233,62 @@
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('extras', this)">Extras</button>
         </div>
 
-        <!-- Contenedor del Menú en formato cuadrícula (de izquierda a derecha) -->
+        <!-- GRID DE 3 PLATOS POR FILA -->
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="contenedor-menu">
           
-          <!-- PLATO 1 -->
+          <!-- EJEMPLO DE TARJETA 1 -->
           <div class="col">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=500&auto=format&fit=crop" class="dish-img" alt="Chaufa de Pollo">
-              </div>
-              <div class="dish-body">
-                <div>
-                  <div class="dish-title-row">
-                    <h3 class="dish-name">Chaufa de Pollo</h3>
-                    <span class="dish-price-badge">S/ 18.00</span>
-                  </div>
-                  <p class="dish-desc">Arroz salteado al wok con trozos de pollo, huevo, sillao y cebollita china fresquita.</p>
-                </div>
-                <button class="btn btn-red btn-sm w-100 py-2" onclick="agregarAlPedido('Chaufa de Pollo', 18.00)">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
-              </div>
+              <div class="dish-name">Chaufa de Pollo</div>
+              <img src="https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop" class="dish-img" alt="Chaufa de Pollo">
+              <div class="dish-desc">Arroz salteado al wok, trozos de pollo, huevo, sillao y cebolla china.</div>
+              <div class="dish-price">S/ 18.00</div>
+              <button class="btn btn-add-dish" onclick="agregarAlPedido('Chaufa de Pollo', 18.00)">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
-          <!-- PLATO 2 -->
+          <!-- EJEMPLO DE TARJETA 2 -->
           <div class="col">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=500&auto=format&fit=crop" class="dish-img" alt="Lomo Saltado">
-              </div>
-              <div class="dish-body">
-                <div>
-                  <div class="dish-title-row">
-                    <h3 class="dish-name">Lomo Saltado</h3>
-                    <span class="dish-price-badge">S/ 26.00</span>
-                  </div>
-                  <p class="dish-desc">Jugosos trozos de carne salteados con cebolla, tomate, ají amarillo y papas fritas.</p>
-                </div>
-                <button class="btn btn-red btn-sm w-100 py-2" onclick="agregarAlPedido('Llo Saltado', 26.00)">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
-              </div>
+              <div class="dish-name">Lomo Saltado</div>
+              <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=400&auto=format&fit=crop" class="dish-img" alt="Lomo Saltado">
+              <div class="dish-desc">Lomo de res, cebolla, tomate, ají amarillo y papas fritas crocantes.</div>
+              <div class="dish-price">S/ 26.00</div>
+              <button class="btn btn-add-dish" onclick="agregarAlPedido('Lomo Saltado', 26.00)">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
-          <!-- PLATO 3 -->
+          <!-- EJEMPLO DE TARJETA 3 -->
           <div class="col">
             <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=500&auto=format&fit=crop" class="dish-img" alt="Wantan Frito">
-              </div>
-              <div class="dish-body">
-                <div>
-                  <div class="dish-title-row">
-                    <h3 class="dish-name">Wantan Frito (6 uds)</h3>
-                    <span class="dish-price-badge">S/ 12.00</span>
-                  </div>
-                  <p class="dish-desc">Crujientes láminas rellenas de pollo picado servidas con salsa tamarindo agridulce.</p>
-                </div>
-                <button class="btn btn-red btn-sm w-100 py-2" onclick="agregarAlPedido('Wantan Frito', 12.00)">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- PLATO 4 -->
-          <div class="col">
-            <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=500&auto=format&fit=crop" class="dish-img" alt="Aeropuerto Especial">
-              </div>
-              <div class="dish-body">
-                <div>
-                  <div class="dish-title-row">
-                    <h3 class="dish-name">Aeropuerto Especial</h3>
-                    <span class="dish-price-badge">S/ 24.00</span>
-                  </div>
-                  <p class="dish-desc">Combinación perfecta de arroz chaufa, tallarín frito y frijolito chino al wok.</p>
-                </div>
-                <button class="btn btn-red btn-sm w-100 py-2" onclick="agregarAlPedido('Aeropuerto Especial', 24.00)">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- PLATO 5 -->
-          <div class="col">
-            <div class="dish-card">
-              <div class="dish-img-container">
-                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=500&auto=format&fit=crop" class="dish-img" alt="Chicha Morada">
-              </div>
-              <div class="dish-body">
-                <div>
-                  <div class="dish-title-row">
-                    <h3 class="dish-name">Chicha Morada (1L)</h3>
-                    <span class="dish-price-badge">S/ 10.00</span>
-                  </div>
-                  <p class="dish-desc">Refresco artesanal heladito elaborado con maíz morado, piña, canela y clavo.</p>
-                </div>
-                <button class="btn btn-red btn-sm w-100 py-2" onclick="agregarAlPedido('Chicha Morada 1L', 10.00)">
-                  <i class="fa-solid fa-plus me-1"></i> Agregar
-                </button>
-              </div>
+              <div class="dish-name">Wantan Frito (6 uds)</div>
+              <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop" class="dish-img" alt="Wantan Frito">
+              <div class="dish-desc">Láminas crocantes rellenas de pollo picado con salsa tamarindo.</div>
+              <div class="dish-price">S/ 12.00</div>
+              <button class="btn btn-add-dish" onclick="agregarAlPedido('Wantan Frito', 12.00)">
+                <i class="fa-solid fa-plus me-1"></i> Agregar
+              </button>
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- COLUMNA DERECHA: COMANDA Y CAJA (Estática / Fija en su lugar) -->
+      <!-- COLUMNA DERECHA: PANEL LATERAL FIJO (Sin colisión) -->
       <div class="col-lg-5 col-xl-4">
-        <div class="sticky-right-column">
+        <div class="panel-lateral-fijo">
           
-          <!-- Tarjeta 1: Comanda Activa -->
+          <!-- Comanda Activa -->
           <div class="card order-summary-card p-3 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h2 class="h6 font-weight-bold mb-0 text-uppercase"><i class="fa-solid fa-receipt text-danger me-2"></i>Comanda Activa</h2>
-            </div>
+            <h2 class="h6 font-weight-bold mb-2 text-uppercase"><i class="fa-solid fa-receipt text-danger me-2"></i>Comanda Activa</h2>
 
-            <!-- Selección de Ubicación / Mesa -->
-            <div class="mb-3">
+            <div class="mb-2">
               <label for="mesa" class="form-label font-weight-bold text-muted small mb-1">UBICACIÓN / MESA</label>
-              <select class="form-select" id="mesa" onchange="cambiarTipoPedido()">
+              <select class="form-select form-select-sm" id="mesa" onchange="cambiarTipoPedido()">
                 <option value="Mesa 1" selected>📍 Mesa 1</option>
                 <option value="Mesa 2">📍 Mesa 2</option>
                 <option value="Mesa 3">📍 Mesa 3</option>
@@ -406,22 +308,21 @@
               </select>
             </div>
 
-            <!-- Contenedor del Pedido -->
             <label class="form-label font-weight-bold text-muted small mb-1">RESUMEN DEL PEDIDO</label>
-            <div id="lista-pedido" class="p-2 border rounded bg-light mb-3" style="min-height: 110px; max-height: 220px; overflow-y: auto;">
+            <div id="lista-pedido" class="p-2 border rounded bg-light mb-3" style="min-height: 120px; max-height: 200px; overflow-y: auto;">
               <p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>
             </div>
 
-            <button class="btn btn-red btn-lg w-100 py-2 shadow-sm fs-6" onclick="enviarComanda()">
+            <button class="btn btn-send-main w-100 py-2 shadow-sm fs-6" onclick="enviarComanda()">
               🚀 ENVIAR A COCINA
             </button>
           </div>
 
-          <!-- Tarjeta 2: Control de Caja (Estática dentro del contenedor) -->
-          <div class="card order-summary-card p-3 text-center border-warning" style="background-color: rgba(255, 193, 7, 0.06);">
+          <!-- Control de Caja -->
+          <div class="card order-summary-card p-3 text-center border-warning" style="background-color: rgba(255, 193, 7, 0.08);">
             <h6 class="fw-bold text-warning-emphasis mb-1"><i class="fa-solid fa-chart-line me-1"></i> CONTROL DE CAJA DEL DÍA</h6>
-            <p class="text-muted small mb-2" style="font-size: 0.78rem;">Descarga el Excel con las comandas del día y realiza el cierre.</p>
-            <button class="btn btn-excel btn-md w-100 py-2 shadow-sm" onclick="descargarCierre()">
+            <p class="text-muted small mb-2" style="font-size: 0.75rem;">Descarga el reporte en Excel y cierra las ventas de hoy.</p>
+            <button class="btn btn-excel-cierre w-100 py-2 shadow-sm fs-6" onclick="descargarCierre()">
               🔒 CERRAR CAJA Y DESCARGAR EXCEL
             </button>
           </div>
@@ -432,29 +333,22 @@
     </div>
   </div>
 
-  <!-- SCRIPTS DEL SERVIDOR -->
+  <!-- SCRIPTS -->
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
-
-  <!-- LÓGICA DE INTERFAZ -->
   <script>
     function descargarCierre() {
       window.location.href = '/descargar-cierre';
     }
 
-    // Cambiar tema Oscuro / Claro
-    const btnTheme = document.getElementById('btn-theme-toggle');
-    btnTheme.addEventListener('click', () => {
+    // Cambiar Tema
+    document.getElementById('btn-theme-toggle').addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
-      const icon = btnTheme.querySelector('i');
-      if (document.body.classList.contains('dark-mode')) {
-        icon.className = 'fa-solid fa-sun text-warning';
-      } else {
-        icon.className = 'fa-solid fa-moon text-dark';
-      }
+      const icon = document.querySelector('#btn-theme-toggle i');
+      icon.className = document.body.classList.contains('dark-mode') ? 'fa-solid fa-sun text-warning' : 'fa-solid fa-moon text-dark';
     });
 
-    // Control activo de pestañas
+    // Filtros
     const oldVerCategoria = window.verCategoria;
     window.verCategoria = function(cat, btnElement) {
       if (btnElement) {
