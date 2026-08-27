@@ -9,7 +9,7 @@ const socket = io();
 const productos = [
   // 1. CHIFA Y CRIOLLO
   { id: 1, cat: 'chifa', nombre: 'Chaufa de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Arroz salteado al wok, trozos de pollo, huevo, sillao y cebollita china.', img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop' },
-  { id: 2, cat: 'chifa', nombre: 'Aeropuerto de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Mezcla de arroz chaufa, fideo frito al wok, pollo y frijolito chino.', img: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=400&auto=format&fit=crop' },
+  { id: 2, cat: 'chifa', nombre: 'Aeropuerto de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Mezcla de arroz chaufa, fideo frito al wok, pollo y frijolito chino.', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJawZvEG8_kKwAvSzH9p949H4oUV6W0dJA4qBX4wd9-h2v5uq_CZ7p4VKB&s=10' },
   { id: 3, cat: 'chifa', nombre: 'Aeropuerto de Chancho', mesa: 14.50, llevar: 15.00, desc: 'Chaufa, fideo salteado, trozos de chancho asado char siu y frijolito chino.', img: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=400&auto=format&fit=crop' },
   { id: 4, cat: 'chifa', nombre: 'Chaufa de Chancho', mesa: 14.50, llevar: 15.00, desc: 'Arroz salteado al wok con jugosos cortes de chancho asado dulce.', img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop' },
   { id: 5, cat: 'chifa', nombre: 'Chihaukay con Chaufa', mesa: 16.00, llevar: 16.50, desc: 'Pollo crujiente en salsa de ostión con ajonjolí acompañado de arroz chaufa.', img: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=400&auto=format&fit=crop' },
