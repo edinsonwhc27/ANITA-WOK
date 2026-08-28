@@ -508,14 +508,14 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Formato CSV (Excel con columnas separadas)
+// Descargar Registro de Ventas en Formato CSV (Excel con soporte total de tildes UTF-8)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
     return;
   }
 
-  // Fuerza a Excel a interpretar el punto y coma (;) como separador de columnas
+  // Define separador ; e inyecta BOM UTF-8 (\uFEFF) para forzar a Excel a leer tildes y eñes correctamente
   let csvContent = "sep=;\n\uFEFF"; 
 
   // Encabezados de columnas
@@ -524,7 +524,7 @@ function descargarExcelVentas() {
   let sumaTotalDia = 0;
 
   historialVentas.forEach((v) => {
-    const idCorrelativo = v.id; // Ya guardado como 000001, 000002...
+    const idCorrelativo = v.id;
     const hora = v.hora || v.fecha;
     const ubicacion = `"${v.mesa}"`;
     const metodoPago = `"${v.metodoPago}"`;
@@ -556,7 +556,7 @@ function descargarExcelVentas() {
   // Fila final con la SUMA TOTAL DEL DÍA
   csvContent += `TOTAL DÍA;;;;;;;;;${sumaTotalDia.toFixed(2)}\n`;
 
-  // Crear archivo y descargar
+  // Generación del archivo con codificación explicita UTF-8
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
