@@ -389,18 +389,23 @@ function enviarComanda() {
   }
 
   const datosComanda = {
-    id: Date.now(),
+    id: Date.now().toString(),
     mesa: mesa,
     metodoPago: metodoPago,
     cliente: { telefono: tel, nombre: nom, direccion: dir, referencia: ref },
     items: [...pedido],
     recargoDelivery: recargoDelivery,
     total: total,
-    fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    fecha: new Date().toLocaleDateString(),
+    hora: new Date().toLocaleTimeString('es-PE', { hour12: true })
   };
 
   // Emitir comanda por Socket.io a la cocina
-  socket.emit('nuevaComanda', datosComanda);
+  if (typeof socket !== 'undefined') {
+    socket.emit('nuevaComanda', datosComanda);
+  } else {
+    console.error('Socket no está disponible.');
+  }
 
   // Guardar en el historial de ventas local
   historialVentas.push(datosComanda);
@@ -451,7 +456,7 @@ function cerrarCaja() {
 
       tablaHTML += `
         <tr>
-          <td>${v.fecha}</td>
+          <td>${v.hora || v.fecha}</td>
           <td><span class="badge bg-secondary">${v.mesa}</span></td>
           <td><span class="badge bg-info text-dark">${v.metodoPago}</span></td>
           <td>${resumenItems}</td>
@@ -469,25 +474,25 @@ function cerrarCaja() {
         <div class="col-6 col-md-3">
           <div class="p-2 bg-light rounded text-center border">
             <small class="text-muted d-block">Efectivo</small>
-            <strong class="text-success">S/ ${porMetodo.Efectivo.toFixed(2)}</strong>
+            <strong class="text-success">S/ ${(porMetodo.Efectivo || 0).toFixed(2)}</strong>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="p-2 bg-light rounded text-center border">
             <small class="text-muted d-block">Yape</small>
-            <strong class="text-primary">S/ ${porMetodo.Yape.toFixed(2)}</strong>
+            <strong class="text-primary">S/ ${(porMetodo.Yape || 0).toFixed(2)}</strong>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="p-2 bg-light rounded text-center border">
             <small class="text-muted d-block">Plin</small>
-            <strong class="text-info">S/ ${porMetodo.Plin.toFixed(2)}</strong>
+            <strong class="text-info">S/ ${(porMetodo.Plin || 0).toFixed(2)}</strong>
           </div>
         </div>
         <div class="col-6 col-md-3">
           <div class="p-2 bg-light rounded text-center border">
             <small class="text-muted d-block">Tarjeta</small>
-            <strong class="text-warning text-dark">S/ ${porMetodo.Tarjeta.toFixed(2)}</strong>
+            <strong class="text-warning text-dark">S/ ${(porMetodo.Tarjeta || 0).toFixed(2)}</strong>
           </div>
         </div>
       </div>
@@ -516,7 +521,7 @@ function descargarExcelVentas() {
 
   historialVentas.forEach(v => {
     const clienteNombre = v.cliente && v.cliente.nombre ? v.cliente.nombre.replace(/,/g, '') : 'N/A';
-    csvContent += `${v.id},${v.fecha},${v.mesa},${v.metodoPago},"${clienteNombre}",${v.total.toFixed(2)}\n`;
+    csvContent += `${v.id},${v.hora || v.fecha},${v.mesa},${v.metodoPago},"${clienteNombre}",${v.total.toFixed(2)}\n`;
   });
 
   const encodedUri = encodeURI(csvContent);
