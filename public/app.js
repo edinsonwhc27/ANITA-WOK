@@ -508,60 +508,114 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Formato CSV (Excel con soporte total de tildes UTF-8)
+// Descargar Registro de Ventas en Formato Excel (.xls) para compatibilidad nativa de tildes
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
     return;
   }
 
-  // Define separador ; e inyecta BOM UTF-8 (\uFEFF) para forzar a Excel a leer tildes y eñes correctamente
-  let csvContent = "sep=;\n\uFEFF"; 
-
-  // Encabezados de columnas
-  csvContent += "ID Comanda;Hora;Ubicación;Método de Pago;Cliente;Teléfono;Dirección;Pedidos;Delivery;Total del Pedido\n";
-
   let sumaTotalDia = 0;
+
+  // Construcción de tabla en formato HTML nativo para Excel (soporta tildes, ñ y columnas automáticas)
+  let excelHTML = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8" />
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Reporte de Ventas</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <style>
+        th { background-color: #212529; color: #ffffff; font-weight: bold; text-align: center; }
+        td, th { border: 1px solid #cccccc; padding: 5px; }
+        .monto { text-align: right; }
+        .texto { mso-number-format:"\\@"; }
+        .total { font-weight: bold; background-color: #f8d7da; }
+      </style>
+    </head>
+    <body>
+      <table>
+        <thead>
+          <tr>
+            <th>ID Comanda</th>
+            <th>Hora</th>
+            <th>Ubicación</th>
+            <th>Método de Pago</th>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Pedidos</th>
+            <th>Delivery</th>
+            <th>Total del Pedido</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
 
   historialVentas.forEach((v) => {
     const idCorrelativo = v.id;
     const hora = v.hora || v.fecha;
-    const ubicacion = `"${v.mesa}"`;
-    const metodoPago = `"${v.metodoPago}"`;
-    const clienteNombre = `"${(v.cliente && v.cliente.nombre) ? v.cliente.nombre.replace(/"/g, '""') : 'N/A'}"`;
-    const clienteTel = `"${(v.cliente && v.cliente.telefono) ? v.cliente.telefono : 'N/A'}"`;
-    const clienteDir = `"${(v.cliente && v.cliente.direccion) ? v.cliente.direccion.replace(/"/g, '""') : 'N/A'}"`;
-    
-    // Lista de platos del pedido
+    const ubicacion = v.mesa || '';
+    const metodoPago = v.metodoPago || '';
+    const clienteNombre = (v.cliente && v.cliente.nombre) ? v.cliente.nombre : 'N/A';
+    const clienteTel = (v.cliente && v.cliente.telefono) ? v.cliente.telefono : 'N/A';
+    const clienteDir = (v.cliente && v.cliente.direccion) ? v.cliente.direccion : 'N/A';
+
     const listaPedidos = v.items.map(i => {
       let detalle = `${i.cantidad}x ${i.nombre}`;
       if (i.observacion) detalle += ` (${i.observacion})`;
       return detalle;
     }).join(' + ');
 
-    const pedidosFormateados = `"${listaPedidos.replace(/"/g, '""')}"`;
     const delivery = (v.recargoDelivery || 0).toFixed(2);
     const totalPedido = v.total.toFixed(2);
 
-    // Sumar al total acumulado del día
     sumaTotalDia += v.total;
 
-    // Agregar fila
-    csvContent += `${idCorrelativo};${hora};${ubicacion};${metodoPago};${clienteNombre};${clienteTel};${clienteDir};${pedidosFormateados};${delivery};${totalPedido}\n`;
+    excelHTML += `
+      <tr>
+        <td class="texto">${idCorrelativo}</td>
+        <td>${hora}</td>
+        <td>${ubicacion}</td>
+        <td>${metodoPago}</td>
+        <td>${clienteNombre}</td>
+        <td class="texto">${clienteTel}</td>
+        <td>${clienteDir}</td>
+        <td>${listaPedidos}</td>
+        <td class="monto">S/ ${delivery}</td>
+        <td class="monto">S/ ${totalPedido}</td>
+      </tr>
+    `;
   });
 
-  // Fila vacía de espacio
-  csvContent += `;;;;;;;;;\n`;
+  excelHTML += `
+        <tr><td colspan="10"></td></tr>
+        <tr class="total">
+          <td colspan="9">TOTAL DÍA</td>
+          <td class="monto">S/ ${sumaTotalDia.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+  </html>
+  `;
 
-  // Fila final con la SUMA TOTAL DEL DÍA
-  csvContent += `TOTAL DÍA;;;;;;;;;${sumaTotalDia.toFixed(2)}\n`;
-
-  // Generación del archivo con codificación explicita UTF-8
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+  const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const url = URL.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.xls`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
