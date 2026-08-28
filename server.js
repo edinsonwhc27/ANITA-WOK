@@ -46,14 +46,20 @@ app.use(express.static('public'));
 
 // --- SOCKET.IO: RECEPCIÓN Y ENVÍO EN TIEMPO REAL ---
 io.on('connection', (socket) => {
-    socket.on('nuevo-pedido', (pedido) => {
+    console.log(`[SOCKET] Cliente conectado: ${socket.id}`);
+
+    // Evento estandarizado a 'nuevaComanda'
+    socket.on('nuevaComanda', (pedido) => {
         const fechaHoy = obtenerFechaPeru();
         const horaActual = new Date().toLocaleTimeString('es-PE', { timeZone: 'America/Lima', hour12: true });
 
         const ventaRegistrada = {
             id: pedido.id || Date.now(),
             mesa: pedido.mesa || 'Sin mesa',
-            platos: pedido.platos || [],
+            metodoPago: pedido.metodoPago || 'Efectivo',
+            cliente: pedido.cliente || {},
+            items: pedido.items || pedido.platos || [],
+            recargoDelivery: parseFloat(pedido.recargoDelivery || 0),
             total: parseFloat(pedido.total || 0),
             fecha: fechaHoy,
             hora: pedido.hora || horaActual
@@ -65,8 +71,12 @@ io.on('connection', (socket) => {
 
         console.log(`[PEDIDO RECIBIDO] ${ventaRegistrada.mesa} - Total: S/ ${ventaRegistrada.total}`);
 
-        // Reenviar a la pantalla de cocina usando EL MISMO NOMBRE de evento: nuevo-pedido
-        io.emit('nuevo-pedido', ventaRegistrada);
+        // Emitir a la cocina usando 'nuevaComanda'
+        io.emit('nuevaComanda', ventaRegistrada);
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`[SOCKET] Cliente desconectado: ${socket.id}`);
     });
 });
 
@@ -85,6 +95,7 @@ app.get('/descargar-cierre', async (req, res) => {
         { header: 'Fecha', key: 'fecha', width: 15 },
         { header: 'Hora', key: 'hora', width: 15 },
         { header: 'Ubicación / Mesa', key: 'mesa', width: 20 },
+        { header: 'Método Pago', key: 'metodoPago', width: 15 },
         { header: 'Detalle de Platos', key: 'detalle', width: 45 },
         { header: 'Total (S/)', key: 'total', width: 15 }
     ];
@@ -92,15 +103,17 @@ app.get('/descargar-cierre', async (req, res) => {
     let totalGeneral = 0;
 
     ventasHoy.forEach((v) => {
-        const detallePlatos = Array.isArray(v.platos) 
-            ? v.platos.map(p => `${p.cantidad || 1}x ${p.nombre || p.titulo}${p.observacion ? ` (${p.observacion})` : ''}`).join(' | ')
-            : String(v.platos);
+        const listaPlatos = v.items || v.platos || [];
+        const detallePlatos = Array.isArray(listaPlatos) 
+            ? listaPlatos.map(p => `${p.cantidad || 1}x ${p.nombre || p.titulo}${p.observacion ? ` (${p.observacion})` : ''}`).join(' | ')
+            : String(listaPlatos);
 
         worksheet.addRow({
             id: v.id,
             fecha: v.fecha,
             hora: v.hora,
             mesa: v.mesa,
+            metodoPago: v.metodoPago || 'Efectivo',
             detalle: detallePlatos,
             total: Number(v.total)
         });
@@ -124,5 +137,5 @@ app.get('/descargar-cierre', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Servidor activo en el puerto ${PORT}`);
+    console.log(`Servidor activo en http://localhost:${PORT}`);
 });
