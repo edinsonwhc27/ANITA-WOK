@@ -318,205 +318,211 @@ function actualizarResumenHTML() {
     `;
   });
 
+  const tipo = selectorMesa ? selectorMesa.value : '';
   let recargoDelivery = 0;
-  if (selectorMesa && selectorMesa.value === 'Delivery' && selectorDelivery) {
+
+  if (tipo === 'Delivery' && selectorDelivery) {
     recargoDelivery = parseFloat(selectorDelivery.value) || 0;
+  }
+
+  const totalFinal = subtotalPlatos + recargoDelivery;
+
+  html += `</div>
+    <div class="border-top mt-3 pt-2">
+      <div class="d-flex justify-content-between small text-muted">
+        <span>Subtotal Platos:</span>
+        <span>S/ ${subtotalPlatos.toFixed(2)}</span>
+      </div>
+  `;
+
+  if (tipo === 'Delivery') {
     html += `
-      <div class="d-flex justify-content-between align-items-center text-warning fw-bold small px-1 mt-1">
+      <div class="d-flex justify-content-between small text-muted">
         <span>Recargo Delivery:</span>
-        <span>+ S/ ${recargoDelivery.toFixed(2)}</span>
+        <span>S/ ${recargoDelivery.toFixed(2)}</span>
       </div>
     `;
   }
 
-  const totalGeneral = subtotalPlatos + recargoDelivery;
-
   html += `
-    </div>
-    <div class="d-flex justify-content-between align-items-center border-top mt-3 pt-2">
-      <span class="fw-bold text-uppercase text-muted small">TOTAL:</span>
-      <span class="fw-extrabold text-danger fs-5">S/ ${totalGeneral.toFixed(2)}</span>
+      <div class="d-flex justify-content-between fw-bold text-danger h6 mt-1 mb-0">
+        <span>TOTAL:</span>
+        <span>S/ ${totalFinal.toFixed(2)}</span>
+      </div>
     </div>
   `;
 
   contenedorResumen.innerHTML = html;
 }
 
-// Enviar Comanda con Datos del Cliente
+// Enviar Comanda a Cocina
 function enviarComanda() {
-  const selectorMesa = document.getElementById('mesa');
-  const selectorDelivery = document.getElementById('recargo-delivery');
-  let mesaSeleccionada = selectorMesa ? selectorMesa.value : 'Mesa 1';
-
   if (pedido.length === 0) {
-    alert('Debes agregar al menos un plato antes de enviar.');
+    alert('Agrega al menos un plato antes de enviar la comanda.');
     return;
   }
 
-  // Capturar Datos del Cliente si aplica (Para Llevar o Delivery)
-  let datosCliente = null;
-  if (mesaSeleccionada === 'Llevar' || mesaSeleccionada === 'Delivery') {
-    const tel = document.getElementById('cliente-telefono')?.value.trim();
-    const nom = document.getElementById('cliente-nombre')?.value.trim();
-    const dir = document.getElementById('cliente-direccion')?.value.trim();
-    const ref = document.getElementById('cliente-referencia')?.value.trim();
+  const selectorMesa = document.getElementById('mesa');
+  const selectorDelivery = document.getElementById('recargo-delivery');
+  const selectorMetodo = document.getElementById('metodo-pago');
 
-    if (tel && nom) {
-      datosCliente = { telefono: tel, nombre: nom, direccion: dir, referencia: ref };
-      guardarClienteNuevo(tel, nom, dir, ref); // Se guarda en Clientes Frecuentes automáticamente
-    }
+  const mesa = selectorMesa ? selectorMesa.value : 'Mesa 1';
+  const metodoPago = selectorMetodo ? selectorMetodo.value : 'Efectivo';
+
+  let subtotal = pedido.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  let recargoDelivery = 0;
+
+  if (mesa === 'Delivery' && selectorDelivery) {
+    recargoDelivery = parseFloat(selectorDelivery.value) || 0;
   }
 
-  let subtotal = 0;
-  pedido.forEach(item => subtotal += (item.precio * item.cantidad));
+  const total = subtotal + recargoDelivery;
 
-  let recargo = 0;
-  if (mesaSeleccionada === 'Delivery' && selectorDelivery) {
-    recargo = parseFloat(selectorDelivery.value) || 0;
-    mesaSeleccionada = `Delivery (S/ ${recargo.toFixed(2)})`;
+  // Recopilar datos del cliente si aplica
+  const tel = document.getElementById('cliente-telefono')?.value.trim() || '';
+  const nom = document.getElementById('cliente-nombre')?.value.trim() || '';
+  const dir = document.getElementById('cliente-direccion')?.value.trim() || '';
+  const ref = document.getElementById('cliente-referencia')?.value.trim() || '';
+
+  if ((mesa === 'Llevar' || mesa === 'Delivery') && tel && nom) {
+    guardarClienteNuevo(tel, nom, dir, ref);
   }
 
-  const totalFinal = subtotal + recargo;
-  const hoy = new Date();
-
-  const datosPedido = {
-    id: Date.now().toString().slice(-6), // ID corto de 6 dígitos
-    fecha: hoy.toLocaleDateString(),
-    hora: hoy.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    mesa: mesaSeleccionada,
-    cliente: datosCliente, // Se adjunta el cliente a la comanda
-    platos: [...pedido],
-    total: totalFinal.toFixed(2)
+  const datosComanda = {
+    id: Date.now(),
+    mesa: mesa,
+    metodoPago: metodoPago,
+    cliente: { telefono: tel, nombre: nom, direccion: dir, referencia: ref },
+    items: [...pedido],
+    recargoDelivery: recargoDelivery,
+    total: total,
+    fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   };
 
-  historialVentas.push(datosPedido);
+  // Emitir comanda por Socket.io a la cocina
+  socket.emit('nuevaComanda', datosComanda);
 
-  if (typeof socket !== 'undefined') {
-    socket.emit('nuevo-pedido', datosPedido);
-  }
+  // Guardar en el historial de ventas local
+  historialVentas.push(datosComanda);
 
-  // Limpiar pedido y campos de texto de cliente
+  alert(`¡Comanda enviada a Cocina! Ubicación: ${mesa} | Pago: ${metodoPago}`);
+
+  // Limpiar pedido activo
   pedido = [];
-  const telInput = document.getElementById('cliente-telefono');
-  const nomInput = document.getElementById('cliente-nombre');
-  const dirInput = document.getElementById('cliente-direccion');
-  const refInput = document.getElementById('cliente-referencia');
-
-  if (telInput) telInput.value = '';
-  if (nomInput) nomInput.value = '';
-  if (dirInput) dirInput.value = '';
-  if (refInput) refInput.value = '';
-
   actualizarResumenHTML();
-  alert(`🚀 ¡Comanda enviada a cocina para ${mesaSeleccionada}!`);
 }
 
-// Cierre de Caja Modal
+// Cerrar Caja y Mostrar Modal
 function cerrarCaja() {
-  const modalElement = document.getElementById('modalCaja');
+  const modalElem = document.getElementById('modalCaja');
   const cuerpoModal = document.getElementById('cuerpo-modal-caja');
-  if (!modalElement || !cuerpoModal) return;
+  if (!modalElem || !cuerpoModal) return;
 
-  const totalVentas = historialVentas.reduce((sum, v) => sum + parseFloat(v.total), 0);
-  const totalPedidos = historialVentas.length;
-
-  let desgloseHtml = '';
   if (historialVentas.length === 0) {
-    desgloseHtml = '<p class="text-center text-muted my-3">No hay comandas registradas en el día.</p>';
+    cuerpoModal.innerHTML = '<p class="text-muted text-center py-3 mb-0">No se registran ventas en el turno actual.</p>';
   } else {
-    desgloseHtml = `
-      <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-        <table class="table table-sm table-hover align-middle">
-          <thead class="table-dark small">
+    let totalGeneral = 0;
+    let porMetodo = { Efectivo: 0, Yape: 0, Plin: 0, Tarjeta: 0 };
+
+    let tablaHTML = `
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle" style="font-size:0.85rem;">
+          <thead class="table-dark">
             <tr>
-              <th>ID</th>
               <th>Hora</th>
-              <th>Ubicación / Cliente</th>
-              <th>Detalle</th>
+              <th>Mesa/Tipo</th>
+              <th>Método</th>
+              <th>Ítems</th>
               <th class="text-end">Total</th>
             </tr>
           </thead>
-          <tbody class="small">
+          <tbody>
     `;
 
     historialVentas.forEach(v => {
-      const resumenPlatos = v.platos.map(p => `${p.cantidad}x ${p.nombre}${p.observacion ? ' ('+p.observacion+')' : ''}`).join(', ');
-      const infoCliente = v.cliente ? `<br><small class="text-primary">👤 ${v.cliente.nombre} (${v.cliente.telefono})</small>` : '';
-      
-      desgloseHtml += `
+      totalGeneral += v.total;
+      if (porMetodo[v.metodoPago] !== undefined) {
+        porMetodo[v.metodoPago] += v.total;
+      } else {
+        porMetodo[v.metodoPago] = v.total;
+      }
+
+      const resumenItems = v.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
+
+      tablaHTML += `
         <tr>
-          <td><strong>#${v.id}</strong></td>
-          <td>${v.hora}</td>
-          <td><span class="badge bg-secondary">${v.mesa}</span>${infoCliente}</td>
-          <td class="text-truncate" style="max-width: 200px;">${resumenPlatos}</td>
-          <td class="text-end fw-bold text-danger">S/ ${v.total}</td>
+          <td>${v.fecha}</td>
+          <td><span class="badge bg-secondary">${v.mesa}</span></td>
+          <td><span class="badge bg-info text-dark">${v.metodoPago}</span></td>
+          <td>${resumenItems}</td>
+          <td class="text-end fw-bold">S/ ${v.total.toFixed(2)}</td>
         </tr>
       `;
     });
 
-    desgloseHtml += `
+    tablaHTML += `
           </tbody>
         </table>
       </div>
+
+      <div class="row g-2 mt-2 pt-2 border-top">
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Efectivo</small>
+            <strong class="text-success">S/ ${porMetodo.Efectivo.toFixed(2)}</strong>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Yape</small>
+            <strong class="text-primary">S/ ${porMetodo.Yape.toFixed(2)}</strong>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Plin</small>
+            <strong class="text-info">S/ ${porMetodo.Plin.toFixed(2)}</strong>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Tarjeta</small>
+            <strong class="text-warning text-dark">S/ ${porMetodo.Tarjeta.toFixed(2)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-danger mt-3 mb-0 d-flex justify-content-between align-items-center">
+        <strong class="h6 mb-0">TOTAL VENTAS TURNO:</strong>
+        <strong class="h5 mb-0">S/ ${totalGeneral.toFixed(2)}</strong>
+      </div>
     `;
+
+    cuerpoModal.innerHTML = tablaHTML;
   }
 
-  cuerpoModal.innerHTML = `
-    <div class="p-1">
-      <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-        <span class="fw-bold text-secondary">Total de Pedidos hoy:</span>
-        <span class="badge bg-primary fs-6">${totalPedidos}</span>
-      </div>
-      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-        <span class="fw-bold text-secondary">Recaudado del Día:</span>
-        <strong class="text-danger fs-4">S/ ${totalVentas.toFixed(2)}</strong>
-      </div>
-      <h6 class="fw-bold text-dark mb-2">Detalle de Comandas:</h6>
-      ${desgloseHtml}
-    </div>
-  `;
-
-  const modal = new bootstrap.Modal(modalElement);
+  const modal = new bootstrap.Modal(modalElem);
   modal.show();
 }
 
-// Descargar Excel (.CSV Estructurado con Separador ';' para Excel en Español)
+// Descargar Registro de Ventas en Formato CSV (Excel)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
-    alert('No hay ventas registradas hoy para exportar.');
+    alert('No hay ventas registradas para exportar.');
     return;
   }
 
-  let csvContent = "\uFEFF"; // UTF-8 BOM para soporte correcto de tildes y caracteres especiales
-  csvContent += "ID Pedido;Fecha;Hora;Ubicacion/Tipo;Cliente;Telefono;Direccion;Detalle del Pedido;Total (S/)\n";
-
-  let sumaTotal = 0;
+  let csvContent = "data:text/csv;charset=utf-8,ID,Hora,Ubicacion,MetodoPago,Cliente,Total\n";
 
   historialVentas.forEach(v => {
-    const detallePlatos = v.platos.map(p => {
-      const obs = p.observacion ? ` [Notas: ${p.observacion}]` : '';
-      return `${p.cantidad}x ${p.nombre}${obs}`;
-    }).join(' | ');
-
-    const clienteNom = v.cliente ? v.cliente.nombre : '-';
-    const clienteTel = v.cliente ? v.cliente.telefono : '-';
-    const clienteDir = v.cliente ? `${v.cliente.direccion || ''} ${v.cliente.referencia ? '(' + v.cliente.referencia + ')' : ''}`.trim() : '-';
-
-    csvContent += `"#${v.id}";"${v.fecha}";"${v.hora}";"${v.mesa}";"${clienteNom}";"${clienteTel}";"${clienteDir}";"${detallePlatos}";"${v.total}"\n`;
-    sumaTotal += parseFloat(v.total);
+    const clienteNombre = v.cliente && v.cliente.nombre ? v.cliente.nombre.replace(/,/g, '') : 'N/A';
+    csvContent += `${v.id},${v.fecha},${v.mesa},${v.metodoPago},"${clienteNombre}",${v.total.toFixed(2)}\n`;
   });
 
-  // Fila final con el gran total
-  csvContent += `;;;;;;;"TOTAL ACUMULADO DEL DIA:";"${sumaTotal.toFixed(2)}"\n`;
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+  const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
-  
-  const hoyStr = new Date().toISOString().slice(0, 10);
-  link.setAttribute("href", url);
-  link.setAttribute("download", `Cierre_Caja_AnitaWok_${hoyStr}.csv`);
-  
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Cierre_Caja_AnitaWok_${new Date().toISOString().slice(0,10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
