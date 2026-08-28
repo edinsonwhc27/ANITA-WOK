@@ -384,8 +384,11 @@ function enviarComanda() {
     guardarClienteNuevo(tel, nom, dir, ref);
   }
 
+  // Generar ID correlativo tipo 000001, 000002...
+  const idCorrelativo = String(historialVentas.length + 1).padStart(6, '0');
+
   const datosComanda = {
-    id: Date.now().toString(),
+    id: idCorrelativo,
     mesa: mesa,
     metodoPago: metodoPago,
     cliente: { telefono: tel, nombre: nom, direccion: dir, referencia: ref },
@@ -404,7 +407,7 @@ function enviarComanda() {
 
   historialVentas.push(datosComanda);
 
-  alert(`¡Comanda enviada a Cocina! Ubicación: ${mesa} | Pago: ${metodoPago}`);
+  alert(`¡Comanda #${idCorrelativo} enviada a Cocina! Ubicación: ${mesa} | Pago: ${metodoPago}`);
 
   pedido = [];
   actualizarResumenHTML();
@@ -427,6 +430,7 @@ function cerrarCaja() {
         <table class="table table-sm table-striped align-middle" style="font-size:0.85rem;">
           <thead class="table-dark">
             <tr>
+              <th>ID</th>
               <th>Hora</th>
               <th>Mesa/Tipo</th>
               <th>Método</th>
@@ -449,6 +453,7 @@ function cerrarCaja() {
 
       tablaHTML += `
         <tr>
+          <td><span class="fw-bold">#${v.id}</span></td>
           <td>${v.hora || v.fecha}</td>
           <td><span class="badge bg-secondary">${v.mesa}</span></td>
           <td><span class="badge bg-info text-dark">${v.metodoPago}</span></td>
@@ -510,36 +515,53 @@ function descargarExcelVentas() {
     return;
   }
 
-  // Instrucción para que Excel use punto y coma (;) como separador de columnas
+  // Fuerza a Excel a interpretar el punto y coma (;) como separador de columnas
   let csvContent = "sep=;\n\uFEFF"; 
-  csvContent += "ID Comanda;Hora;Ubicación;Método Pago;Cliente;Teléfono;Dirección;Plato;Cantidad;Precio Unit.;Subtotal Item;Delivery;Total Comanda\n";
 
-  historialVentas.forEach(v => {
-    const id = v.id;
+  // Encabezados de columnas
+  csvContent += "ID Comanda;Hora;Ubicación;Método de Pago;Cliente;Teléfono;Dirección;Pedidos;Delivery;Total del Pedido\n";
+
+  let sumaTotalDia = 0;
+
+  historialVentas.forEach((v) => {
+    const idCorrelativo = v.id; // Ya guardado como 000001, 000002...
     const hora = v.hora || v.fecha;
-    const mesa = `"${v.mesa}"`;
-    const metodo = `"${v.metodoPago}"`;
+    const ubicacion = `"${v.mesa}"`;
+    const metodoPago = `"${v.metodoPago}"`;
     const clienteNombre = `"${(v.cliente && v.cliente.nombre) ? v.cliente.nombre.replace(/"/g, '""') : 'N/A'}"`;
     const clienteTel = `"${(v.cliente && v.cliente.telefono) ? v.cliente.telefono : 'N/A'}"`;
     const clienteDir = `"${(v.cliente && v.cliente.direccion) ? v.cliente.direccion.replace(/"/g, '""') : 'N/A'}"`;
+    
+    // Lista de platos del pedido
+    const listaPedidos = v.items.map(i => {
+      let detalle = `${i.cantidad}x ${i.nombre}`;
+      if (i.observacion) detalle += ` (${i.observacion})`;
+      return detalle;
+    }).join(' + ');
+
+    const pedidosFormateados = `"${listaPedidos.replace(/"/g, '""')}"`;
     const delivery = (v.recargoDelivery || 0).toFixed(2);
-    const totalComanda = v.total.toFixed(2);
+    const totalPedido = v.total.toFixed(2);
 
-    v.items.forEach(item => {
-      const platoNombre = `"${item.nombre.replace(/"/g, '""')}${item.observacion ? ' (' + item.observacion.replace(/"/g, '""') + ')' : ''}"`;
-      const cantidad = item.cantidad;
-      const precioUnit = item.precio.toFixed(2);
-      const subtotalItem = (item.precio * item.cantidad).toFixed(2);
+    // Sumar al total acumulado del día
+    sumaTotalDia += v.total;
 
-      csvContent += `${id};${hora};${mesa};${metodo};${clienteNombre};${clienteTel};${clienteDir};${platoNombre};${cantidad};${precioUnit};${subtotalItem};${delivery};${totalComanda}\n`;
-    });
+    // Agregar fila
+    csvContent += `${idCorrelativo};${hora};${ubicacion};${metodoPago};${clienteNombre};${clienteTel};${clienteDir};${pedidosFormateados};${delivery};${totalPedido}\n`;
   });
 
+  // Fila vacía de espacio
+  csvContent += `;;;;;;;;;\n`;
+
+  // Fila final con la SUMA TOTAL DEL DÍA
+  csvContent += `TOTAL DÍA;;;;;;;;;${sumaTotalDia.toFixed(2)}\n`;
+
+  // Crear archivo y descargar
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `Reporte_Detallado_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
