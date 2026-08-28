@@ -7,6 +7,11 @@ const socket = io();
 // Array de ventas acumuladas
 let historialVentas = [];
 
+// Base de Datos de Clientes Frecuentes (Persistente en el navegador)
+let baseClientes = JSON.parse(localStorage.getItem('anita_wok_clientes')) || [
+  { telefono: '987654321', nombre: 'Juan Pérez', direccion: 'Av. Brasil 450', referencia: 'Frente al parque' }
+];
+
 // Base de Datos Oficial (47 Productos)
 const productos = [
   // 1. CHIFA Y CRIOLLO
@@ -120,15 +125,31 @@ function verCategoria(cat, btnElement) {
 // Opciones de Ubicación (Mesa 1-10 / Llevar / Delivery)
 function cambiarTipoPedido() {
   const selectorMesa = document.getElementById('mesa');
+  if (!selectorMesa) return;
+  
+  const opcion = selectorMesa.value;
   const contenedorDelivery = document.getElementById('contenedor-recargo-delivery');
-  const opcion = selectorMesa ? selectorMesa.value : '';
+  const bloqueCliente = document.getElementById('bloque-datos-cliente');
+  const contDireccion = document.getElementById('contenedor-cliente-direccion');
+  const contReferencia = document.getElementById('contenedor-cliente-referencia');
 
+  // Mostrar / Ocultar campos de Cliente y Delivery
   if (opcion === 'Delivery') {
-    contenedorDelivery.classList.remove('d-none');
+    if (contenedorDelivery) contenedorDelivery.classList.remove('d-none');
+    if (bloqueCliente) bloqueCliente.classList.remove('d-none');
+    if (contDireccion) contDireccion.classList.remove('d-none');
+    if (contReferencia) contReferencia.classList.remove('d-none');
+  } else if (opcion === 'Llevar') {
+    if (contenedorDelivery) contenedorDelivery.classList.add('d-none');
+    if (bloqueCliente) bloqueCliente.classList.remove('d-none');
+    if (contDireccion) contDireccion.classList.add('d-none');
+    if (contReferencia) contReferencia.classList.add('d-none');
   } else {
-    contenedorDelivery.classList.add('d-none');
+    if (contenedorDelivery) contenedorDelivery.classList.add('d-none');
+    if (bloqueCliente) bloqueCliente.classList.add('d-none');
   }
 
+  // Actualizar precios de platos según tipo de pedido
   const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
   pedido.forEach(item => {
     const prod = productos.find(p => p.id === item.id);
@@ -140,6 +161,73 @@ function cambiarTipoPedido() {
   renderMenu();
   actualizarResumenHTML();
 }
+
+// ==========================================
+// MÓDULO BUSCADOR Y AUTOCOMPLETADO DE CLIENTES
+// ==========================================
+function buscarCliente(query) {
+  const sugerencias = document.getElementById('lista-sugerencias');
+  if (!sugerencias) return;
+  
+  sugerencias.innerHTML = '';
+  if (query.trim().length < 2) { 
+    sugerencias.classList.add('d-none'); 
+    return; 
+  }
+
+  const coincidencias = baseClientes.filter(c => 
+    c.telefono.includes(query) || c.nombre.toLowerCase().includes(query.toLowerCase())
+  );
+
+  if (coincidencias.length === 0) { 
+    sugerencias.classList.add('d-none'); 
+    return; 
+  }
+
+  coincidencias.forEach(cliente => {
+    const item = document.createElement('div');
+    item.className = 'item-sugerencia border-bottom p-2 bg-light cursor-pointer';
+    item.style.cursor = 'pointer';
+    item.innerHTML = `<strong>${cliente.nombre}</strong> — <span class="text-muted">${cliente.telefono}</span>`;
+    item.onclick = () => seleccionarCliente(cliente);
+    sugerencias.appendChild(item);
+  });
+  
+  sugerencias.classList.remove('d-none');
+}
+
+function seleccionarCliente(cliente) {
+  const tel = document.getElementById('cliente-telefono');
+  const nom = document.getElementById('cliente-nombre');
+  const dir = document.getElementById('cliente-direccion');
+  const ref = document.getElementById('cliente-referencia');
+
+  if (tel) tel.value = cliente.telefono;
+  if (nom) nom.value = cliente.nombre;
+  if (dir) dir.value = cliente.direccion || '';
+  if (ref) ref.value = cliente.referencia || '';
+  
+  const sugerencias = document.getElementById('lista-sugerencias');
+  if (sugerencias) sugerencias.classList.add('d-none');
+}
+
+function guardarClienteNuevo(telefono, nombre, direccion, referencia) {
+  if (!telefono || !nombre) return;
+  const existe = baseClientes.find(c => c.telefono === telefono);
+  if (!existe) {
+    baseClientes.push({ telefono, nombre, direccion, referencia });
+    localStorage.setItem('anita_wok_clientes', JSON.stringify(baseClientes));
+  }
+}
+
+// Ocultar la lista de sugerencias al hacer clic fuera del buscador
+document.addEventListener('click', function(e) {
+  const sugerencias = document.getElementById('lista-sugerencias');
+  const inputTelefono = document.getElementById('cliente-telefono');
+  if (sugerencias && inputTelefono && e.target !== inputTelefono && !sugerencias.contains(e.target)) {
+    sugerencias.classList.add('d-none');
+  }
+});
 
 // Agregar Plato al Pedido
 function agregarAlPedido(idProd) {
@@ -254,7 +342,7 @@ function actualizarResumenHTML() {
   contenedorResumen.innerHTML = html;
 }
 
-// Enviar Comanda
+// Enviar Comanda con Datos del Cliente
 function enviarComanda() {
   const selectorMesa = document.getElementById('mesa');
   const selectorDelivery = document.getElementById('recargo-delivery');
@@ -263,6 +351,20 @@ function enviarComanda() {
   if (pedido.length === 0) {
     alert('Debes agregar al menos un plato antes de enviar.');
     return;
+  }
+
+  // Capturar Datos del Cliente si aplica (Para Llevar o Delivery)
+  let datosCliente = null;
+  if (mesaSeleccionada === 'Llevar' || mesaSeleccionada === 'Delivery') {
+    const tel = document.getElementById('cliente-telefono')?.value.trim();
+    const nom = document.getElementById('cliente-nombre')?.value.trim();
+    const dir = document.getElementById('cliente-direccion')?.value.trim();
+    const ref = document.getElementById('cliente-referencia')?.value.trim();
+
+    if (tel && nom) {
+      datosCliente = { telefono: tel, nombre: nom, direccion: dir, referencia: ref };
+      guardarClienteNuevo(tel, nom, dir, ref); // Se guarda en Clientes Frecuentes automáticamente
+    }
   }
 
   let subtotal = 0;
@@ -282,6 +384,7 @@ function enviarComanda() {
     fecha: hoy.toLocaleDateString(),
     hora: hoy.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     mesa: mesaSeleccionada,
+    cliente: datosCliente, // Se adjunta el cliente a la comanda
     platos: [...pedido],
     total: totalFinal.toFixed(2)
   };
@@ -292,7 +395,18 @@ function enviarComanda() {
     socket.emit('nuevo-pedido', datosPedido);
   }
 
+  // Limpiar pedido y campos de texto de cliente
   pedido = [];
+  const telInput = document.getElementById('cliente-telefono');
+  const nomInput = document.getElementById('cliente-nombre');
+  const dirInput = document.getElementById('cliente-direccion');
+  const refInput = document.getElementById('cliente-referencia');
+
+  if (telInput) telInput.value = '';
+  if (nomInput) nomInput.value = '';
+  if (dirInput) dirInput.value = '';
+  if (refInput) refInput.value = '';
+
   actualizarResumenHTML();
   alert(`🚀 ¡Comanda enviada a cocina para ${mesaSeleccionada}!`);
 }
@@ -317,7 +431,7 @@ function cerrarCaja() {
             <tr>
               <th>ID</th>
               <th>Hora</th>
-              <th>Ubicación</th>
+              <th>Ubicación / Cliente</th>
               <th>Detalle</th>
               <th class="text-end">Total</th>
             </tr>
@@ -327,12 +441,14 @@ function cerrarCaja() {
 
     historialVentas.forEach(v => {
       const resumenPlatos = v.platos.map(p => `${p.cantidad}x ${p.nombre}${p.observacion ? ' ('+p.observacion+')' : ''}`).join(', ');
+      const infoCliente = v.cliente ? `<br><small class="text-primary">👤 ${v.cliente.nombre} (${v.cliente.telefono})</small>` : '';
+      
       desgloseHtml += `
         <tr>
           <td><strong>#${v.id}</strong></td>
           <td>${v.hora}</td>
-          <td><span class="badge bg-secondary">${v.mesa}</span></td>
-          <td class="text-truncate" style="max-width: 250px;">${resumenPlatos}</td>
+          <td><span class="badge bg-secondary">${v.mesa}</span>${infoCliente}</td>
+          <td class="text-truncate" style="max-width: 200px;">${resumenPlatos}</td>
           <td class="text-end fw-bold text-danger">S/ ${v.total}</td>
         </tr>
       `;
@@ -371,9 +487,8 @@ function descargarExcelVentas() {
     return;
   }
 
-  // Encabezado con punto y coma (;) para abrir directo ordenado en Excel
   let csvContent = "\uFEFF"; // UTF-8 BOM para soporte correcto de tildes y caracteres especiales
-  csvContent += "ID Pedido;Fecha;Hora;Ubicacion/Tipo;Detalle del Pedido;Total (S/)\n";
+  csvContent += "ID Pedido;Fecha;Hora;Ubicacion/Tipo;Cliente;Telefono;Direccion;Detalle del Pedido;Total (S/)\n";
 
   let sumaTotal = 0;
 
@@ -383,12 +498,16 @@ function descargarExcelVentas() {
       return `${p.cantidad}x ${p.nombre}${obs}`;
     }).join(' | ');
 
-    csvContent += `"#${v.id}";"${v.fecha}";"${v.hora}";"${v.mesa}";"${detallePlatos}";"${v.total}"\n`;
+    const clienteNom = v.cliente ? v.cliente.nombre : '-';
+    const clienteTel = v.cliente ? v.cliente.telefono : '-';
+    const clienteDir = v.cliente ? `${v.cliente.direccion || ''} ${v.cliente.referencia ? '(' + v.cliente.referencia + ')' : ''}`.trim() : '-';
+
+    csvContent += `"#${v.id}";"${v.fecha}";"${v.hora}";"${v.mesa}";"${clienteNom}";"${clienteTel}";"${clienteDir}";"${detallePlatos}";"${v.total}"\n`;
     sumaTotal += parseFloat(v.total);
   });
 
   // Fila final con el gran total
-  csvContent += `;;;;"TOTAL ACUMULADO DEL DIA:";"${sumaTotal.toFixed(2)}"\n`;
+  csvContent += `;;;;;;;"TOTAL ACUMULADO DEL DIA:";"${sumaTotal.toFixed(2)}"\n`;
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
