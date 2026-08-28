@@ -133,7 +133,6 @@ function cambiarTipoPedido() {
   const contDireccion = document.getElementById('contenedor-cliente-direccion');
   const contReferencia = document.getElementById('contenedor-cliente-referencia');
 
-  // Mostrar / Ocultar campos de Cliente y Delivery
   if (opcion === 'Delivery') {
     if (contenedorDelivery) contenedorDelivery.classList.remove('d-none');
     if (bloqueCliente) bloqueCliente.classList.remove('d-none');
@@ -149,7 +148,6 @@ function cambiarTipoPedido() {
     if (bloqueCliente) bloqueCliente.classList.add('d-none');
   }
 
-  // Actualizar precios de platos según tipo de pedido
   const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
   pedido.forEach(item => {
     const prod = productos.find(p => p.id === item.id);
@@ -220,7 +218,6 @@ function guardarClienteNuevo(telefono, nombre, direccion, referencia) {
   }
 }
 
-// Ocultar la lista de sugerencias al hacer clic fuera del buscador
 document.addEventListener('click', function(e) {
   const sugerencias = document.getElementById('lista-sugerencias');
   const inputTelefono = document.getElementById('cliente-telefono');
@@ -378,7 +375,6 @@ function enviarComanda() {
 
   const total = subtotal + recargoDelivery;
 
-  // Recopilar datos del cliente si aplica
   const tel = document.getElementById('cliente-telefono')?.value.trim() || '';
   const nom = document.getElementById('cliente-nombre')?.value.trim() || '';
   const dir = document.getElementById('cliente-direccion')?.value.trim() || '';
@@ -400,19 +396,16 @@ function enviarComanda() {
     hora: new Date().toLocaleTimeString('es-PE', { hour12: true })
   };
 
-  // Emitir comanda por Socket.io a la cocina
   if (typeof socket !== 'undefined') {
     socket.emit('nuevaComanda', datosComanda);
   } else {
     console.error('Socket no está disponible.');
   }
 
-  // Guardar en el historial de ventas local
   historialVentas.push(datosComanda);
 
   alert(`¡Comanda enviada a Cocina! Ubicación: ${mesa} | Pago: ${metodoPago}`);
 
-  // Limpiar pedido activo
   pedido = [];
   actualizarResumenHTML();
 }
@@ -517,17 +510,36 @@ function descargarExcelVentas() {
     return;
   }
 
-  let csvContent = "data:text/csv;charset=utf-8,ID,Hora,Ubicacion,MetodoPago,Cliente,Total\n";
+  // UTF-8 BOM para evitar desorden de caracteres y tildes en Excel
+  let csvContent = "\uFEFF"; 
+  csvContent += "ID Comanda,Hora,Ubicación,Método Pago,Cliente,Teléfono,Dirección,Plato,Cantidad,Precio Unit.,Subtotal Item,Delivery,Total Comanda\n";
 
   historialVentas.forEach(v => {
-    const clienteNombre = v.cliente && v.cliente.nombre ? v.cliente.nombre.replace(/,/g, '') : 'N/A';
-    csvContent += `${v.id},${v.hora || v.fecha},${v.mesa},${v.metodoPago},"${clienteNombre}",${v.total.toFixed(2)}\n`;
+    const id = v.id;
+    const hora = v.hora || v.fecha;
+    const mesa = `"${v.mesa}"`;
+    const metodo = `"${v.metodoPago}"`;
+    const clienteNombre = `"${(v.cliente && v.cliente.nombre) ? v.cliente.nombre.replace(/"/g, '""') : 'N/A'}"`;
+    const clienteTel = `"${(v.cliente && v.cliente.telefono) ? v.cliente.telefono : 'N/A'}"`;
+    const clienteDir = `"${(v.cliente && v.cliente.direccion) ? v.cliente.direccion.replace(/"/g, '""') : 'N/A'}"`;
+    const delivery = (v.recargoDelivery || 0).toFixed(2);
+    const totalComanda = v.total.toFixed(2);
+
+    v.items.forEach(item => {
+      const platoNombre = `"${item.nombre.replace(/"/g, '""')}${item.observacion ? ' (' + item.observacion.replace(/"/g, '""') + ')' : ''}"`;
+      const cantidad = item.cantidad;
+      const precioUnit = item.precio.toFixed(2);
+      const subtotalItem = (item.precio * item.cantidad).toFixed(2);
+
+      csvContent += `${id},${hora},${mesa},${metodo},${clienteNombre},${clienteTel},${clienteDir},${platoNombre},${cantidad},${precioUnit},${subtotalItem},${delivery},${totalComanda}\n`;
+    });
   });
 
-  const encodedUri = encodeURI(csvContent);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `Cierre_Caja_AnitaWok_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Reporte_Detallado_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
