@@ -503,16 +503,16 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Formato CSV (Excel)
+// Descargar Registro de Ventas en Formato CSV (Excel con columnas separadas)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
     return;
   }
 
-  // UTF-8 BOM para evitar desorden de caracteres y tildes en Excel
-  let csvContent = "\uFEFF"; 
-  csvContent += "ID Comanda,Hora,Ubicación,Método Pago,Cliente,Teléfono,Dirección,Plato,Cantidad,Precio Unit.,Subtotal Item,Delivery,Total Comanda\n";
+  // Instrucción para que Excel use punto y coma (;) como separador de columnas
+  let csvContent = "sep=;\n\uFEFF"; 
+  csvContent += "ID Comanda;Hora;Ubicación;Método Pago;Cliente;Teléfono;Dirección;Plato;Cantidad;Precio Unit.;Subtotal Item;Delivery;Total Comanda\n";
 
   historialVentas.forEach(v => {
     const id = v.id;
@@ -531,7 +531,7 @@ function descargarExcelVentas() {
       const precioUnit = item.precio.toFixed(2);
       const subtotalItem = (item.precio * item.cantidad).toFixed(2);
 
-      csvContent += `${id},${hora},${mesa},${metodo},${clienteNombre},${clienteTel},${clienteDir},${platoNombre},${cantidad},${precioUnit},${subtotalItem},${delivery},${totalComanda}\n`;
+      csvContent += `${id};${hora};${mesa};${metodo};${clienteNombre};${clienteTel};${clienteDir};${platoNombre};${cantidad};${precioUnit};${subtotalItem};${delivery};${totalComanda}\n`;
     });
   });
 
