@@ -8,8 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* BARRA SUPERIOR BEIGE */
     .navbar-beige { background-color: #f5f0eb !important; border-bottom: 1px solid #e2dcd5; }
-    .navbar-brand img { height: 38px; width: auto; object-fit: contain; }
+    .navbar-brand img { height: 35px; width: auto; object-fit: contain; }
+    
     .dish-card { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; padding: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .dish-name { font-weight: bold; font-size: 0.95rem; margin-bottom: 5px; color: #212529; }
     .dish-img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
@@ -22,11 +25,12 @@
 </head>
 <body>
 
+  <!-- NAVBAR BEIGE CON LOGO A LA IZQUIERDA DEL NOMBRE -->
   <nav class="navbar navbar-expand-lg navbar-light navbar-beige px-3 mb-3">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="logo.png" alt="ANITA-WOK Logo" class="me-2" onerror="this.style.display='none'; document.getElementById('alt-logo-text').style.display='inline';">
-        <span id="alt-logo-text" class="fw-bold text-danger fs-4" style="display:none;">ANITA-WOK</span>
+        <img src="logo.png" alt="Logo" class="me-2" onerror="this.style.display='none';">
+        <span class="fw-bold text-danger fs-4">ANITA-WOK</span>
       </a>
       <a href="/cocina" class="btn btn-sm btn-danger fw-bold"><i class="fa-solid fa-utensils me-1"></i> Ir a Cocina</a>
     </div>
@@ -64,9 +68,20 @@
           </div>
         </div>
 
+        <!-- RECARGO DELIVERY REDUCIDO A DESPLEGABLE -->
         <div id="contenedor-recargo-delivery" class="mb-3 d-none bg-white p-2 rounded border shadow-sm">
-          <label class="form-label small fw-bold text-muted mb-1">Recargo por Delivery (S/):</label>
-          <input type="number" id="recargo-delivery" class="form-control form-control-sm" value="3.00" step="0.50" onchange="actualizarResumenHTML()">
+          <div class="d-flex align-items-center gap-2" style="max-width: 280px;">
+            <label for="recargo-delivery" class="form-label small fw-bold text-muted mb-0 text-nowrap">Delivery:</label>
+            <select id="recargo-delivery" class="form-select form-select-sm" onchange="actualizarResumenHTML()">
+              <option value="1.00">S/ 1.00</option>
+              <option value="1.50">S/ 1.50</option>
+              <option value="2.00">S/ 2.00</option>
+              <option value="2.50">S/ 2.50</option>
+              <option value="3.00" selected>S/ 3.00</option>
+              <option value="3.50">S/ 3.50</option>
+              <option value="4.00">S/ 4.00</option>
+            </select>
+          </div>
         </div>
 
         <div class="d-flex gap-2 mb-3 overflow-auto pb-1">
@@ -124,7 +139,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
           <button type="button" class="btn btn-success fw-bold" onclick="descargarExcelVentas()">
-            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel (.xls)
+            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel (.csv)
           </button>
         </div>
       </div>
@@ -133,8 +148,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- Carga del JS con fallback por si está en la raíz o en /js/ -->
   <script src="app.js" onerror="this.onerror=null; this.src='/js/app.js';"></script>
 
 </body>
