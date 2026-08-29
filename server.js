@@ -1,30 +1,50 @@
-// Memoria temporal de pedidos pendientes
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const path = require('path');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Servir archivos estáticos de la carpeta "public"
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir la página de cocina en la ruta /cocina
+app.get('/cocina', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'cocina.html'));
+});
+
+// Memoria en vivo de pedidos pendientes
 let pedidosPendientes = [];
 
+// Manejo de conexiones WebSockets
 io.on('connection', (socket) => {
-  // 1. Al conectar la cocina, enviar los pedidos que están pendientes
+  // Cargar pedidos actuales al conectar
   socket.emit('cargarPedidos', pedidosPendientes);
 
-  // 2. Cuando el usuario envía un pedido desde la carta (index.html)
+  // Recibir nuevo pedido desde la carta (index.html)
   socket.on('nuevoPedido', (pedido) => {
-    // Generar ID único y timestamp si no lo tiene
     const nuevoPedido = {
       id: pedido.id || Date.now().toString(),
       mesa: pedido.mesa || 'Mesa General',
       items: pedido.items || [],
-      metodoPago: pedido.metodoPago || '',
+      metodoPago: pedido.metodoPago || 'Efectivo',
       timestamp: Date.now()
     };
 
     pedidosPendientes.push(nuevoPedido);
-
-    // Retransmitir a TODOS los clientes conectados (incluyendo cocina.html)
     io.emit('nuevoPedido', nuevoPedido);
   });
 
-  // 3. Cuando la cocina marca un pedido como LISTO
+  // Completar pedido desde la cocina (cocina.html)
   socket.on('completarPedido', (idPedido) => {
     pedidosPendientes = pedidosPendientes.filter(p => p.id !== idPedido);
     io.emit('cargarPedidos', pedidosPendientes);
   });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Servidor ANITA-WOK corriendo en el puerto ${PORT}`);
 });
