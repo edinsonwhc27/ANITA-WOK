@@ -4,94 +4,233 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ANITA-WOK - Sistema de Comandas</title>
+
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .navbar-brand { font-weight: bold; color: #dc3545 !important; }
-    .dish-card { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; padding: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .dish-name { font-weight: bold; font-size: 0.95rem; margin-bottom: 5px; color: #212529; }
-    .dish-img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
-    .dish-desc { font-size: 0.75rem; color: #6c757d; margin-bottom: 8px; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .dish-price { font-weight: bold; color: #dc3545; font-size: 1rem; margin-bottom: 8px; }
-    .btn-add-dish { background-color: #dc3545; color: white; border: none; border-radius: 5px; font-weight: 600; padding: 6px; font-size: 0.85rem; width: 100%; }
-    .btn-add-dish:hover { background-color: #bb2d3b; color: white; }
-    .category-btn { border-radius: 20px; font-size: 0.82rem; padding: 4px 15px; font-weight: 600; }
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Header Beige con texto rojo */
+    .brand-header {
+      background-color: #f5f5dc;
+      color: #d32f2f;
+      padding: 10px 20px;
+      border-bottom: 2px solid #e0e0d1;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .brand-logo {
+      height: 45px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* Tarjeta de plato */
+    .dish-card {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .dish-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .dish-img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .dish-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #2c3e50;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .dish-desc {
+      font-size: 0.72rem;
+      color: #6c757d;
+      flex-grow: 1;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .dish-price {
+      font-weight: 800;
+      color: #d32f2f;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    /* Botón Agregar Rojo */
+    .btn-add-dish {
+      background-color: #d32f2f;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    .btn-add-dish:hover {
+      background-color: #b71c1c;
+      color: white;
+    }
+
+    /* Panel Lateral de Comanda */
+    .sidebar-comanda {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 15px;
+    }
+
+    .category-btn {
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      padding: 5px 15px;
+    }
+
+    /* Lista desplegable para sugerencias de clientes */
+    .lista-sugerencias {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      max-height: 180px;
+      overflow-y: auto;
+      background-color: white;
+      border: 1px solid #ced4da;
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .item-sugerencia {
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .item-sugerencia:hover {
+      background-color: #f8f9fa;
+    }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom px-3 mb-3">
-    <div class="container-fluid">
-      <a class="navbar-brand fs-4" href="#"><i class="fa-solid fa-fire-burner me-2"></i>ANITA-WOK</a>
-      <a href="/cocina" class="btn btn-sm btn-danger fw-bold"><i class="fa-solid fa-utensils me-1"></i> Ir a Cocina</a>
+  <!-- Encabezado con Fondo Beige y Letras Rojas -->
+  <header class="brand-header d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <!-- Ruta del logo apuntando a img/logo.png -->
+      <img src="img/logo.png" alt="Logo Anita Wok" class="brand-logo" onerror="this.src='https://via.placeholder.com/150x50/f5f5dc/d32f2f?text=ANITA-WOK'">
+      <h1 class="h4 mb-0 fw-bold text-danger">ANITA-WOK</h1>
     </div>
-  </nav>
+
+    <a href="/cocina.html" class="btn btn-danger btn-sm fw-bold">
+      <i class="fa-solid fa-utensils me-1"></i> Ir a Cocina
+    </a>
+  </header>
 
   <div class="container-fluid px-3">
     <div class="row g-3">
-      
-      <!-- COLUMNA IZQUIERDA: MENÚ Y FILTROS -->
-      <div class="col-md-8 col-lg-9">
-        
-        <!-- BARRA DE SELECCIÓN Y BÚSQUEDA -->
-        <div class="row g-2 mb-3 align-items-center bg-white p-2 rounded border shadow-sm">
-          <div class="col-md-4">
-            <label for="mesa" class="form-label small fw-bold text-muted mb-1">Ubicación / Tipo:</label>
-            <select id="mesa" class="form-select form-select-sm" onchange="cambiarTipoPedido()">
-              <option value="Mesa 1">Mesa 1</option>
-              <option value="Mesa 2">Mesa 2</option>
-              <option value="Mesa 3">Mesa 3</option>
-              <option value="Mesa 4">Mesa 4</option>
-              <option value="Mesa 5">Mesa 5</option>
-              <option value="Mesa 6">Mesa 6</option>
-              <option value="Mesa 7">Mesa 7</option>
-              <option value="Mesa 8">Mesa 8</option>
-              <option value="Mesa 9">Mesa 9</option>
-              <option value="Mesa 10">Mesa 10</option>
-              <option value="Llevar">Para Llevar</option>
-              <option value="Delivery">Delivery</option>
-            </select>
+
+      <!-- Columna Principal: Selección de Mesas (1 al 10) y Menú -->
+      <div class="col-lg-8 col-md-7">
+
+        <!-- Ubicación / Tipo / Delivery -->
+        <div class="card p-2 mb-3 shadow-sm border-0">
+          <div class="row align-items-center g-2">
+            <div class="col-auto">
+              <label for="mesa" class="fw-bold text-secondary small mb-0">Ubicación / Tipo:</label>
+            </div>
+            <div class="col-md-5 col-sm-6">
+              <select id="mesa" class="form-select form-select-sm fw-bold border-danger" onchange="cambiarTipoPedido()">
+                <option value="Mesa 1">Mesa 1</option>
+                <option value="Mesa 2">Mesa 2</option>
+                <option value="Mesa 3">Mesa 3</option>
+                <option value="Mesa 4">Mesa 4</option>
+                <option value="Mesa 5">Mesa 5</option>
+                <option value="Mesa 6">Mesa 6</option>
+                <option value="Mesa 7">Mesa 7</option>
+                <option value="Mesa 8">Mesa 8</option>
+                <option value="Mesa 9">Mesa 9</option>
+                <option value="Mesa 10">Mesa 10</option>
+                <option value="Llevar">Para Llevar (Empaque + S/ 0.50)</option>
+                <option value="Delivery">Delivery</option>
+              </select>
+            </div>
+
+            <!-- Selector dinámico de tarifa de Delivery -->
+            <div class="col-md-4 col-sm-6 d-none" id="contenedor-recargo-delivery">
+              <select id="recargo-delivery" class="form-select form-select-sm border-warning fw-bold" onchange="actualizarResumenHTML()">
+                <option value="1.00">Delivery (+ S/ 1.00)</option>
+                <option value="1.50">Delivery (+ S/ 1.50)</option>
+                <option value="2.00">Delivery (+ S/ 2.00)</option>
+                <option value="2.50">Delivery (+ S/ 2.50)</option>
+                <option value="3.00">Delivery (+ S/ 3.00)</option>
+                <option value="3.50">Delivery (+ S/ 3.50)</option>
+                <option value="4.00">Delivery (+ S/ 4.00)</option>
+                <option value="4.50">Delivery (+ S/ 4.50)</option>
+                <option value="5.00">Delivery (+ S/ 5.00)</option>
+              </select>
+            </div>
           </div>
 
-          <!-- BARRA DE BÚSQUEDA -->
-          <div class="col-md-8">
-            <label for="input-buscador" class="form-label small fw-bold text-muted mb-1">Buscar plato:</label>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-              <input type="text" id="input-buscador" class="form-control" placeholder="Escribe el nombre del plato..." oninput="filtrarPorNombre(this.value)">
+          <!-- BLOQUE AGREGADO: Datos del Cliente (Solo activo si es Llevar o Delivery) -->
+          <div class="row g-2 mt-1 border-top pt-2 d-none position-relative" id="bloque-datos-cliente">
+            <div class="col-12">
+              <span class="badge bg-danger small"><i class="fa-solid fa-user me-1"></i> Datos del Cliente</span>
+            </div>
+            
+            <div class="col-md-4 col-sm-6 position-relative">
+              <input type="tel" class="form-control form-control-sm" id="cliente-telefono" placeholder="Teléfono / Celular" oninput="buscarCliente(this.value)" autocomplete="off">
+              <div id="lista-sugerencias" class="lista-sugerencias d-none"></div>
+            </div>
+
+            <div class="col-md-8 col-sm-6">
+              <input type="text" class="form-control form-control-sm" id="cliente-nombre" placeholder="Nombre del Cliente">
+            </div>
+
+            <div class="col-md-7 col-sm-6 d-none" id="contenedor-cliente-direccion">
+              <input type="text" class="form-control form-control-sm" id="cliente-direccion" placeholder="Dirección de Envío">
+            </div>
+
+            <div class="col-md-5 col-sm-6 d-none" id="contenedor-cliente-referencia">
+              <input type="text" class="form-control form-control-sm" id="cliente-referencia" placeholder="Referencia (ej. Frente al parque)">
             </div>
           </div>
+
         </div>
 
-        <!-- RECARGO DELIVERY Y DATOS CLIENTE (OCULTOS POR DEFECTO) -->
-        <div id="contenedor-recargo-delivery" class="mb-2 d-none">
-          <label class="form-label small fw-bold text-muted mb-1">Recargo por Delivery (S/):</label>
-          <input type="number" id="recargo-delivery" class="form-control form-control-sm" value="3.00" step="0.50" onchange="actualizarResumenHTML()">
-        </div>
-
-        <div id="bloque-datos-cliente" class="bg-white p-2 rounded border shadow-sm mb-3 d-none">
-          <div class="row g-2 position-relative">
-            <div class="col-md-4">
-              <input type="text" id="cliente-telefono" class="form-control form-control-sm" placeholder="Teléfono" oninput="buscarCliente(this.value)">
-              <div id="lista-sugerencias" class="position-absolute w-100 shadow rounded bg-white d-none" style="z-index: 1000; max-height: 150px; overflow-y: auto;"></div>
-            </div>
-            <div class="col-md-4">
-              <input type="text" id="cliente-nombre" class="form-control form-control-sm" placeholder="Nombre del cliente">
-            </div>
-            <div class="col-md-4" id="contenedor-cliente-direccion">
-              <input type="text" id="cliente-direccion" class="form-control form-control-sm" placeholder="Dirección">
-            </div>
-            <div class="col-12 d-none" id="contenedor-cliente-referencia">
-              <input type="text" id="cliente-referencia" class="form-control form-control-sm" placeholder="Referencia de entrega">
-            </div>
-          </div>
-        </div>
-
-        <!-- BOTONES DE CATEGORÍAS -->
+        <!-- Categorías -->
         <div class="d-flex gap-2 mb-3 overflow-auto pb-1">
           <button class="btn btn-danger category-btn active" onclick="verCategoria('chifa', this)">Chifa y Criollo</button>
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('compartir', this)">Para Compartir</button>
@@ -99,50 +238,56 @@
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('extras', this)">Extras</button>
         </div>
 
-        <!-- CONTENEDOR DE PLATOS -->
-        <div id="contenedor-menu" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
+        <!-- Grid de Platos -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2" id="contenedor-menu"></div>
+
       </div>
 
-      <!-- COLUMNA DERECHA: COMANDA ACTIVA -->
-      <div class="col-md-4 col-lg-3">
-        <div class="bg-white p-3 rounded border shadow-sm sticky-top" style="top: 15px;">
+      <!-- Columna Lateral: Comanda y Cerrar Caja -->
+      <div class="col-lg-4 col-md-5">
+        <div class="sidebar-comanda p-3">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-            <h6 class="fw-bold mb-0 text-danger"><i class="fa-solid fa-receipt me-1"></i> COMANDA ACTIVA</h6>
-            <span id="badge-total-items" class="badge bg-secondary">0 ítems</span>
+            <h2 class="h6 mb-0 fw-bold text-uppercase text-danger">
+              <i class="fa-solid fa-receipt me-1"></i> Comanda Activa
+            </h2>
+            <span class="badge bg-secondary" id="badge-total-items">0 ítems</span>
           </div>
 
-          <!-- LISTA DE PLATOS AGREGADOS -->
-          <div id="lista-pedido" class="mb-3">
+          <div id="lista-pedido" style="max-height: 40vh; overflow-y: auto;">
             <p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>
           </div>
 
-          <!-- MÉTODO DE PAGO Y ACCIONES -->
-          <div class="border-top pt-2">
-            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-wallet me-1"></i>Método de Pago:</label>
-            <select id="metodo-pago" class="form-select form-select-sm mb-3">
+          <!-- Selección de Método de Pago Sugerido -->
+          <div class="mt-3 pt-2 border-top">
+            <label for="metodo-pago" class="fw-bold text-secondary small mb-1">
+              <i class="fa-solid fa-wallet me-1"></i> Método de Pago:
+            </label>
+            <select id="metodo-pago" class="form-select form-select-sm fw-bold border-success">
               <option value="Efectivo">Efectivo</option>
               <option value="Yape">Yape</option>
               <option value="Plin">Plin</option>
-              <option value="Tarjeta">Tarjeta</option>
+              <option value="Tarjeta">Tarjeta (Débito/Crédito)</option>
             </select>
-
-            <button class="btn btn-danger w-100 fw-bold mb-2 shadow-sm" onclick="enviarComanda()">
-              <i class="fa-solid fa-paper-plane me-1"></i> ENVIAR A COCINA
-            </button>
-            
-            <button class="btn btn-warning w-100 fw-bold text-dark shadow-sm" style="font-size: 0.8rem;" onclick="cerrarCaja()">
-              <i class="fa-solid fa-box-archive me-1"></i> CERRAR CAJA Y DESCARGAR EXCEL
-            </button>
           </div>
+
+          <!-- Botón Enviar -->
+          <button class="btn btn-danger w-100 mt-3 fw-bold py-2 shadow-sm" onclick="enviarComanda()">
+            <i class="fa-solid fa-paper-plane me-2"></i> ENVIAR A COCINA
+          </button>
+
+          <!-- Botón Cerrar Caja debajo de Comanda Activa -->
+          <button class="btn btn-warning w-100 mt-2 fw-bold text-dark shadow-sm" onclick="cerrarCaja()">
+            <i class="fa-solid fa-cash-register me-2"></i> CERRAR CAJA Y DESCARGAR EXCEL
+          </button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- MODAL DE CIERRE DE CAJA -->
+  <!-- Modal para Cierre de Caja -->
   <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">
           <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2"></i>Resumen de Cierre de Caja</h5>
@@ -150,18 +295,328 @@
         </div>
         <div class="modal-body" id="cuerpo-modal-caja"></div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
           <button type="button" class="btn btn-success fw-bold" onclick="descargarExcelVentas()">
-            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel (.csv)
+            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel
           </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Socket.io & Bootstrap JS -->
-  <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANITA-WOK - Sistema de Comandas</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Header Beige con texto rojo */
+    .brand-header {
+      background-color: #f5f5dc;
+      color: #d32f2f;
+      padding: 10px 20px;
+      border-bottom: 2px solid #e0e0d1;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .brand-logo {
+      height: 45px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* Tarjeta de plato */
+    .dish-card {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .dish-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .dish-img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .dish-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #2c3e50;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .dish-desc {
+      font-size: 0.72rem;
+      color: #6c757d;
+      flex-grow: 1;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .dish-price {
+      font-weight: 800;
+      color: #d32f2f;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    /* Botón Agregar Rojo */
+    .btn-add-dish {
+      background-color: #d32f2f;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    .btn-add-dish:hover {
+      background-color: #b71c1c;
+      color: white;
+    }
+
+    /* Panel Lateral de Comanda */
+    .sidebar-comanda {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 15px;
+    }
+
+    .category-btn {
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      padding: 5px 15px;
+    }
+
+    /* Lista desplegable para sugerencias de clientes */
+    .lista-sugerencias {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      max-height: 180px;
+      overflow-y: auto;
+      background-color: white;
+      border: 1px solid #ced4da;
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .item-sugerencia {
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .item-sugerencia:hover {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado con Fondo Beige y Letras Rojas -->
+  <header class="brand-header d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <!-- Ruta del logo apuntando a img/logo.png -->
+      <img src="img/logo.png" alt="Logo Anita Wok" class="brand-logo" onerror="this.src='https://via.placeholder.com/150x50/f5f5dc/d32f2f?text=ANITA-WOK'">
+      <h1 class="h4 mb-0 fw-bold text-danger">ANITA-WOK</h1>
+    </div>
+
+    <a href="/cocina.html" class="btn btn-danger btn-sm fw-bold">
+      <i class="fa-solid fa-utensils me-1"></i> Ir a Cocina
+    </a>
+  </header>
+
+  <div class="container-fluid px-3">
+    <div class="row g-3">
+
+      <!-- Columna Principal: Selección de Mesas (1 al 10) y Menú -->
+      <div class="col-lg-8 col-md-7">
+
+        <!-- Ubicación / Tipo / Delivery -->
+        <div class="card p-2 mb-3 shadow-sm border-0">
+          <div class="row align-items-center g-2">
+            <div class="col-auto">
+              <label for="mesa" class="fw-bold text-secondary small mb-0">Ubicación / Tipo:</label>
+            </div>
+            <div class="col-md-5 col-sm-6">
+              <select id="mesa" class="form-select form-select-sm fw-bold border-danger" onchange="cambiarTipoPedido()">
+                <option value="Mesa 1">Mesa 1</option>
+                <option value="Mesa 2">Mesa 2</option>
+                <option value="Mesa 3">Mesa 3</option>
+                <option value="Mesa 4">Mesa 4</option>
+                <option value="Mesa 5">Mesa 5</option>
+                <option value="Mesa 6">Mesa 6</option>
+                <option value="Mesa 7">Mesa 7</option>
+                <option value="Mesa 8">Mesa 8</option>
+                <option value="Mesa 9">Mesa 9</option>
+                <option value="Mesa 10">Mesa 10</option>
+                <option value="Llevar">Para Llevar (Empaque + S/ 0.50)</option>
+                <option value="Delivery">Delivery</option>
+              </select>
+            </div>
+
+            <!-- Selector dinámico de tarifa de Delivery -->
+            <div class="col-md-4 col-sm-6 d-none" id="contenedor-recargo-delivery">
+              <select id="recargo-delivery" class="form-select form-select-sm border-warning fw-bold" onchange="actualizarResumenHTML()">
+                <option value="1.00">Delivery (+ S/ 1.00)</option>
+                <option value="1.50">Delivery (+ S/ 1.50)</option>
+                <option value="2.00">Delivery (+ S/ 2.00)</option>
+                <option value="2.50">Delivery (+ S/ 2.50)</option>
+                <option value="3.00">Delivery (+ S/ 3.00)</option>
+                <option value="3.50">Delivery (+ S/ 3.50)</option>
+                <option value="4.00">Delivery (+ S/ 4.00)</option>
+                <option value="4.50">Delivery (+ S/ 4.50)</option>
+                <option value="5.00">Delivery (+ S/ 5.00)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- BLOQUE AGREGADO: Datos del Cliente (Solo activo si es Llevar o Delivery) -->
+          <div class="row g-2 mt-1 border-top pt-2 d-none position-relative" id="bloque-datos-cliente">
+            <div class="col-12">
+              <span class="badge bg-danger small"><i class="fa-solid fa-user me-1"></i> Datos del Cliente</span>
+            </div>
+            
+            <div class="col-md-4 col-sm-6 position-relative">
+              <input type="tel" class="form-control form-control-sm" id="cliente-telefono" placeholder="Teléfono / Celular" oninput="buscarCliente(this.value)" autocomplete="off">
+              <div id="lista-sugerencias" class="lista-sugerencias d-none"></div>
+            </div>
+
+            <div class="col-md-8 col-sm-6">
+              <input type="text" class="form-control form-control-sm" id="cliente-nombre" placeholder="Nombre del Cliente">
+            </div>
+
+            <div class="col-md-7 col-sm-6 d-none" id="contenedor-cliente-direccion">
+              <input type="text" class="form-control form-control-sm" id="cliente-direccion" placeholder="Dirección de Envío">
+            </div>
+
+            <div class="col-md-5 col-sm-6 d-none" id="contenedor-cliente-referencia">
+              <input type="text" class="form-control form-control-sm" id="cliente-referencia" placeholder="Referencia (ej. Frente al parque)">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Categorías -->
+        <div class="d-flex gap-2 mb-3 overflow-auto pb-1">
+          <button class="btn btn-danger category-btn active" onclick="verCategoria('chifa', this)">Chifa y Criollo</button>
+          <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('compartir', this)">Para Compartir</button>
+          <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('bebidas', this)">Bebidas</button>
+          <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('extras', this)">Extras</button>
+        </div>
+
+        <!-- Grid de Platos -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-2" id="contenedor-menu"></div>
+
+      </div>
+
+      <!-- Columna Lateral: Comanda y Cerrar Caja -->
+      <div class="col-lg-4 col-md-5">
+        <div class="sidebar-comanda p-3">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+            <h2 class="h6 mb-0 fw-bold text-uppercase text-danger">
+              <i class="fa-solid fa-receipt me-1"></i> Comanda Activa
+            </h2>
+            <span class="badge bg-secondary" id="badge-total-items">0 ítems</span>
+          </div>
+
+          <div id="lista-pedido" style="max-height: 40vh; overflow-y: auto;">
+            <p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>
+          </div>
+
+          <!-- Selección de Método de Pago Sugerido -->
+          <div class="mt-3 pt-2 border-top">
+            <label for="metodo-pago" class="fw-bold text-secondary small mb-1">
+              <i class="fa-solid fa-wallet me-1"></i> Método de Pago:
+            </label>
+            <select id="metodo-pago" class="form-select form-select-sm fw-bold border-success">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+              <option value="Tarjeta">Tarjeta (Débito/Crédito)</option>
+            </select>
+          </div>
+
+          <!-- Botón Enviar -->
+          <button class="btn btn-danger w-100 mt-3 fw-bold py-2 shadow-sm" onclick="enviarComanda()">
+            <i class="fa-solid fa-paper-plane me-2"></i> ENVIAR A COCINA
+          </button>
+
+          <!-- Botón Cerrar Caja debajo de Comanda Activa -->
+          <button class="btn btn-warning w-100 mt-2 fw-bold text-dark shadow-sm" onclick="cerrarCaja()">
+            <i class="fa-solid fa-cash-register me-2"></i> CERRAR CAJA Y DESCARGAR EXCEL
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal para Cierre de Caja -->
+  <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2"></i>Resumen de Cierre de Caja</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="cuerpo-modal-caja"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success fw-bold" onclick="descargarExcelVentas()">
+            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
