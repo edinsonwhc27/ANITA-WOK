@@ -9,10 +9,6 @@
   <style>
     body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     
-    /* BARRA SUPERIOR BEIGE */
-    .navbar-beige { background-color: #f5f0eb !important; border-bottom: 1px solid #e2dcd5; }
-    .navbar-brand img { height: 35px; width: auto; object-fit: contain; }
-    
     .dish-card { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; padding: 12px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .dish-name { font-weight: bold; font-size: 0.95rem; margin-bottom: 5px; color: #212529; }
     .dish-img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; }
@@ -25,17 +21,19 @@
 </head>
 <body>
 
-  <!-- NAVBAR BEIGE CON LOGO Y NOMBRE EN LA PARTE SUPERIOR DERECHA -->
-  <nav class="navbar navbar-expand-lg navbar-light navbar-beige px-3 mb-3">
+  <!-- BARRA SUPERIOR BEIGE CON LOGO Y NOMBRE A LA IZQUIERDA -->
+  <nav class="navbar navbar-expand-lg navbar-light px-3 mb-3" style="background-color: #f5f0eb !important; border-bottom: 1px solid #e2dcd5;">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <!-- Botón Cocina a la Izquierda -->
-      <a href="/cocina" class="btn btn-sm btn-danger fw-bold"><i class="fa-solid fa-utensils me-1"></i> Ir a Cocina</a>
-
-      <!-- Logo y Nombre a la Derecha -->
-      <a class="navbar-brand d-flex align-items-center me-0" href="#">
-        <img src="logo.png" alt="Logo" class="me-2" onerror="this.style.display='none';">
+      
+      <!-- LOGO + NOMBRE A LA IZQUIERDA -->
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="logo.png" alt="Logo" class="me-2" style="height: 40px; width: auto; object-fit: contain;">
         <span class="fw-bold text-danger fs-4">ANITA-WOK</span>
       </a>
+
+      <!-- BOTÓN IR A COCINA A LA DERECHA -->
+      <a href="/cocina" class="btn btn-sm btn-danger fw-bold"><i class="fa-solid fa-utensils me-1"></i> Ir a Cocina</a>
+
     </div>
   </nav>
 
@@ -43,7 +41,7 @@
     <div class="row g-3">
       
       <div class="col-md-8 col-lg-9">
-        <!-- BARRAS UBICACIÓN, BUSCADOR Y DELIVERY A LA MISMA ALTURA HORIZONTAL -->
+        <!-- BARRAS UBICACIÓN, DELIVERY Y BUSCADOR EN LA MISMA LÍNEA HORIZONTAL -->
         <div class="bg-white p-2 rounded border shadow-sm mb-3">
           <div class="row g-2 align-items-center">
             
@@ -68,7 +66,7 @@
               </div>
             </div>
 
-            <!-- Recargo Delivery (Se oculta/muestra inline en la misma fila) -->
+            <!-- Recargo Delivery -->
             <div class="col-auto d-none" id="contenedor-recargo-delivery">
               <div class="d-flex align-items-center gap-2">
                 <label for="recargo-delivery" class="form-label small fw-bold text-muted mb-0 text-nowrap">Delivery:</label>
@@ -84,7 +82,7 @@
               </div>
             </div>
 
-            <!-- Buscador Rápido (Toma el resto del espacio horizontal) -->
+            <!-- Buscador Rápido -->
             <div class="col">
               <div class="d-flex align-items-center gap-2">
                 <label for="input-buscador" class="form-label small fw-bold text-muted mb-0 text-nowrap">Buscador Rápido:</label>
@@ -98,6 +96,7 @@
           </div>
         </div>
 
+        <!-- CATEGORÍAS DE LA CARTA -->
         <div class="d-flex gap-2 mb-3 overflow-auto pb-1">
           <button class="btn btn-danger category-btn active" onclick="verCategoria('chifa', this)">Chifa y Criollo</button>
           <button class="btn btn-outline-secondary category-btn" onclick="verCategoria('compartir', this)">Para Compartir</button>
@@ -108,6 +107,7 @@
         <div id="contenedor-menu" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
       </div>
 
+      <!-- PANEL LATERAL DE COMANDA -->
       <div class="col-md-4 col-lg-3">
         <div class="bg-white p-3 rounded border shadow-sm sticky-top" style="top: 15px;">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
@@ -142,6 +142,7 @@
     </div>
   </div>
 
+  <!-- MODAL DE CIERRE DE CAJA -->
   <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
