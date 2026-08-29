@@ -7,10 +7,8 @@ const socket = io();
 // Array de ventas acumuladas
 let historialVentas = [];
 
-// Base de Datos de Clientes Frecuentes (Persistente en el navegador)
-let baseClientes = JSON.parse(localStorage.getItem('anita_wok_clientes')) || [
-  { telefono: '987654321', nombre: 'Juan Pérez', direccion: 'Av. Brasil 450', referencia: 'Frente al parque' }
-];
+// Variable global para filtro por texto en tiempo real
+let textoBusqueda = '';
 
 // Base de Datos Oficial (47 Productos)
 const productos = [
@@ -76,6 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarResumenHTML();
 });
 
+// Función para filtrar por nombre en tiempo real
+function filtrarPorNombre(texto) {
+  textoBusqueda = texto.toLowerCase().trim();
+  renderMenu();
+}
+
 // Renderizar Menú
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
@@ -85,8 +89,22 @@ function renderMenu() {
   const opcion = selectorMesa ? selectorMesa.value : '';
   const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
-  const productosFiltrados = productos.filter(p => p.cat === categoriaActual);
+  const productosFiltrados = productos.filter(p => {
+    const coincideCat = (textoBusqueda === '' ? p.cat === categoriaActual : true);
+    const coincideTexto = p.nombre.toLowerCase().includes(textoBusqueda);
+    return coincideCat && coincideTexto;
+  });
+
   contenedor.innerHTML = '';
+
+  if (productosFiltrados.length === 0) {
+    contenedor.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <p class="text-muted fw-bold">No se encontraron platos que coincidan con la búsqueda.</p>
+      </div>
+    `;
+    return;
+  }
 
   productosFiltrados.forEach(p => {
     const precio = esLlevarODelivery ? p.llevar : p.mesa;
@@ -111,6 +129,11 @@ function renderMenu() {
 // Filtro por Categorías
 function verCategoria(cat, btnElement) {
   categoriaActual = cat;
+  textoBusqueda = '';
+  
+  const inputBuscador = document.getElementById('input-buscador');
+  if (inputBuscador) inputBuscador.value = '';
+
   if (btnElement) {
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.classList.remove('btn-danger', 'active');
@@ -122,30 +145,18 @@ function verCategoria(cat, btnElement) {
   renderMenu();
 }
 
-// Opciones de Ubicación (Mesa 1-10 / Llevar / Delivery)
+// Opciones de Ubicación
 function cambiarTipoPedido() {
   const selectorMesa = document.getElementById('mesa');
   if (!selectorMesa) return;
   
   const opcion = selectorMesa.value;
   const contenedorDelivery = document.getElementById('contenedor-recargo-delivery');
-  const bloqueCliente = document.getElementById('bloque-datos-cliente');
-  const contDireccion = document.getElementById('contenedor-cliente-direccion');
-  const contReferencia = document.getElementById('contenedor-cliente-referencia');
 
   if (opcion === 'Delivery') {
     if (contenedorDelivery) contenedorDelivery.classList.remove('d-none');
-    if (bloqueCliente) bloqueCliente.classList.remove('d-none');
-    if (contDireccion) contDireccion.classList.remove('d-none');
-    if (contReferencia) contReferencia.classList.remove('d-none');
-  } else if (opcion === 'Llevar') {
-    if (contenedorDelivery) contenedorDelivery.classList.add('d-none');
-    if (bloqueCliente) bloqueCliente.classList.remove('d-none');
-    if (contDireccion) contDireccion.classList.add('d-none');
-    if (contReferencia) contReferencia.classList.add('d-none');
   } else {
     if (contenedorDelivery) contenedorDelivery.classList.add('d-none');
-    if (bloqueCliente) bloqueCliente.classList.add('d-none');
   }
 
   const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
@@ -159,70 +170,6 @@ function cambiarTipoPedido() {
   renderMenu();
   actualizarResumenHTML();
 }
-
-// Buscador de Clientes
-function buscarCliente(query) {
-  const sugerencias = document.getElementById('lista-sugerencias');
-  if (!sugerencias) return;
-  
-  sugerencias.innerHTML = '';
-  if (query.trim().length < 2) { 
-    sugerencias.classList.add('d-none'); 
-    return; 
-  }
-
-  const coincidencias = baseClientes.filter(c => 
-    c.telefono.includes(query) || c.nombre.toLowerCase().includes(query.toLowerCase())
-  );
-
-  if (coincidencias.length === 0) { 
-    sugerencias.classList.add('d-none'); 
-    return; 
-  }
-
-  coincidencias.forEach(cliente => {
-    const item = document.createElement('div');
-    item.className = 'item-sugerencia border-bottom p-2 bg-light cursor-pointer';
-    item.style.cursor = 'pointer';
-    item.innerHTML = `<strong>${cliente.nombre}</strong> — <span class="text-muted">${cliente.telefono}</span>`;
-    item.onclick = () => seleccionarCliente(cliente);
-    sugerencias.appendChild(item);
-  });
-  
-  sugerencias.classList.remove('d-none');
-}
-
-function seleccionarCliente(cliente) {
-  const tel = document.getElementById('cliente-telefono');
-  const nom = document.getElementById('cliente-nombre');
-  const dir = document.getElementById('cliente-direccion');
-  const ref = document.getElementById('cliente-referencia');
-
-  if (tel) tel.value = cliente.telefono;
-  if (nom) nom.value = cliente.nombre;
-  if (dir) dir.value = cliente.direccion || '';
-  if (ref) ref.value = cliente.referencia || '';
-  
-  const sugerencias = document.getElementById('lista-sugerencias');
-  if (sugerencias) sugerencias.classList.add('d-none');
-}
-
-function guardarClienteNuevo(telefono, nombre, direccion, referencia) {
-  if (!telefono || !nombre) return;
-  const existe = baseClientes.find(c => c.telefono === telefono);
-  if (!existe) {
-    baseClientes.push({ telefono, nombre, direccion, referencia });
-    localStorage.setItem('anita_wok_clientes', JSON.stringify(baseClientes));
-  }
-}
-
-document.addEventListener('click', function(e) {
-  const sugerencias = document.getElementById('lista-sugerencias');
-  const inputTelefono = document.getElementById('cliente-telefono');
-  if (sugerencias && inputTelefono && e.target !== inputTelefono && !sugerencias.contains(e.target)) {
-    sugerencias.classList.add('d-none');
-  }
-});
 
 // Agregar Plato al Pedido
 function agregarAlPedido(idProd) {
@@ -372,23 +319,12 @@ function enviarComanda() {
   }
 
   const total = subtotal + recargoDelivery;
-
-  const tel = document.getElementById('cliente-telefono')?.value.trim() || '';
-  const nom = document.getElementById('cliente-nombre')?.value.trim() || '';
-  const dir = document.getElementById('cliente-direccion')?.value.trim() || '';
-  const ref = document.getElementById('cliente-referencia')?.value.trim() || '';
-
-  if ((mesa === 'Llevar' || mesa === 'Delivery') && tel && nom) {
-    guardarClienteNuevo(tel, nom, dir, ref);
-  }
-
   const idCorrelativo = String(historialVentas.length + 1).padStart(6, '0');
 
   const datosComanda = {
     id: idCorrelativo,
     mesa: mesa,
     metodoPago: metodoPago,
-    cliente: { telefono: tel, nombre: nom, direccion: dir, referencia: ref },
     items: [...pedido],
     recargoDelivery: recargoDelivery,
     total: total,
@@ -505,7 +441,7 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Formato CSV (Sin advertencias de Excel)
+// Descargar Registro de Ventas en Excel Nativo (.xls) sin advertencias
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
@@ -513,41 +449,86 @@ function descargarExcelVentas() {
   }
 
   let sumaTotalDia = 0;
-  
-  // Encabezados del CSV con BOM UTF-8 (\uFEFF) para abrir sin alertas y conservar tildes
-  let csvContent = "\uFEFF"; 
-  csvContent += "ID Comanda;Hora;Ubicación;Método de Pago;Cliente;Teléfono;Dirección;Pedidos;Delivery;Total del Pedido\n";
+
+  let excelHTML = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <meta charset="utf-8">
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Ventas del Día</x:Name>
+              <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+    </head>
+    <body>
+      <table border="1">
+        <thead>
+          <tr style="background-color: #dc3545; color: #ffffff; font-weight: bold;">
+            <th>ID Comanda</th>
+            <th>Hora</th>
+            <th>Ubicación</th>
+            <th>Método de Pago</th>
+            <th>Pedidos</th>
+            <th>Delivery</th>
+            <th>Total del Pedido</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
 
   historialVentas.forEach((v) => {
     const idCorrelativo = v.id;
     const hora = v.hora || v.fecha;
     const ubicacion = v.mesa || '';
     const metodoPago = v.metodoPago || '';
-    const clienteNombre = (v.cliente && v.cliente.nombre) ? v.cliente.nombre : 'N/A';
-    const clienteTel = (v.cliente && v.cliente.telefono) ? v.cliente.telefono : 'N/A';
-    const clienteDir = (v.cliente && v.cliente.direccion) ? v.cliente.direccion : 'N/A';
 
     const listaPedidos = v.items.map(i => {
       let detalle = `${i.cantidad}x ${i.nombre}`;
       if (i.observacion) detalle += ` (${i.observacion})`;
       return detalle;
-    }).join(' + ').replace(/"/g, '""');
+    }).join(' + ');
 
     const delivery = (v.recargoDelivery || 0).toFixed(2);
     const totalPedido = v.total.toFixed(2);
 
     sumaTotalDia += v.total;
 
-    csvContent += `"${idCorrelativo}";"${hora}";"${ubicacion}";"${metodoPago}";"${clienteNombre}";"${clienteTel}";"${clienteDir}";"${listaPedidos}";"S/ ${delivery}";"S/ ${totalPedido}"\n`;
+    excelHTML += `
+      <tr>
+        <td style="text-align: center;">#${idCorrelativo}</td>
+        <td style="text-align: center;">${hora}</td>
+        <td style="text-align: center;">${ubicacion}</td>
+        <td style="text-align: center;">${metodoPago}</td>
+        <td>${listaPedidos}</td>
+        <td style="text-align: right;">S/ ${delivery}</td>
+        <td style="text-align: right; font-weight: bold;">S/ ${totalPedido}</td>
+      </tr>
+    `;
   });
 
-  csvContent += `\n;;;;;;;;"TOTAL DÍA";"S/ ${sumaTotalDia.toFixed(2)}"\n`;
+  excelHTML += `
+          <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <td colspan="6" style="text-align: right;">TOTAL DÍA:</td>
+            <td style="text-align: right; color: #dc3545;">S/ ${sumaTotalDia.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.xls`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
