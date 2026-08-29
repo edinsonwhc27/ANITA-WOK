@@ -25,14 +25,17 @@
 </head>
 <body>
 
-  <!-- NAVBAR BEIGE CON LOGO A LA IZQUIERDA DEL NOMBRE -->
+  <!-- NAVBAR BEIGE CON LOGO Y NOMBRE EN LA PARTE SUPERIOR DERECHA -->
   <nav class="navbar navbar-expand-lg navbar-light navbar-beige px-3 mb-3">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="#">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <!-- Botón Cocina a la Izquierda -->
+      <a href="/cocina" class="btn btn-sm btn-danger fw-bold"><i class="fa-solid fa-utensils me-1"></i> Ir a Cocina</a>
+
+      <!-- Logo y Nombre a la Derecha -->
+      <a class="navbar-brand d-flex align-items-center me-0" href="#">
         <img src="logo.png" alt="Logo" class="me-2" onerror="this.style.display='none';">
         <span class="fw-bold text-danger fs-4">ANITA-WOK</span>
       </a>
-      <a href="/cocina" class="btn btn-sm btn-danger fw-bold"><i class="fa-solid fa-utensils me-1"></i> Ir a Cocina</a>
     </div>
   </nav>
 
@@ -40,47 +43,58 @@
     <div class="row g-3">
       
       <div class="col-md-8 col-lg-9">
-        <div class="row g-2 mb-3 align-items-center bg-white p-2 rounded border shadow-sm">
-          <div class="col-md-4">
-            <label for="mesa" class="form-label small fw-bold text-muted mb-1">Ubicación / Tipo:</label>
-            <select id="mesa" class="form-select form-select-sm" onchange="cambiarTipoPedido()">
-              <option value="Mesa 1">Mesa 1</option>
-              <option value="Mesa 2">Mesa 2</option>
-              <option value="Mesa 3">Mesa 3</option>
-              <option value="Mesa 4">Mesa 4</option>
-              <option value="Mesa 5">Mesa 5</option>
-              <option value="Mesa 6">Mesa 6</option>
-              <option value="Mesa 7">Mesa 7</option>
-              <option value="Mesa 8">Mesa 8</option>
-              <option value="Mesa 9">Mesa 9</option>
-              <option value="Mesa 10">Mesa 10</option>
-              <option value="Llevar">Para Llevar</option>
-              <option value="Delivery">Delivery</option>
-            </select>
-          </div>
-
-          <div class="col-md-8">
-            <label for="input-buscador" class="form-label small fw-bold text-muted mb-1">Buscador Rápido:</label>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-              <input type="text" id="input-buscador" class="form-control" placeholder="Escribe el nombre del plato..." oninput="filtrarPorNombre(this.value)">
+        <!-- BARRAS UBICACIÓN, BUSCADOR Y DELIVERY A LA MISMA ALTURA HORIZONTAL -->
+        <div class="bg-white p-2 rounded border shadow-sm mb-3">
+          <div class="row g-2 align-items-center">
+            
+            <!-- Ubicación / Tipo -->
+            <div class="col-auto">
+              <div class="d-flex align-items-center gap-2">
+                <label for="mesa" class="form-label small fw-bold text-muted mb-0 text-nowrap">Ubicación / Tipo:</label>
+                <select id="mesa" class="form-select form-select-sm" style="width: 130px;" onchange="cambiarTipoPedido()">
+                  <option value="Mesa 1">Mesa 1</option>
+                  <option value="Mesa 2">Mesa 2</option>
+                  <option value="Mesa 3">Mesa 3</option>
+                  <option value="Mesa 4">Mesa 4</option>
+                  <option value="Mesa 5">Mesa 5</option>
+                  <option value="Mesa 6">Mesa 6</option>
+                  <option value="Mesa 7">Mesa 7</option>
+                  <option value="Mesa 8">Mesa 8</option>
+                  <option value="Mesa 9">Mesa 9</option>
+                  <option value="Mesa 10">Mesa 10</option>
+                  <option value="Llevar">Para Llevar</option>
+                  <option value="Delivery">Delivery</option>
+                </select>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- RECARGO DELIVERY REDUCIDO A DESPLEGABLE -->
-        <div id="contenedor-recargo-delivery" class="mb-3 d-none bg-white p-2 rounded border shadow-sm">
-          <div class="d-flex align-items-center gap-2" style="max-width: 280px;">
-            <label for="recargo-delivery" class="form-label small fw-bold text-muted mb-0 text-nowrap">Delivery:</label>
-            <select id="recargo-delivery" class="form-select form-select-sm" onchange="actualizarResumenHTML()">
-              <option value="1.00">S/ 1.00</option>
-              <option value="1.50">S/ 1.50</option>
-              <option value="2.00">S/ 2.00</option>
-              <option value="2.50">S/ 2.50</option>
-              <option value="3.00" selected>S/ 3.00</option>
-              <option value="3.50">S/ 3.50</option>
-              <option value="4.00">S/ 4.00</option>
-            </select>
+            <!-- Recargo Delivery (Se oculta/muestra inline en la misma fila) -->
+            <div class="col-auto d-none" id="contenedor-recargo-delivery">
+              <div class="d-flex align-items-center gap-2">
+                <label for="recargo-delivery" class="form-label small fw-bold text-muted mb-0 text-nowrap">Delivery:</label>
+                <select id="recargo-delivery" class="form-select form-select-sm" style="width: 100px;" onchange="actualizarResumenHTML()">
+                  <option value="1.00">S/ 1.00</option>
+                  <option value="1.50">S/ 1.50</option>
+                  <option value="2.00">S/ 2.00</option>
+                  <option value="2.50">S/ 2.50</option>
+                  <option value="3.00" selected>S/ 3.00</option>
+                  <option value="3.50">S/ 3.50</option>
+                  <option value="4.00">S/ 4.00</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Buscador Rápido (Toma el resto del espacio horizontal) -->
+            <div class="col">
+              <div class="d-flex align-items-center gap-2">
+                <label for="input-buscador" class="form-label small fw-bold text-muted mb-0 text-nowrap">Buscador Rápido:</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                  <input type="text" id="input-buscador" class="form-control" placeholder="Escribe el nombre del plato..." oninput="filtrarPorNombre(this.value)">
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
