@@ -1,13 +1,14 @@
 {
-  "name": "anita-wok-pos",
-  "version": "2.0.0",
-  "description": "Sistema POS y KDS para ANITA-WOK",
+  "name": "anita-wok-comandas",
+  "version": "1.0.0",
+  "description": "Sistema de comandas y caja para Anita Wok",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
+    "exceljs": "^4.3.0",
     "socket.io": "^4.6.1"
   }
 }
