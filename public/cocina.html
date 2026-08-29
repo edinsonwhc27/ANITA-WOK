@@ -9,7 +9,6 @@
   <style>
     :root {
       --brand-red: #be123c;
-      --brand-red-dark: #881337;
       --brand-beige: #f5f0eb;
       --bg-dark: #121214;
       --card-dark: #1c1c1f;
@@ -22,52 +21,45 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
-    /* BARRA SUPERIOR */
     .navbar-cocina {
       background-color: #18181b !important;
       border-bottom: 2px solid var(--brand-red);
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
 
-    /* RESUMEN DE PLATOS ACUMULADOS */
     .summary-card {
       background-color: var(--card-dark);
       border: 1px solid var(--border-dark);
       border-radius: 10px;
     }
+
     .badge-total {
       background-color: var(--brand-red);
       color: #fff;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       border-radius: 6px;
       padding: 6px 12px;
     }
 
-    /* TARJETAS DE COMANDAS */
     .comanda-card {
       background-color: var(--card-dark);
       border-radius: 12px;
-      border: 2px solid var(--border-dark);
+      border: 3px solid var(--border-dark);
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      transition: border-color 0.3s ease, transform 0.2s ease;
-      overflow: hidden;
+      transition: all 0.3s ease;
     }
 
-    /* SEMAFORIZACIÓN (BORDES DE TIEMPO) */
-    .comanda-card.tiempo-nuevo {
-      border-color: #22c55e !important; /* Verde */
-    }
-    .comanda-card.tiempo-alerta {
-      border-color: #eab308 !important; /* Amarillo */
-    }
-    .comanda-card.tiempo-critico {
-      border-color: #ef4444 !important; /* Rojo */
-      animation: pulse-red 1.5s infinite;
+    /* Semaforización */
+    .tiempo-nuevo { border-color: #22c55e !important; }
+    .tiempo-alerta { border-color: #eab308 !important; }
+    .tiempo-critico { 
+      border-color: #ef4444 !important;
+      animation: pulse-red 1.2s infinite;
     }
 
     @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
@@ -83,260 +75,227 @@
       border-bottom: 1px dashed var(--border-dark);
       padding: 8px 0;
     }
-    .platillo-item:last-child {
-      border-bottom: none;
-    }
+    .platillo-item:last-child { border-bottom: none; }
 
-    /* BOTONES */
     .btn-completar {
       background-color: #22c55e;
       color: #000;
       font-weight: 700;
       border: none;
-      border-radius: 8px;
     }
-    .btn-completar:hover {
-      background-color: #16a34a;
-      color: #fff;
-    }
+    .btn-completar:hover { background-color: #16a34a; color: #fff; }
 
-    .btn-imprimir {
-      background-color: #3f3f46;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-    }
-    .btn-imprimir:hover {
-      background-color: #52525b;
-    }
-
-    /* TICKET PARA IMPRESIÓN */
     @media print {
       body * { visibility: hidden; }
       #ticket-impresion, #ticket-impresion * { visibility: visible; }
       #ticket-impresion {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        color: #000;
-        background: #fff;
-        padding: 15px;
-        font-family: monospace;
+        position: absolute; left: 0; top: 0; width: 100%;
+        color: #000; background: #fff; padding: 10px; font-family: monospace;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- BARRA SUPERIOR -->
   <nav class="navbar navbar-expand-lg navbar-dark px-3 mb-3 navbar-cocina">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="img/logo.png" alt="Logo" class="me-2" style="height: 40px; width: auto;">
-        <span class="fw-bold fs-4" style="color: var(--brand-beige);">ANITA-WOK <small class="fs-6 text-danger fw-normal">| COCINA</small></span>
+        <span class="fw-bold fs-4" style="color: var(--brand-beige);">ANITA-WOK <small class="fs-6 text-danger">| COCINA</small></span>
       </a>
       <div class="d-flex align-items-center gap-2">
-        <button id="btn-audio-activar" class="btn btn-sm btn-outline-warning fw-bold" onclick="activarSonido()">
-          <i class="fa-solid fa-volume-high me-1"></i> Activar Sonido
+        <button id="btn-audio" class="btn btn-sm btn-warning fw-bold" onclick="activarAudioInteractivo()">
+          <i class="fa-solid fa-volume-xmark me-1"></i> Haz Clic Aquí para Activar Sonido
         </button>
         <span class="badge bg-outline-light border px-3 py-2" id="reloj-cocina">00:00:00</span>
-        <a href="/" class="btn btn-sm btn-outline-light fw-bold"><i class="fa-solid fa-store me-1"></i> Ir a Carta</a>
       </div>
     </div>
   </nav>
 
   <div class="container-fluid px-3">
-    
-    <!-- RESUMEN DE PLATOS ACUMULADOS EN WOK -->
+    <!-- ACUMULACIÓN DE PLATOS PARA EL COCINERO -->
     <div class="summary-card p-3 mb-4">
       <div class="d-flex align-items-center mb-2">
         <i class="fa-solid fa-fire-burner text-danger fs-5 me-2"></i>
-        <h6 class="fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; color: var(--brand-beige);">Resumen Total Pendiente en Wok</h6>
+        <h6 class="fw-bold mb-0 text-uppercase" style="color: var(--brand-beige);">Resumen de Platos en Wok</h6>
       </div>
-      <div id="contenedor-resumen-acumulado" class="d-flex flex-wrap gap-2">
-        <span class="text-muted small">Sin pedidos en espera</span>
+      <div id="contenedor-resumen" class="d-flex flex-wrap gap-2">
+        <span class="text-muted small">Sin pedidos pendientes</span>
       </div>
     </div>
 
-    <!-- CONTENEDOR DE TARJETAS DE COMANDAS -->
+    <!-- TARJETAS DE COMANDAS -->
     <div id="contenedor-comandas" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3"></div>
-
   </div>
 
-  <!-- AREA OCULTA PARA IMPRESIÓN DE TICKET -->
   <div id="ticket-impresion" style="display: none;"></div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
     const socket = io();
-    let comandasLocales = [];
-    let audioContexto = null;
+    let comandas = [];
+    let audioPermitido = false;
 
-    // Reloj Digital
+    // Reloj en vivo y actualización de tiempos
     setInterval(() => {
       document.getElementById('reloj-cocina').innerText = new Date().toLocaleTimeString();
-      renderizarPantalla();
+      renderizarComandas();
     }, 1000);
 
-    // Habilitar audio al hacer interacción (Requisito de navegadores)
-    function activarSonido() {
-      audioContexto = new (window.AudioContext || window.webkitAudioContext)();
-      const btn = document.getElementById('btn-audio-activar');
-      btn.classList.remove('btn-outline-warning');
-      btn.classList.add('btn-success');
-      btn.innerHTML = '<i class="fa-solid fa-volume-high me-1"></i> Sonido Activo';
+    // Activar audio con interacción directa del usuario
+    function activarAudioInteractivo() {
+      audioPermitido = true;
+      const btn = document.getElementById('btn-audio');
+      btn.className = 'btn btn-sm btn-success fw-bold';
+      btn.innerHTML = '<i class="fa-solid fa-volume-high me-1"></i> Sonido Activado';
+      reproducirTimbre(); // Prueba de sonido inicial
     }
 
-    // Alerta Sonora (Generador de Tono Web Audio)
-    function reproducirAlerta() {
-      if (!audioContexto) {
-        audioContexto = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioContexto.state === 'suspended') {
-        audioContexto.resume();
-      }
+    // Generador de Tono de Alerta (Doble Beep estilo Cocina)
+    function reproducirTimbre() {
+      if (!audioPermitido) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const sonarTono = (frecuencia, inicio, duracion) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(frecuencia, ctx.currentTime + inicio);
+          gain.gain.setValueAtTime(0.4, ctx.currentTime + inicio);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + inicio + duracion);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + inicio);
+          osc.stop(ctx.currentTime + inicio + duracion);
+        };
 
-      const osc = audioContexto.createOscillator();
-      const gain = audioContexto.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, audioContexto.currentTime); // Tono A5
-      gain.gain.setValueAtTime(0.3, audioContexto.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioContexto.currentTime + 0.4);
-
-      osc.connect(gain);
-      gain.connect(audioContexto.destination);
-      osc.start();
-      osc.stop(audioContexto.currentTime + 0.4);
+        sonarTono(800, 0, 0.15);
+        sonarTono(1200, 0.2, 0.25);
+      } catch (e) {
+        console.log("Error de audio:", e);
+      }
     }
 
-    // WebSocket: Escuchar Nuevos Pedidos
-    socket.on('nuevoPedido', (pedido) => {
-      if (!pedido.timestamp) pedido.timestamp = Date.now();
-      comandasLocales.push(pedido);
-      reproducirAlerta();
-      renderizarPantalla();
+    // Escuchar comandas en tiempo real desde WebSockets
+    socket.on('cargarPedidos', (pedidosRecibidos) => {
+      comandas = pedidosRecibidos || [];
+      renderizarComandas();
     });
 
-    // Cargar comandas iniciales
-    socket.on('cargarPedidos', (pedidos) => {
-      comandasLocales = pedidos.map(p => ({
-        ...p,
-        timestamp: p.timestamp || Date.now()
-      }));
-      renderizarPantalla();
+    socket.on('nuevoPedido', (nuevoPedido) => {
+      // Verificar si ya existe para evitar duplicados
+      const existe = comandas.some(c => c.id === nuevoPedido.id);
+      if (!existe) {
+        if (!nuevoPedido.timestamp) nuevoPedido.timestamp = Date.now();
+        comandas.push(nuevoPedido);
+        reproducirTimbre();
+        renderizarComandas();
+      }
     });
 
-    // Renderizar la interfaz
-    function renderizarPantalla() {
+    // Renderizar las tarjetas
+    function renderizarComandas() {
       const contenedor = document.getElementById('contenedor-comandas');
       contenedor.innerHTML = '';
 
-      if (comandasLocales.length === 0) {
-        contenedor.innerHTML = '<div class="col-12 text-center py-5 text-muted"><h5>No hay comandas pendientes</h5></div>';
-        actualizarResumenAcumulado();
+      if (comandas.length === 0) {
+        contenedor.innerHTML = '<div class="col-12 text-center py-5 text-muted"><h5>No hay comandas en espera</h5></div>';
+        actualizarResumen();
         return;
       }
 
       const ahora = Date.now();
 
-      comandasLocales.forEach((comanda, idx) => {
-        const minutosTranscurridos = Math.floor((ahora - comanda.timestamp) / 60000);
-        
-        let claseSemaforo = 'tiempo-nuevo';
-        if (minutosTranscurridos >= 5 && minutosTranscurridos < 10) {
-          claseSemaforo = 'tiempo-alerta';
-        } else if (minutosTranscurridos >= 10) {
-          claseSemaforo = 'tiempo-critico';
-        }
+      comandas.forEach((c, index) => {
+        const transcurridos = Math.floor((ahora - (c.timestamp || ahora)) / 60000);
 
-        let htmlPlatos = '';
-        comanda.items.forEach(item => {
-          htmlPlatos += `
-            <div class="platillo-item d-flex justify-content-between">
-              <span><strong class="text-danger me-2">${item.cantidad}x</strong> ${item.nombre}</span>
-            </div>`;
-        });
+        let semaforo = 'tiempo-nuevo';
+        if (transcurridos >= 5 && transcurridos < 10) semaforo = 'tiempo-alerta';
+        else if (transcurridos >= 10) semaforo = 'tiempo-critico';
+
+        const itemsHTML = (c.items || []).map(item => `
+          <div class="platillo-item d-flex justify-content-between">
+            <span><strong class="text-danger me-2">${item.cantidad || 1}x</strong> ${item.nombre || item.title}</span>
+          </div>
+        `).join('');
 
         const col = document.createElement('div');
         col.className = 'col';
         col.innerHTML = `
-          <div class="comanda-card ${claseSemaforo}">
+          <div class="comanda-card ${semaforo}">
             <div class="comanda-header d-flex justify-content-between align-items-center">
-              <span class="fw-bold text-warning fs-5">${comanda.mesa || 'Mesa'}</span>
-              <span class="badge bg-dark border border-secondary"><i class="fa-regular fa-clock me-1"></i> ${minutosTranscurridos} min</span>
+              <span class="fw-bold text-warning fs-5">${c.mesa || 'Mesa'}</span>
+              <span class="badge bg-dark border border-secondary"><i class="fa-regular fa-clock me-1"></i> ${transcurridos} min</span>
             </div>
             <div class="p-3">
-              ${htmlPlatos}
-              ${comanda.metodoPago ? `<small class="text-muted d-block mt-2">Pago: ${comanda.metodoPago}</small>` : ''}
+              ${itemsHTML}
             </div>
             <div class="p-3 pt-0 d-flex gap-2">
-              <button class="btn btn-imprimir btn-sm flex-fill" onclick="imprimirComanda(${idx})"><i class="fa-solid fa-print"></i> Ticket</button>
-              <button class="btn btn-completar btn-sm flex-fill" onclick="completarPedido(${idx})"><i class="fa-solid fa-check me-1"></i> LISTO</button>
+              <button class="btn btn-secondary btn-sm flex-fill" onclick="imprimirTicket(${index})"><i class="fa-solid fa-print"></i></button>
+              <button class="btn btn-completar btn-sm flex-fill" onclick="despacharPedido('${c.id}', ${index})"><i class="fa-solid fa-check me-1"></i> LISTO</button>
             </div>
           </div>
         `;
         contenedor.appendChild(col);
       });
 
-      actualizarResumenAcumulado();
+      actualizarResumen();
     }
 
-    // Calcular y renderizar platos acumulados
-    function actualizarResumenAcumulado() {
-      const contenedorResumen = document.getElementById('contenedor-resumen-acumulado');
-      const conteo = {};
+    // Actualizar Panel Superior de Acumulados
+    function actualizarResumen() {
+      const contenedorResumen = document.getElementById('contenedor-resumen');
+      const resumen = {};
 
-      comandasLocales.forEach(comanda => {
-        comanda.items.forEach(item => {
-          conteo[item.nombre] = (conteo[item.nombre] || 0) + item.cantidad;
+      comandas.forEach(c => {
+        (c.items || []).forEach(item => {
+          const nombre = item.nombre || item.title;
+          const cant = item.cantidad || 1;
+          resumen[nombre] = (resumen[nombre] || 0) + cant;
         });
       });
 
-      const nombres = Object.keys(conteo);
-      if (nombres.length === 0) {
-        contenedorResumen.innerHTML = '<span class="text-muted small">Sin pedidos en espera</span>';
+      const llaves = Object.keys(resumen);
+      if (llaves.length === 0) {
+        contenedorResumen.innerHTML = '<span class="text-muted small">Sin pedidos pendientes</span>';
         return;
       }
 
-      contenedorResumen.innerHTML = nombres.map(nombre => 
-        `<span class="badge badge-total">${conteo[nombre]}x ${nombre}</span>`
-      ).join('');
+      contenedorResumen.innerHTML = llaves.map(k => `
+        <span class="badge badge-total">${resumen[k]}x ${k}</span>
+      `).join('');
     }
 
-    // Completar pedido
-    function completarPedido(index) {
-      const comanda = comandasLocales[index];
-      if (comanda && comanda.id) {
-        socket.emit('completarPedido', comanda.id);
+    // Marcar como Listo
+    function despacharPedido(id, index) {
+      if (id) {
+        socket.emit('completarPedido', id);
       }
-      comandasLocales.splice(index, 1);
-      renderizarPantalla();
+      comandas.splice(index, 1);
+      renderizarComandas();
     }
 
-    // Imprimir Ticket Individual
-    function imprimirComanda(index) {
-      const c = comandasLocales[index];
+    // Impresión de Ticket
+    function imprimirTicket(index) {
+      const c = comandas[index];
       if (!c) return;
 
-      const ticketDiv = document.getElementById('ticket-impresion');
-      let itemsHTML = c.items.map(i => `<div>${i.cantidad} x ${i.nombre}</div>`).join('');
-      
-      ticketDiv.innerHTML = `
-        <h3 style="text-align:center;">ANITA-WOK</h3>
-        <p style="text-align:center;">COMANDA DE COCINA</p>
+      const ticket = document.getElementById('ticket-impresion');
+      const items = (c.items || []).map(i => `<div>${i.cantidad || 1}x ${i.nombre || i.title}</div>`).join('');
+
+      ticket.innerHTML = `
+        <h3 style="text-align:center; margin:0;">ANITA-WOK</h3>
+        <p style="text-align:center; margin:0;">--- COCINA ---</p>
         <hr>
-        <p><strong>Ubicación:</strong> ${c.mesa}</p>
-        <p><strong>Hora:</strong> ${new Date(c.timestamp).toLocaleTimeString()}</p>
+        <p><strong>${c.mesa || 'Mesa'}</strong></p>
+        <p>Hora: ${new Date(c.timestamp || Date.now()).toLocaleTimeString()}</p>
         <hr>
-        ${itemsHTML}
+        ${items}
         <hr>
       `;
-      ticketDiv.style.display = 'block';
+      ticket.style.display = 'block';
       window.print();
-      ticketDiv.style.display = 'none';
+      ticket.style.display = 'none';
     }
   </script>
 </body>
