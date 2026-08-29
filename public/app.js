@@ -418,7 +418,7 @@ function cerrarCaja() {
   modal.show();
 }
 
-// EXPORTACIÓN EN CSV (NATIVO EXCEL SIN AVISOS DE SEGURIDAD EN NINGÚN DISPOSITIVO)
+// EXPORTACIÓN EN CSV (NATIVO EXCEL SIN AVISOS DE SEGURIDAD)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
@@ -446,7 +446,6 @@ function descargarExcelVentas() {
 
   lineas.push(`"";"";"";"";"TOTAL DIA:";"";"S/ ${sumaTotalDia.toFixed(2)}"`);
 
-  // BOM UTF-8 para garantizar que abre perfecto en Excel sin cartel de advertencia y con tildes
   const contenidoCSV = "\uFEFF" + lineas.join("\n");
   const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' });
   
