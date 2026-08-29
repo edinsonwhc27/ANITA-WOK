@@ -3,227 +3,235 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ANITA-WOK - Pantalla de Cocina / Recepción</title>
-
-  <!-- Bootstrap 5 CSS -->
+  <title>ANITA-WOK | Pantalla de Cocina (KDS)</title>
+  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
   <style>
     body {
       background-color: #121212;
-      color: #ffffff;
+      color: #e0e0e0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
-    .brand-header {
+    .header-kds {
       background-color: #1f1f1f;
-      padding: 12px 20px;
-      border-bottom: 2px solid #d32f2f;
+      border-bottom: 2px solid #333;
     }
-
-    .comanda-card {
+    .kds-card {
       background-color: #1e1e1e;
-      border: 2px solid #d32f2f;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 4px 10px rgba(211, 47, 47, 0.2);
+      border-radius: 12px;
+      border: 3px solid #333;
+      transition: all 0.3s ease;
     }
 
-    .comanda-header {
-      border-bottom: 1px solid #333;
-      padding-bottom: 8px;
-      margin-bottom: 10px;
+    /* SEMAFORIZACIÓN POR TIEMPO */
+    .kds-card.verde {
+      border-color: #28a745 !important;
+    }
+    .kds-card.amarillo {
+      border-color: #ffc107 !important;
+    }
+    .kds-card.rojo {
+      border-color: #dc3545 !important;
+      animation: pulse-red 2s infinite;
     }
 
-    .item-plato {
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-bottom: 1px dashed #333;
-      padding: 6px 0;
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
     }
 
-    .item-obs {
+    .badge-tiempo {
       font-size: 0.85rem;
-      color: #ffca28;
-      font-weight: normal;
-      display: block;
+      font-weight: 700;
     }
-
-    .badge-metodo {
-      font-size: 0.8rem;
-      background-color: #198754;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 5px;
+    .consolidado-box {
+      background-color: #2a2a2a;
+      border-left: 4px solid #0d6efd;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Encabezado de Cocina -->
-  <header class="brand-header d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center gap-2">
-      <h1 class="h4 mb-0 fw-bold text-danger"><i class="fa-solid fa-utensils me-2"></i> ANITA-WOK — COCINA</h1>
+  <!-- Topbar KDS -->
+  <div class="header-kds p-3 mb-3 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <h3 class="fw-bold mb-0 text-warning"><i class="bi bi-fire me-2"></i>COCINA - ANITA WOK</h3>
+      <span class="badge bg-secondary fs-6" id="countPendientes">0 Pendientes</span>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <!-- BOTÓN PARA ACTIVAR/DESBLOQUEAR EL SONIDO EN EL NAVEGADOR -->
-      <button id="btn-activar-sonido" class="btn btn-warning btn-sm fw-bold" onclick="activarAudio()">
-        <i class="fa-solid fa-volume-high me-1"></i> Activar Sonido Alerta
+      <button class="btn btn-outline-info btn-sm" onclick="toggleConsolidado()">
+        <i class="bi bi-layers-fill me-1"></i> Ver Consolidado
       </button>
-      <a href="/index.html" class="btn btn-outline-light btn-sm">
-        <i class="fa-solid fa-receipt me-1"></i> Ir a Caza / Comandas
-      </a>
-    </div>
-  </header>
-
-  <div class="container-fluid p-3">
-    <!-- Grid donde se cargan las comandas -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3" id="contenedor-comandas">
-      <div class="col-12 text-center py-5 text-muted" id="mensaje-vacio">
-        <h4><i class="fa-solid fa-clock me-2"></i> Esperando nuevas comandas...</h4>
-      </div>
+      <span id="reloj" class="fs-5 font-monospace fw-bold text-light">00:00:00</span>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
+  <div class="container-fluid px-4">
+    
+    <!-- SECCIÓN DE CONSOLIDADO EN LOTE (Muestra totales de platos repetidos por preparar) -->
+    <div id="seccionConsolidado" class="consolidado-box p-3 mb-4 d-none">
+      <h5 class="fw-bold text-info mb-3"><i class="bi bi-calculator-fill me-2"></i>CONSOLIDADO TOTAL POR PREPARAR (LOTE EN COCINA)</h5>
+      <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-2" id="gridConsolidado">
+        <!-- Generado dinámicamente -->
+      </div>
+    </div>
 
+    <!-- GRID DE COMMANDAS INDIVIDUALES -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 row-cols-xxl-4 g-3" id="gridComandas">
+      <!-- Carga dinámica -->
+    </div>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    let audioPermitido = false;
+    let comandas = [];
 
-    // Sintetizador Web Audio API para reproducir el pitido
-    function emitirPitido() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
+    // Reloj
+    setInterval(() => {
+      document.getElementById('reloj').innerText = new Date().toLocaleTimeString();
+      renderComandas(); // Re-render periodic for timer updates
+    }, 1000);
 
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-        
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.4);
-
-        setTimeout(() => {
-          const osc2 = audioCtx.createOscillator();
-          const gain2 = audioCtx.createGain();
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(1046.50, audioCtx.currentTime);
-          gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
-          osc2.connect(gain2);
-          gain2.connect(audioCtx.destination);
-          osc2.start();
-          osc2.stop(audioCtx.currentTime + 0.5);
-        }, 200);
-
-      } catch (e) {
-        console.error("Error al reproducir el pitido:", e);
-      }
-    }
-
-    // Función para activar el audio al hacer clic por primera vez
-    function activarAudio() {
-      audioPermitido = true;
-      emitirPitido();
-      const btn = document.getElementById('btn-activar-sonido');
-      if (btn) {
-        btn.className = "btn btn-success btn-sm fw-bold";
-        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Sonido Activado';
-      }
-    }
-
-    // Escuchar la llegada de una nueva comanda desde el servidor
-    socket.on('nuevaComanda', (comanda) => {
-      console.log("Nueva comanda recibida:", comanda);
-
-      if (audioPermitido) {
-        emitirPitido();
-      }
-
-      // Ocultar mensaje de espera
-      const msgVacio = document.getElementById('mensaje-vacio');
-      if (msgVacio) msgVacio.style.display = 'none';
-
-      // Construir tarjeta de comanda
-      const contenedor = document.getElementById('contenedor-comandas');
-      const col = document.createElement('div');
-      col.className = 'col';
-      col.id = `comanda-${comanda.id}`;
-
-      let itemsHTML = '';
-      const listaPlatos = comanda.items || comanda.platos || [];
-      listaPlatos.forEach(item => {
-        itemsHTML += `
-          <div class="item-plato">
-            <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
-            ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
-          </div>
-        `;
-      });
-
-      let datosCliente = '';
-      if (comanda.cliente && comanda.cliente.nombre) {
-        datosCliente = `
-          <div class="small text-info mt-2 pt-1 border-top border-secondary">
-            <strong><i class="fa-solid fa-user me-1"></i>${comanda.cliente.nombre}</strong> 
-            ${comanda.cliente.telefono ? `(${comanda.cliente.telefono})` : ''}<br>
-            ${comanda.cliente.direccion ? `<i class="fa-solid fa-location-dot me-1"></i>${comanda.cliente.direccion}` : ''}
-          </div>
-        `;
-      }
-
-      col.innerHTML = `
-        <div class="comanda-card">
-          <div class="comanda-header d-flex justify-content-between align-items-center">
-            <div>
-              <span class="h5 fw-bold text-warning mb-0">${comanda.mesa}</span>
-              <small class="text-muted d-block">${comanda.hora || comanda.fecha || ''}</small>
-            </div>
-            <span class="badge-metodo">${comanda.metodoPago || 'Efectivo'}</span>
-          </div>
-
-          <div class="comanda-body">
-            ${itemsHTML}
-            ${datosCliente}
-          </div>
-
-          <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-white">Total: S/ ${Number(comanda.total).toFixed(2)}</span>
-            <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
-              <i class="fa-solid fa-check me-1"></i> Listo
-            </button>
-          </div>
-        </div>
-      `;
-
-      // Insertar la comanda al inicio
-      contenedor.insertBefore(col, contenedor.firstChild);
+    socket.on('cargarComandas', (data) => {
+      comandas = data;
+      renderComandas();
     });
 
-    // Función para marcar como despachada/lista la comanda
-    function despacharComanda(id) {
-      const elem = document.getElementById(`comanda-${id}`);
-      if (elem) {
-        elem.remove();
+    socket.on('nuevaComanda', (comanda) => {
+      comandas.push(comanda);
+      reproducirAlerta();
+      renderComandas();
+    });
+
+    socket.on('estadoCambiado', ({ id, estado }) => {
+      const item = comandas.find(c => c.id === id);
+      if (item) item.estado = estado;
+      renderComandas();
+    });
+
+    function reproducirAlerta() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.2;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch(e){}
+    }
+
+    function cambiarEstado(id, nuevoEstado) {
+      socket.emit('cambiarEstado', { id, estado: nuevoEstado });
+    }
+
+    function toggleConsolidado() {
+      const el = document.getElementById('seccionConsolidado');
+      el.classList.toggle('d-none');
+    }
+
+    function renderComandas() {
+      const grid = document.getElementById('gridComandas');
+      const pendientes = comandas.filter(c => c.estado !== 'Atendido');
+      
+      document.getElementById('countPendientes').innerText = `${pendientes.length} Pendientes`;
+
+      // Render Consolidado en Lote
+      renderConsolidado(pendientes);
+
+      if (pendientes.length === 0) {
+        grid.innerHTML = `<div class="col-12 text-center py-5"><h3 class="text-muted"><i class="bi bi-check2-circle text-success fs-1 d-block mb-2"></i> ¡Sin comanda pendiente! Todo al día.</h3></div>`;
+        return;
       }
 
-      const contenedor = document.getElementById('contenedor-comandas');
-      const tarjetas = contenedor.querySelectorAll('.col:not(#mensaje-vacio)');
-      if (tarjetas.length === 0) {
-        const msgVacio = document.getElementById('mensaje-vacio');
-        if (msgVacio) msgVacio.style.display = 'block';
+      const ahora = new Date();
+
+      grid.innerHTML = pendientes.map(c => {
+        const transcurridoMin = Math.floor((ahora - new Date(c.fecha)) / 60000);
+        
+        // SEMAFORIZACIÓN
+        let semaforoClass = 'verde';
+        let badgeBg = 'bg-success';
+        if (transcurridoMin >= 10 && transcurridoMin < 20) {
+          semaforoClass = 'amarillo';
+          badgeBg = 'bg-warning text-dark';
+        } else if (transcurridoMin >= 20) {
+          semaforoClass = 'rojo';
+          badgeBg = 'bg-danger';
+        }
+
+        const itemsHtml = c.items.map(it => `
+          <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary">
+            <span class="fs-5 fw-bold text-light">${it.cant}x ${it.nombre}</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="col">
+            <div class="card kds-card ${semaforoClass} h-100 p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-secondary fs-6">#${c.id.toString().slice(-4)}</span>
+                <span class="badge ${badgeBg} badge-tiempo">
+                  <i class="bi bi-clock me-1"></i>${transcurridoMin} min
+                </span>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold text-warning mb-0">
+                  ${c.tipo === 'Mesa' ? '🍽️ MESA ' + c.mesa : (c.tipo === 'Llevar' ? '🛍️ PARA LLEVAR' : '🛵 DELIVERY')}
+                </h5>
+              </div>
+
+              <div class="my-2 flex-grow-1">
+                ${itemsHtml}
+              </div>
+
+              ${c.obs ? `<div class="alert alert-warning py-1 px-2 mb-2 small font-monospace"><i class="bi bi-exclamation-triangle-fill me-1"></i>${c.obs}</div>` : ''}
+
+              <div class="mt-2 pt-2 border-top border-secondary">
+                <button class="btn btn-success w-100 fw-bold py-2" onclick="cambiarEstado(${c.id}, 'Atendido')">
+                  <i class="bi bi-check-lg me-1"></i> MARCAR ATENDIDO
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderConsolidado(pendientes) {
+      const gridCons = document.getElementById('gridConsolidado');
+      const resumen = {};
+
+      pendientes.forEach(c => {
+        c.items.forEach(it => {
+          resumen[it.nombre] = (resumen[it.nombre] || 0) + it.cant;
+        });
+      });
+
+      const keys = Object.keys(resumen);
+      if (keys.length === 0) {
+        gridCons.innerHTML = `<div class="col-12 text-muted small">No hay platos pendientes.</div>`;
+        return;
       }
+
+      gridCons.innerHTML = keys.map(plato => `
+        <div class="col">
+          <div class="bg-dark p-2 rounded border border-secondary text-center">
+            <div class="fs-3 fw-bold text-warning">${resumen[plato]}</div>
+            <div class="small fw-bold text-light text-truncate" title="${plato}">${plato}</div>
+          </div>
+        </div>
+      `).join('');
     }
   </script>
 </body>
