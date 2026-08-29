@@ -1,69 +1,30 @@
-// ==========================================
-// ANITA-WOK - SERVIDOR PRINCIPAL (server.js)
-// ==========================================
-
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
-
-// Middleware para procesar JSON y datos de formularios
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Servir archivos estáticos (HTML, CSS, JS) desde la carpeta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Ruta principal
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Ruta para la vista de cocina
-app.get('/cocina', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'cocina.html'));
-});
-
-// ==========================================
-// EVENTOS DE SOCKET.IO (COMANDAS EN TIEMPO REAL)
-// ==========================================
+// Memoria temporal de pedidos pendientes
+let pedidosPendientes = [];
 
 io.on('connection', (socket) => {
-  console.log(`[SOCKET] Cliente conectado: ${socket.id}`);
+  // 1. Al conectar la cocina, enviar los pedidos que están pendientes
+  socket.emit('cargarPedidos', pedidosPendientes);
 
-  // Recibir nueva comanda enviada desde el mozo/caja
-  socket.on('nuevaComanda', (comanda) => {
-    console.log(`[PEDIDO RECIBIDO] ${comanda.mesa || 'Sin Mesa'} - Total: S/ ${comanda.total}`);
-    
-    // Transmitir la comanda a la pantalla de cocina y a los demás clientes conectados
-    io.emit('nuevaComanda', comanda);
+  // 2. Cuando el usuario envía un pedido desde la carta (index.html)
+  socket.on('nuevoPedido', (pedido) => {
+    // Generar ID único y timestamp si no lo tiene
+    const nuevoPedido = {
+      id: pedido.id || Date.now().toString(),
+      mesa: pedido.mesa || 'Mesa General',
+      items: pedido.items || [],
+      metodoPago: pedido.metodoPago || '',
+      timestamp: Date.now()
+    };
+
+    pedidosPendientes.push(nuevoPedido);
+
+    // Retransmitir a TODOS los clientes conectados (incluyendo cocina.html)
+    io.emit('nuevoPedido', nuevoPedido);
   });
 
-  // Notificar cambio de estado de comanda (ej: "En Preparación" o "Atendido")
-  socket.on('cambiarEstadoComanda', (datos) => {
-    console.log(`[ESTADO ACTUALIZADO] Comanda ID: ${datos.id} -> ${datos.estado}`);
-    io.emit('cambiarEstadoComanda', datos);
+  // 3. Cuando la cocina marca un pedido como LISTO
+  socket.on('completarPedido', (idPedido) => {
+    pedidosPendientes = pedidosPendientes.filter(p => p.id !== idPedido);
+    io.emit('cargarPedidos', pedidosPendientes);
   });
-
-  socket.on('disconnect', () => {
-    console.log(`[SOCKET] Cliente desconectado: ${socket.id}`);
-  });
-});
-
-// ==========================================
-// INICIO DEL SERVIDOR
-// ==========================================
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Servidor Anita-Wok iniciado con éxito en http://localhost:${PORT}`);
 });
