@@ -2,13 +2,15 @@
 // ANITA-WOK - SISTEMA DE COMANDAS & CARTA COMPLETA
 // ==========================================
 
-const socket = io();
+const socket = typeof io !== 'undefined' ? io() : null;
 
 // Array de ventas acumuladas
 let historialVentas = [];
 
 // Variable global para filtro por texto en tiempo real
 let textoBusqueda = '';
+let categoriaActual = 'chifa';
+let pedido = [];
 
 // Base de Datos Oficial (47 Productos)
 const productos = [
@@ -66,10 +68,8 @@ const productos = [
   { id: 47, cat: 'extras', nombre: 'Chorizo Frito', mesa: 4.00, llevar: 4.00, desc: 'Porción de chorizo ahumado frito al wok.', img: 'https://i.blogs.es/3a13ea/chorizo-frito-arguinano/1200_630.jpeg' }
 ];
 
-let pedido = [];
-let categoriaActual = 'chifa';
-
-document.addEventListener('DOMContentLoaded', () => {
+// Inicializar cuando el DOM esté listo
+window.addEventListener('DOMContentLoaded', () => {
   renderMenu();
   actualizarResumenHTML();
 });
@@ -332,10 +332,8 @@ function enviarComanda() {
     hora: new Date().toLocaleTimeString('es-PE', { hour12: true })
   };
 
-  if (typeof socket !== 'undefined') {
+  if (socket) {
     socket.emit('nuevaComanda', datosComanda);
-  } else {
-    console.error('Socket no está disponible.');
   }
 
   historialVentas.push(datosComanda);
@@ -441,7 +439,7 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Excel Nativo (.xls) sin advertencias
+// Descargar Registro de Ventas en Excel Nativo (.xls)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
