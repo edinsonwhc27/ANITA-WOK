@@ -1,18 +1,15 @@
 // ==========================================
-// ANITA-WOK - SISTEMA DE COMANDAS & CARTA COMPLETA
+// ANITA-WOK - SISTEMA DE COMANDAS & CARTA
 // ==========================================
 
 const socket = typeof io !== 'undefined' ? io() : null;
 
-// Array de ventas acumuladas
 let historialVentas = [];
-
-// Variable global para filtro por texto en tiempo real
 let textoBusqueda = '';
 let categoriaActual = 'chifa';
 let pedido = [];
 
-// Base de Datos Oficial (47 Productos)
+// Base de datos de productos
 const productos = [
   // 1. CHIFA Y CRIOLLO
   { id: 1, cat: 'chifa', nombre: 'Chaufa de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Arroz salteado al wok, trozos de pollo, huevo, sillao y cebollita china.', img: 'https://cdn.blog.paulinacocina.net/wp-content/uploads/2021/12/arroz-chaufa-peruano-receta.jpg' },
@@ -68,19 +65,7 @@ const productos = [
   { id: 47, cat: 'extras', nombre: 'Chorizo Frito', mesa: 4.00, llevar: 4.00, desc: 'Porción de chorizo ahumado frito al wok.', img: 'https://i.blogs.es/3a13ea/chorizo-frito-arguinano/1200_630.jpeg' }
 ];
 
-// Inicializar cuando el DOM esté listo
-window.addEventListener('DOMContentLoaded', () => {
-  renderMenu();
-  actualizarResumenHTML();
-});
-
-// Función para filtrar por nombre en tiempo real
-function filtrarPorNombre(texto) {
-  textoBusqueda = texto.toLowerCase().trim();
-  renderMenu();
-}
-
-// Renderizar Menú
+// Función para renderizar los platos en pantalla
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
   if (!contenedor) return;
@@ -100,7 +85,7 @@ function renderMenu() {
   if (productosFiltrados.length === 0) {
     contenedor.innerHTML = `
       <div class="col-12 text-center py-4">
-        <p class="text-muted fw-bold">No se encontraron platos que coincidan con la búsqueda.</p>
+        <p class="text-muted fw-bold">No se encontraron platos.</p>
       </div>
     `;
     return;
@@ -116,7 +101,7 @@ function renderMenu() {
         <div class="dish-name">${p.nombre}</div>
         <img src="${p.img}" class="dish-img" alt="${p.nombre}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250?text=ANITA-WOK'">
         <div class="dish-desc">${p.desc}</div>
-        <div class="dish-price">S/ ${precio.toFixed(2)} ${esLlevarODelivery ? '<small style="font-size:0.65rem;" class="text-danger">(Llevar/Deliv.)</small>' : ''}</div>
+        <div class="dish-price">S/ ${precio.toFixed(2)} ${esLlevarODelivery ? '<small style="font-size:0.65rem;" class="text-danger">(Llevar)</small>' : ''}</div>
         <button class="btn btn-add-dish" onclick="agregarAlPedido(${p.id})">
           <i class="fa-solid fa-plus me-1"></i> Agregar
         </button>
@@ -126,7 +111,11 @@ function renderMenu() {
   });
 }
 
-// Filtro por Categorías
+function filtrarPorNombre(texto) {
+  textoBusqueda = texto.toLowerCase().trim();
+  renderMenu();
+}
+
 function verCategoria(cat, btnElement) {
   categoriaActual = cat;
   textoBusqueda = '';
@@ -145,7 +134,6 @@ function verCategoria(cat, btnElement) {
   renderMenu();
 }
 
-// Opciones de Ubicación
 function cambiarTipoPedido() {
   const selectorMesa = document.getElementById('mesa');
   if (!selectorMesa) return;
@@ -171,7 +159,6 @@ function cambiarTipoPedido() {
   actualizarResumenHTML();
 }
 
-// Agregar Plato al Pedido
 function agregarAlPedido(idProd) {
   const selectorMesa = document.getElementById('mesa');
   const opcion = selectorMesa ? selectorMesa.value : '';
@@ -214,7 +201,6 @@ function actualizarObservacion(index, texto) {
   }
 }
 
-// Actualizar Comanda Activa
 function actualizarResumenHTML() {
   const contenedorResumen = document.getElementById('lista-pedido');
   const badgeTotal = document.getElementById('badge-total-items');
@@ -297,7 +283,6 @@ function actualizarResumenHTML() {
   contenedorResumen.innerHTML = html;
 }
 
-// Enviar Comanda a Cocina
 function enviarComanda() {
   if (pedido.length === 0) {
     alert('Agrega al menos un plato antes de enviar la comanda.');
@@ -344,7 +329,6 @@ function enviarComanda() {
   actualizarResumenHTML();
 }
 
-// Cerrar Caja y Mostrar Modal
 function cerrarCaja() {
   const modalElem = document.getElementById('modalCaja');
   const cuerpoModal = document.getElementById('cuerpo-modal-caja');
@@ -374,11 +358,7 @@ function cerrarCaja() {
 
     historialVentas.forEach(v => {
       totalGeneral += v.total;
-      if (porMetodo[v.metodoPago] !== undefined) {
-        porMetodo[v.metodoPago] += v.total;
-      } else {
-        porMetodo[v.metodoPago] = v.total;
-      }
+      porMetodo[v.metodoPago] = (porMetodo[v.metodoPago] || 0) + v.total;
 
       const resumenItems = v.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
 
@@ -439,7 +419,6 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Excel Nativo (.xls)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
@@ -482,11 +461,6 @@ function descargarExcelVentas() {
   `;
 
   historialVentas.forEach((v) => {
-    const idCorrelativo = v.id;
-    const hora = v.hora || v.fecha;
-    const ubicacion = v.mesa || '';
-    const metodoPago = v.metodoPago || '';
-
     const listaPedidos = v.items.map(i => {
       let detalle = `${i.cantidad}x ${i.nombre}`;
       if (i.observacion) detalle += ` (${i.observacion})`;
@@ -495,15 +469,14 @@ function descargarExcelVentas() {
 
     const delivery = (v.recargoDelivery || 0).toFixed(2);
     const totalPedido = v.total.toFixed(2);
-
     sumaTotalDia += v.total;
 
     excelHTML += `
       <tr>
-        <td style="text-align: center;">#${idCorrelativo}</td>
-        <td style="text-align: center;">${hora}</td>
-        <td style="text-align: center;">${ubicacion}</td>
-        <td style="text-align: center;">${metodoPago}</td>
+        <td style="text-align: center;">#${v.id}</td>
+        <td style="text-align: center;">${v.hora || v.fecha}</td>
+        <td style="text-align: center;">${v.mesa}</td>
+        <td style="text-align: center;">${v.metodoPago}</td>
         <td>${listaPedidos}</td>
         <td style="text-align: right;">S/ ${delivery}</td>
         <td style="text-align: right; font-weight: bold;">S/ ${totalPedido}</td>
@@ -530,4 +503,14 @@ function descargarExcelVentas() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// EJECUCIÓN INMEDIATA AL CARGAR EL ARCHIVO
+renderMenu();
+
+// MANTENER EJECUCIÓN SI EL DOM AÚN ESTABA CARGANDO
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderMenu);
+} else {
+  renderMenu();
 }
