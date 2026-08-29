@@ -12,9 +12,6 @@ let baseClientes = JSON.parse(localStorage.getItem('anita_wok_clientes')) || [
   { telefono: '987654321', nombre: 'Juan Pérez', direccion: 'Av. Brasil 450', referencia: 'Frente al parque' }
 ];
 
-// Variable global para filtro por texto en tiempo real
-let textoBusqueda = '';
-
 // Base de Datos Oficial (47 Productos)
 const productos = [
   // 1. CHIFA Y CRIOLLO
@@ -79,12 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarResumenHTML();
 });
 
-// Función para filtrar por nombre en tiempo real
-function filtrarPorNombre(texto) {
-  textoBusqueda = texto.toLowerCase().trim();
-  renderMenu();
-}
-
 // Renderizar Menú
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
@@ -94,22 +85,8 @@ function renderMenu() {
   const opcion = selectorMesa ? selectorMesa.value : '';
   const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
-  const productosFiltrados = productos.filter(p => {
-    const coincideCat = (p.cat === categoriaActual);
-    const coincideTexto = p.nombre.toLowerCase().includes(textoBusqueda);
-    return coincideCat && coincideTexto;
-  });
-
+  const productosFiltrados = productos.filter(p => p.cat === categoriaActual);
   contenedor.innerHTML = '';
-
-  if (productosFiltrados.length === 0) {
-    contenedor.innerHTML = `
-      <div class="col-12 text-center py-4">
-        <p class="text-muted fw-bold">No se encontraron platos que coincidan.</p>
-      </div>
-    `;
-    return;
-  }
 
   productosFiltrados.forEach(p => {
     const precio = esLlevarODelivery ? p.llevar : p.mesa;
@@ -134,11 +111,6 @@ function renderMenu() {
 // Filtro por Categorías
 function verCategoria(cat, btnElement) {
   categoriaActual = cat;
-  textoBusqueda = '';
-  
-  const inputBuscador = document.getElementById('input-buscador');
-  if (inputBuscador) inputBuscador.value = '';
-
   if (btnElement) {
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.classList.remove('btn-danger', 'active');
@@ -533,7 +505,7 @@ function cerrarCaja() {
   modal.show();
 }
 
-// Descargar Registro de Ventas en Formato CSV
+// Descargar Registro de Ventas en Formato CSV (Sin advertencias de Excel)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
@@ -542,6 +514,7 @@ function descargarExcelVentas() {
 
   let sumaTotalDia = 0;
   
+  // Encabezados del CSV con BOM UTF-8 (\uFEFF) para abrir sin alertas y conservar tildes
   let csvContent = "\uFEFF"; 
   csvContent += "ID Comanda;Hora;Ubicación;Método de Pago;Cliente;Teléfono;Dirección;Pedidos;Delivery;Total del Pedido\n";
 
