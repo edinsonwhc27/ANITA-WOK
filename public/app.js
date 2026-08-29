@@ -77,14 +77,6 @@ let categoriaActual = 'chifa';
 document.addEventListener('DOMContentLoaded', () => {
   renderMenu();
   actualizarResumenHTML();
-
-  // Escuchar automáticamente cualquier input de búsqueda existente en el HTML
-  const buscadorHTML = document.getElementById('input-buscador') || document.getElementById('buscador');
-  if (buscadorHTML) {
-    buscadorHTML.addEventListener('input', (e) => {
-      filtrarPorNombre(e.target.value);
-    });
-  }
 });
 
 // Función para filtrar por nombre en tiempo real
@@ -144,7 +136,7 @@ function verCategoria(cat, btnElement) {
   categoriaActual = cat;
   textoBusqueda = '';
   
-  const inputBuscador = document.getElementById('input-buscador') || document.getElementById('buscador');
+  const inputBuscador = document.getElementById('input-buscador');
   if (inputBuscador) inputBuscador.value = '';
 
   if (btnElement) {
