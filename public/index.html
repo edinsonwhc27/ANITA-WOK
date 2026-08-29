@@ -21,12 +21,14 @@
       color: #27272a;
     }
 
+    /* BARRA NAVEGACIÓN CÁLIDA Y ELEGANTE */
     .navbar-custom {
       background-color: var(--brand-beige) !important;
       border-bottom: 2px solid #e7dfd5 !important;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
     }
 
+    /* TARJETAS DE CONTENEDOR (Buscador, Comanda, Modales) */
     .card-container {
       background: #ffffff;
       border-radius: 12px;
@@ -34,6 +36,7 @@
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
     }
 
+    /* TARJETAS DE PLATOS */
     .dish-card { 
       background: #ffffff; 
       border-radius: 12px; 
@@ -44,12 +47,13 @@
       flex-direction: column; 
       justify-content: space-between; 
       box-shadow: 0 3px 10px rgba(0,0,0,0.03); 
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
     .dish-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      border-color: #dcd4c8;
     }
 
     .dish-name { 
@@ -59,6 +63,25 @@
       color: var(--brand-black); 
     }
 
+    .dish-img { 
+      width: 100%; 
+      height: 125px; 
+      object-fit: cover; 
+      border-radius: 8px; 
+      margin-bottom: 10px; 
+    }
+
+    .dish-desc { 
+      font-size: 0.78rem; 
+      color: #666666; 
+      margin-bottom: 10px; 
+      line-height: 1.3; 
+      display: -webkit-box; 
+      -webkit-line-clamp: 2; 
+      -webkit-box-orient: vertical; 
+      overflow: hidden; 
+    }
+
     .dish-price { 
       font-weight: 800; 
       color: var(--brand-red); 
@@ -66,6 +89,7 @@
       margin-bottom: 8px; 
     }
 
+    /* BOTONES */
     .btn-red { 
       background-color: var(--brand-red) !important; 
       color: #ffffff !important;
@@ -74,12 +98,31 @@
       font-weight: 600; 
       padding: 8px 12px; 
       font-size: 0.88rem; 
+      transition: background-color 0.2s ease;
     }
 
     .btn-red:hover { 
       background-color: var(--brand-red-hover) !important; 
     }
 
+    .btn-add-dish { 
+      background-color: var(--brand-red); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      padding: 8px; 
+      font-size: 0.85rem; 
+      width: 100%; 
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-add-dish:hover { 
+      background-color: var(--brand-red-hover); 
+      color: white; 
+    }
+
+    /* CATEGORÍAS */
     .category-btn { 
       border-radius: 20px; 
       font-size: 0.85rem; 
@@ -88,6 +131,12 @@
       border: 1px solid #dcd4c8;
       background-color: #ffffff;
       color: #444444;
+      transition: all 0.2s ease;
+    }
+
+    .category-btn:hover {
+      background-color: #f5f0eb;
+      color: #111111;
     }
 
     .category-btn.active {
@@ -99,15 +148,21 @@
 </head>
 <body>
 
+  <!-- BARRA SUPERIOR BEIGE CON LOGO Y NOMBRE A LA IZQUIERDA -->
   <nav class="navbar navbar-expand-lg navbar-light px-3 mb-3 navbar-custom">
     <div class="container-fluid d-flex justify-content-between align-items-center">
+      
+      <!-- LOGO + NOMBRE A LA IZQUIERDA -->
       <a class="navbar-brand d-flex align-items-center" href="#">
         <img src="img/logo.png" alt="Logo" class="me-2" style="height: 42px; width: auto; object-fit: contain;">
         <span class="fw-bold fs-4" style="color: var(--brand-red); letter-spacing: 0.5px;">ANITA-WOK</span>
       </a>
+
+      <!-- BOTÓN IR A COCINA A LA DERECHA -->
       <a href="/cocina" class="btn btn-red btn-sm fw-bold shadow-sm">
         <i class="fa-solid fa-utensils me-1"></i> Ir a Cocina
       </a>
+
     </div>
   </nav>
 
@@ -115,30 +170,54 @@
     <div class="row g-3">
       
       <div class="col-md-8 col-lg-9">
+        <!-- BARRAS UBICACIÓN, DELIVERY Y BUSCADOR EN LA MISMA LÍNEA HORIZONTAL -->
         <div class="card-container p-3 mb-3">
           <div class="row g-2 align-items-center">
             
+            <!-- Ubicación / Tipo -->
             <div class="col-auto">
               <div class="d-flex align-items-center gap-2">
-                <label for="mesa" class="form-label small fw-bold text-secondary mb-0 text-nowrap">Ubicación:</label>
-                <select id="mesa" class="form-select form-select-sm" style="width: 130px; border-radius: 6px;">
+                <label for="mesa" class="form-label small fw-bold text-secondary mb-0 text-nowrap">Ubicación / Tipo:</label>
+                <select id="mesa" class="form-select form-select-sm" style="width: 130px; border-radius: 6px;" onchange="cambiarTipoPedido()">
                   <option value="Mesa 1">Mesa 1</option>
                   <option value="Mesa 2">Mesa 2</option>
                   <option value="Mesa 3">Mesa 3</option>
                   <option value="Mesa 4">Mesa 4</option>
                   <option value="Mesa 5">Mesa 5</option>
+                  <option value="Mesa 6">Mesa 6</option>
+                  <option value="Mesa 7">Mesa 7</option>
+                  <option value="Mesa 8">Mesa 8</option>
+                  <option value="Mesa 9">Mesa 9</option>
+                  <option value="Mesa 10">Mesa 10</option>
                   <option value="Llevar">Para Llevar</option>
                   <option value="Delivery">Delivery</option>
                 </select>
               </div>
             </div>
 
+            <!-- Recargo Delivery -->
+            <div class="col-auto d-none" id="contenedor-recargo-delivery">
+              <div class="d-flex align-items-center gap-2">
+                <label for="recargo-delivery" class="form-label small fw-bold text-secondary mb-0 text-nowrap">Delivery:</label>
+                <select id="recargo-delivery" class="form-select form-select-sm" style="width: 100px; border-radius: 6px;" onchange="actualizarResumenHTML()">
+                  <option value="1.00">S/ 1.00</option>
+                  <option value="1.50">S/ 1.50</option>
+                  <option value="2.00">S/ 2.00</option>
+                  <option value="2.50">S/ 2.50</option>
+                  <option value="3.00" selected>S/ 3.00</option>
+                  <option value="3.50">S/ 3.50</option>
+                  <option value="4.00">S/ 4.00</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Buscador Rápido -->
             <div class="col">
               <div class="d-flex align-items-center gap-2">
-                <label for="input-buscador" class="form-label small fw-bold text-secondary mb-0 text-nowrap">Buscador:</label>
+                <label for="input-buscador" class="form-label small fw-bold text-secondary mb-0 text-nowrap">Buscador Rápido:</label>
                 <div class="input-group input-group-sm">
-                  <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                  <input type="text" id="input-buscador" class="form-control" placeholder="Buscar plato..." oninput="filtrarPorNombre(this.value)">
+                  <span class="input-group-text bg-light" style="border-top-left-radius: 6px; border-bottom-left-radius: 6px;"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                  <input type="text" id="input-buscador" class="form-control" style="border-top-right-radius: 6px; border-bottom-right-radius: 6px;" placeholder="Escribe el nombre del plato..." oninput="filtrarPorNombre(this.value)">
                 </div>
               </div>
             </div>
@@ -146,15 +225,18 @@
           </div>
         </div>
 
+        <!-- CATEGORÍAS DE LA CARTA -->
         <div class="d-flex gap-2 mb-3 overflow-auto pb-1">
           <button class="btn category-btn active" onclick="verCategoria('chifa', this)">Chifa y Criollo</button>
           <button class="btn category-btn" onclick="verCategoria('compartir', this)">Para Compartir</button>
           <button class="btn category-btn" onclick="verCategoria('bebidas', this)">Bebidas</button>
+          <button class="btn category-btn" onclick="verCategoria('extras', this)">Extras</button>
         </div>
 
         <div id="contenedor-menu" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
       </div>
 
+      <!-- PANEL LATERAL DE COMANDA -->
       <div class="col-md-4 col-lg-3">
         <div class="card-container p-3 sticky-top" style="top: 15px;">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
@@ -168,15 +250,19 @@
 
           <div class="border-top pt-2">
             <label class="form-label small fw-bold text-secondary mb-1"><i class="fa-solid fa-wallet me-1"></i>Método de Pago:</label>
-            <select id="metodo-pago" class="form-select form-select-sm mb-3">
+            <select id="metodo-pago" class="form-select form-select-sm mb-3" style="border-radius: 6px;">
               <option value="Efectivo">Efectivo</option>
               <option value="Yape">Yape</option>
               <option value="Plin">Plin</option>
               <option value="Tarjeta">Tarjeta</option>
             </select>
 
-            <button class="btn btn-red w-100 fw-bold shadow-sm" onclick="enviarComanda()">
+            <button class="btn btn-red w-100 fw-bold mb-2 shadow-sm" onclick="enviarComanda()">
               <i class="fa-solid fa-paper-plane me-1"></i> ENVIAR A COCINA
+            </button>
+            
+            <button class="btn btn-warning w-100 fw-bold text-dark shadow-sm" style="font-size: 0.8rem; border-radius: 8px;" onclick="cerrarCaja()">
+              <i class="fa-solid fa-box-archive me-1"></i> CERRAR CAJA Y DESCARGAR EXCEL
             </button>
           </div>
         </div>
@@ -185,9 +271,28 @@
     </div>
   </div>
 
+  <!-- MODAL DE CIERRE DE CAJA -->
+  <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+        <div class="modal-header text-white" style="background-color: var(--brand-red);">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2"></i>Resumen de Cierre de Caja</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="cuerpo-modal-caja"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" style="border-radius: 6px;" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-success fw-bold" style="border-radius: 6px;" onclick="descargarExcelVentas()">
+            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel (.csv)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js" onerror="this.onerror=null; this.src='/js/app.js';"></script>
 
 </body>
 </html>
