@@ -9,7 +9,7 @@ let textoBusqueda = '';
 let categoriaActual = 'chifa';
 let pedido = [];
 
-// Base de datos de productos
+// Base de datos de productos (47 Productos)
 const productos = [
   // 1. CHIFA Y CRIOLLO
   { id: 1, cat: 'chifa', nombre: 'Chaufa de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Arroz salteado al wok, trozos de pollo, huevo, sillao y cebollita china.', img: 'https://cdn.blog.paulinacocina.net/wp-content/uploads/2021/12/arroz-chaufa-peruano-receta.jpg' },
@@ -65,7 +65,6 @@ const productos = [
   { id: 47, cat: 'extras', nombre: 'Chorizo Frito', mesa: 4.00, llevar: 4.00, desc: 'Porción de chorizo ahumado frito al wok.', img: 'https://i.blogs.es/3a13ea/chorizo-frito-arguinano/1200_630.jpeg' }
 ];
 
-// Función para renderizar los platos en pantalla
 function renderMenu() {
   const contenedor = document.getElementById('contenedor-menu');
   if (!contenedor) return;
@@ -419,96 +418,48 @@ function cerrarCaja() {
   modal.show();
 }
 
+// EXPORTACIÓN EN CSV (NATIVO EXCEL SIN AVISOS DE SEGURIDAD EN NINGÚN DISPOSITIVO)
 function descargarExcelVentas() {
   if (historialVentas.length === 0) {
     alert('No hay ventas registradas para exportar.');
     return;
   }
 
-  let sumaTotalDia = 0;
+  let lineas = [];
+  lineas.push("ID Comanda;Hora;Ubicacion;Metodo de Pago;Pedidos;Delivery;Total del Pedido");
 
-  let excelHTML = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-    <head>
-      <meta charset="utf-8">
-      <!--[if gte mso 9]>
-      <xml>
-        <x:ExcelWorkbook>
-          <x:ExcelWorksheets>
-            <x:ExcelWorksheet>
-              <x:Name>Ventas del Día</x:Name>
-              <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-            </x:ExcelWorksheet>
-          </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-      </xml>
-      <![endif]-->
-    </head>
-    <body>
-      <table border="1">
-        <thead>
-          <tr style="background-color: #dc3545; color: #ffffff; font-weight: bold;">
-            <th>ID Comanda</th>
-            <th>Hora</th>
-            <th>Ubicación</th>
-            <th>Método de Pago</th>
-            <th>Pedidos</th>
-            <th>Delivery</th>
-            <th>Total del Pedido</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
+  let sumaTotalDia = 0;
 
   historialVentas.forEach((v) => {
     const listaPedidos = v.items.map(i => {
       let detalle = `${i.cantidad}x ${i.nombre}`;
       if (i.observacion) detalle += ` (${i.observacion})`;
       return detalle;
-    }).join(' + ');
+    }).join(' + ').replace(/;/g, ',');
 
     const delivery = (v.recargoDelivery || 0).toFixed(2);
     const totalPedido = v.total.toFixed(2);
     sumaTotalDia += v.total;
 
-    excelHTML += `
-      <tr>
-        <td style="text-align: center;">#${v.id}</td>
-        <td style="text-align: center;">${v.hora || v.fecha}</td>
-        <td style="text-align: center;">${v.mesa}</td>
-        <td style="text-align: center;">${v.metodoPago}</td>
-        <td>${listaPedidos}</td>
-        <td style="text-align: right;">S/ ${delivery}</td>
-        <td style="text-align: right; font-weight: bold;">S/ ${totalPedido}</td>
-      </tr>
-    `;
+    lineas.push(`#${v.id};"${v.hora || v.fecha}";"${v.mesa}";"${v.metodoPago}";"${listaPedidos}";"S/ ${delivery}";"S/ ${totalPedido}"`);
   });
 
-  excelHTML += `
-          <tr style="font-weight: bold; background-color: #f8f9fa;">
-            <td colspan="6" style="text-align: right;">TOTAL DÍA:</td>
-            <td style="text-align: right; color: #dc3545;">S/ ${sumaTotalDia.toFixed(2)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </body>
-    </html>
-  `;
+  lineas.push(`"";"";"";"";"TOTAL DIA:";"";"S/ ${sumaTotalDia.toFixed(2)}"`);
 
-  const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  // BOM UTF-8 para garantizar que abre perfecto en Excel sin cartel de advertencia y con tildes
+  const contenidoCSV = "\uFEFF" + lineas.join("\n");
+  const blob = new Blob([contenidoCSV], { type: 'text/csv;charset=utf-8;' });
+  
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.xls`);
+  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
-// EJECUCIÓN INMEDIATA AL CARGAR EL ARCHIVO
-renderMenu();
-
-// MANTENER EJECUCIÓN SI EL DOM AÚN ESTABA CARGANDO
+// Inicialización
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', renderMenu);
 } else {
