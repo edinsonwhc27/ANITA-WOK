@@ -1,423 +1,554 @@
-// CARTA COMPLETA OFICIAL - ANITA WOK (47 PRODUCTOS)
-const PRODUCTOS = [
-  // CHAUFAS Y AROPAS
-  { id: 1, nombre: "Arroz Chaufa de Pollo", cat: "Chaufas", precioMesa: 14.00, precioLlevar: 15.00 },
-  { id: 2, nombre: "Arroz Chaufa de Carne", cat: "Chaufas", precioMesa: 16.00, precioLlevar: 17.00 },
-  { id: 3, nombre: "Arroz Chaufa de Cerdo / Chancho", cat: "Chaufas", precioMesa: 16.00, precioLlevar: 17.00 },
-  { id: 4, nombre: "Arroz Chaufa Mixto (Pollo y Carne)", cat: "Chaufas", precioMesa: 18.00, precioLlevar: 19.00 },
-  { id: 5, nombre: "Arroz Chaufa Especial Anita Wok", cat: "Chaufas", precioMesa: 22.00, precioLlevar: 23.00 },
-  { id: 6, nombre: "Arroz Chaufa Camaron", cat: "Chaufas", precioMesa: 24.00, precioLlevar: 25.00 },
-  { id: 7, nombre: "Arroz Chaufa Marisco", cat: "Chaufas", precioMesa: 24.00, precioLlevar: 25.00 },
-  { id: 8, nombre: "Chaufa Aeropuerto de Pollo", cat: "Chaufas", precioMesa: 16.00, precioLlevar: 17.00 },
-  { id: 9, nombre: "Chaufa Aeropuerto Especial", cat: "Chaufas", precioMesa: 22.00, precioLlevar: 23.00 },
+app.js// ==========================================
+// ANITA-WOK - SISTEMA DE COMANDAS & CARTA COMPLETA
+// ==========================================
 
-  // TALLARINES SALTADOS
-  { id: 10, nombre: "Tallarin Saltado de Pollo", cat: "Tallarines", precioMesa: 15.00, precioLlevar: 16.00 },
-  { id: 11, nombre: "Tallarin Saltado de Carne", cat: "Tallarines", precioMesa: 17.00, precioLlevar: 18.00 },
-  { id: 12, nombre: "Tallarin Saltado Mixto", cat: "Tallarines", precioMesa: 19.00, precioLlevar: 20.00 },
-  { id: 13, nombre: "Tallarin Saltado Especial Anita", cat: "Tallarines", precioMesa: 23.00, precioLlevar: 24.00 },
-  { id: 14, nombre: "Tallarin Samsi de Pollo", cat: "Tallarines", precioMesa: 17.00, precioLlevar: 18.00 },
-  { id: 15, nombre: "Taypa Especial en Wok", cat: "Especiales", precioMesa: 26.00, precioLlevar: 27.00 },
-
-  // TIPAKAY Y CHIFA CLÁSICO
-  { id: 16, nombre: "Pollo Tipakay con Chaufa", cat: "Chifa Clásico", precioMesa: 18.00, precioLlevar: 19.00 },
-  { id: 17, nombre: "Pollo Chijaukay con Chaufa", cat: "Chifa Clásico", precioMesa: 18.00, precioLlevar: 19.00 },
-  { id: 18, nombre: "Pollo con Verduras y Chaufa", cat: "Chifa Clásico", precioMesa: 17.00, precioLlevar: 18.00 },
-  { id: 19, nombre: "Pollo Piña con Chaufa", cat: "Chifa Clásico", precioMesa: 19.00, precioLlevar: 20.00 },
-  { id: 20, nombre: "Kam Lu Wantan", cat: "Chifa Clásico", precioMesa: 25.00, precioLlevar: 26.00 },
-
-  // ENTRADAS Y BOKITAS
-  { id: 21, nombre: "Sopa Wantan Simple", cat: "Entradas", precioMesa: 8.00, precioLlevar: 9.00 },
-  { id: 22, nombre: "Sopa Wantan Especial", cat: "Entradas", precioMesa: 14.00, precioLlevar: 15.00 },
-  { id: 23, nombre: "Sopa Fuchifu", cat: "Entradas", precioMesa: 10.00, precioLlevar: 11.00 },
-  { id: 24, nombre: "Wantan Frito (6 unidades)", cat: "Entradas", precioMesa: 7.00, precioLlevar: 8.00 },
-  { id: 25, nombre: "Wantan Frito (12 unidades)", cat: "Entradas", precioMesa: 12.00, precioLlevar: 13.00 },
-  { id: 26, nombre: "Siukai / Dumplings Wok (6 un)", cat: "Entradas", precioMesa: 12.00, precioLlevar: 13.00 },
-
-  // CRIOLLO / LOMO SALTADO
-  { id: 27, nombre: "Lomo Saltado de Res Tradicional", cat: "Criollo", precioMesa: 22.00, precioLlevar: 23.00 },
-  { id: 28, nombre: "Lomo Saltado de Pollo", cat: "Criollo", precioMesa: 18.00, precioLlevar: 19.00 },
-  { id: 29, nombre: "Mostrito de Pollo + Chaufa + Papas", cat: "Criollo", precioMesa: 16.00, precioLlevar: 17.00 },
-  { id: 30, nombre: "Pollo a la Plancha con Papas y Ensalada", cat: "Criollo", precioMesa: 17.00, precioLlevar: 18.00 },
-
-  // PORCIONES EXTRA
-  { id: 31, nombre: "Porcion de Arroz Chaufa Blanco/Simple", cat: "Porciones", precioMesa: 6.00, precioLlevar: 7.00 },
-  { id: 32, nombre: "Porcion de Papas Fritas", cat: "Porciones", precioMesa: 6.00, precioLlevar: 7.00 },
-  { id: 33, nombre: "Porcion Naranjitas / Tamarindo extra", cat: "Porciones", precioMesa: 3.00, precioLlevar: 3.00 },
-
-  // BEBIDAS Y GASEOSAS
-  { id: 34, nombre: "Inca Kola 500ml", cat: "Bebidas", precioMesa: 4.50, precioLlevar: 4.50 },
-  { id: 35, nombre: "Coca Cola 500ml", cat: "Bebidas", precioMesa: 4.50, precioLlevar: 4.50 },
-  { id: 36, nombre: "Inca Kola 1.5 Litros", cat: "Bebidas", precioMesa: 9.00, precioLlevar: 9.00 },
-  { id: 37, nombre: "Coca Cola 1.5 Litros", cat: "Bebidas", precioMesa: 9.00, precioLlevar: 9.00 },
-  { id: 38, nombre: "Chicha Morada Jarra 1L", cat: "Bebidas", precioMesa: 10.00, precioLlevar: 11.00 },
-  { id: 39, nombre: "Chicha Morada Vaso", cat: "Bebidas", precioMesa: 3.50, precioLlevar: 4.00 },
-  { id: 40, nombre: "Agua Mineral sin Gas 600ml", cat: "Bebidas", precioMesa: 3.00, precioLlevar: 3.00 },
-
-  // FAMILIARES & COMBOS
-  { id: 41, nombre: "Combo Familiar 1 (Chaufa + Wantan + Bebida)", cat: "Combos", precioMesa: 45.00, precioLlevar: 47.00 },
-  { id: 42, nombre: "Combo Familiar 2 (Chaufa + Chijaukay + Wantan)", cat: "Combos", precioMesa: 52.00, precioLlevar: 54.00 },
-  { id: 43, nombre: "Combo Dueto (2 Chaufas + Wantan 6un)", cat: "Combos", precioMesa: 32.00, precioLlevar: 34.00 },
-  { id: 44, nombre: "Banquete Anita Wok (3 Platos Fuertes + Bebida 1.5L)", cat: "Combos", precioMesa: 75.00, precioLlevar: 78.00 },
-  { id: 45, nombre: "Sopa Familiar Wok (3 Litros)", cat: "Combos", precioMesa: 28.00, precioLlevar: 30.00 },
-  { id: 46, nombre: "Chaufa Familiar Gigante (3-4 personas)", cat: "Combos", precioMesa: 38.00, precioLlevar: 40.00 },
-  { id: 47, nombre: "Tallarin Familiar Gigante (3-4 personas)", cat: "Combos", precioMesa: 40.00, precioLlevar: 42.00 }
-];
-
-// Socket.io
 const socket = io();
 
-// Variables Globales de Comanda
-let comandaActual = [];
-let categoriaActiva = "Todos";
-let historialVentas = JSON.parse(localStorage.getItem("anita_ventas_v2")) || [];
+// Array de ventas acumuladas
+let historialVentas = [];
 
-// Inicialización
-document.addEventListener("DOMContentLoaded", () => {
-  renderCategorias();
-  renderProductos();
-  actualizarComandaUI();
+// Base de Datos de Clientes Frecuentes (Persistente en el navegador)
+let baseClientes = JSON.parse(localStorage.getItem('anita_wok_clientes')) || [
+  { telefono: '987654321', nombre: 'Juan Pérez', direccion: 'Av. Brasil 450', referencia: 'Frente al parque' }
+];
 
-  // Escuchar cambio de tipo servicio
-  document.getElementById("tipoServicio").addEventListener("change", (e) => {
-    const isMesa = e.target.value === "Mesa";
-    document.getElementById("boxMesa").style.display = isMesa ? "block" : "none";
-  });
+// Base de Datos Oficial (47 Productos)
+const productos = [
+  // 1. CHIFA Y CRIOLLO
+  { id: 1, cat: 'chifa', nombre: 'Chaufa de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Arroz salteado al wok, trozos de pollo, huevo, sillao y cebollita china.', img: 'https://cdn.blog.paulinacocina.net/wp-content/uploads/2021/12/arroz-chaufa-peruano-receta.jpg' },
+  { id: 2, cat: 'chifa', nombre: 'Aeropuerto de Pollo', mesa: 13.50, llevar: 14.00, desc: 'Mezcla de arroz chaufa, fideo frito al wok, pollo y frijolito chino.', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJawZvEG8_kKwAvSzH9p949H4oUV6W0dJA4qBX4wd9-h2v5uq_CZ7p4VKB&s=10' },
+  { id: 3, cat: 'chifa', nombre: 'Aeropuerto de Chancho', mesa: 14.50, llevar: 15.00, desc: 'Chaufa, fideo salteado, trozos de chancho asado char siu y frijolito chino.', img: 'https://www.renacerelpunto.com/wp-content/uploads/2024/09/AEROPUERTO-CON-CHANCHO.jpg' },
+  { id: 4, cat: 'chifa', nombre: 'Chaufa de Chancho', mesa: 14.50, llevar: 15.00, desc: 'Arroz salteado al wok con jugosos cortes de chancho asado dulce.', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj4V9ObLZd4U7U-hQS-lOj1ZaPczrhIVqDFmqhUJS4P_LQqpFTw341Ubc&s=10' },
+  { id: 5, cat: 'chifa', nombre: 'Chihaukay', mesa: 16.00, llevar: 16.50, desc: 'Pollo crujiente en salsa de ostión con ajonjolí acompañado de arroz chaufa.', img: 'https://www.kioninternacional.com/wp-content/uploads/2025/01/chijaukaychaufa.jpg' },
+  { id: 7, cat: 'chifa', nombre: 'Tipakay', mesa: 16.00, llevar: 16.50, desc: 'Chicharrón de pollo agridulce bañado en salsa tamarindo con chaufa.', img: 'https://img-global.cpcdn.com/recipes/819cb89210d39293/1200x630cq80/photo.jpg' },
+  { id: 9, cat: 'chifa', nombre: 'Combinado', mesa: 16.00, llevar: 16.50, desc: 'Clásica combinación de arroz chaufa de pollo y tallarín saltado chino.', img: 'https://www.barcidda.pe/wp-content/uploads/2025/03/ThumbComi.jpg' },
+  { id: 10, cat: 'chifa', nombre: 'Amazónico', mesa: 16.00, llevar: 16.50, desc: 'Chaufa especial salteado con cecina ahumada, plátano frito y especias.', img: 'https://thumbs.dreamstime.com/b/gastronom%C3%ADa-de-la-selva-peruana-arroz-chaufa-cecina-chino-con-en-un-plato-217503353.jpg' },
+  { id: 11, cat: 'chifa', nombre: 'Aeropuerto Amazónico', mesa: 16.00, llevar: 16.50, desc: 'Chaufa y fideos salteados con fina cecina de la selva y platano bellaco.', img: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=400&auto=format&fit=crop' },
+  { id: 12, cat: 'chifa', nombre: 'Salvaje', mesa: 14.50, llevar: 15.00, desc: 'Chaufa potente al wok servido con salchicha regional salteada y huevo.', img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop' },
+  { id: 13, cat: 'chifa', nombre: 'Pollo con Verduras', mesa: 15.00, llevar: 15.50, desc: 'Pechuga de pollo troceada con col china, pacoy, pimiento y holantao.', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop' },
+  { id: 14, cat: 'chifa', nombre: 'Pollo Saltado', mesa: 15.00, llevar: 15.50, desc: 'Jugosos trozos de pechuga salteados con cebolla, tomate y papas fritas.', img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=400&auto=format&fit=crop' },
+  { id: 15, cat: 'chifa', nombre: 'Tallarín Saltado Chino', mesa: 14.00, llevar: 14.00, desc: 'Fideos salteados al wok con frijolito chino, cebolla china y pollo.', img: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?q=80&w=400&auto=format&fit=crop' },
+  { id: 16, cat: 'chifa', nombre: 'Tallarín Saltado Criollo', mesa: 15.00, llevar: 15.50, desc: 'Tallarines salteados con jugosa carne de res, tomate y cebolla en gajos.', img: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?q=80&w=400&auto=format&fit=crop' },
+  { id: 17, cat: 'chifa', nombre: 'Sopa Wantán', mesa: 10.00, llevar: 10.00, desc: 'Caldo claro de ave con wantanes rellenos, col china y gotas de aceite de ajonjolí.', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=400&auto=format&fit=crop' },
+  { id: 18, cat: 'chifa', nombre: '12 Wantán Frito', mesa: 12.00, llevar: 12.00, desc: 'Docena de láminas crujientes rellenas de pollo fritas con salsa tamarindo.', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop' },
+  { id: 19, cat: 'chifa', nombre: '6 Wantán Frito', mesa: 6.00, llevar: 6.00, desc: '6 wantanes crujientes rellenos acompañados de salsa tamarindo agridulce.', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop' },
+  { id: 20, cat: 'chifa', nombre: 'Caldo con Huevo', mesa: 8.50, llevar: 8.50, desc: 'Sustancioso caldo de pollo caliente escalfado con huevo fresco.', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=400&auto=format&fit=crop' },
+  { id: 21, cat: 'chifa', nombre: 'Caldo con Presa', mesa: 12.00, llevar: 12.00, desc: 'Caldo concentrado reconfortante servido con una presa entera de pollo.', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=400&auto=format&fit=crop' },
+  { id: 22, cat: 'chifa', nombre: 'Mostrito', mesa: 16.00, llevar: 16.50, desc: 'Combinado contundente de arroz chaufa, papas fritas crocantes y pollo broaster.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=400&auto=format&fit=crop' },
+  { id: 23, cat: 'chifa', nombre: 'Broaster', mesa: 13.00, llevar: 13.00, desc: 'Presa de pollo crujiente estilo broaster servido con papas fritas amarrillas.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=400&auto=format&fit=crop' },
+
+  // 2. COMPARTIDOS
+  { id: 24, cat: 'compartir', nombre: 'Chaufa de Pollo (Compartir)', mesa: 20.00, llevar: 20.00, desc: 'Porción familiar de arroz chaufa con abundante pollo y tortilla de huevo.', img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop' },
+  { id: 25, cat: 'compartir', nombre: 'Aeropuerto de Pollo (Compartir)', mesa: 20.00, llevar: 20.00, desc: 'Bandeja grande de chaufa con tallarín salteado al wok y frijolito chino.', img: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=400&auto=format&fit=crop' },
+  { id: 26, cat: 'compartir', nombre: 'Aeropuerto de Chancho (Compartir)', mesa: 20.00, llevar: 20.00, desc: 'Porción familiar de aeropuerto salteado con chancho asado char siu.', img: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=400&auto=format&fit=crop' },
+  { id: 27, cat: 'compartir', nombre: 'Chaufa de Chancho (Compartir)', mesa: 20.00, llevar: 20.00, desc: 'Bandeja familiar de chaufa salteado con jugoso chancho asado.', img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop' },
+  { id: 28, cat: 'compartir', nombre: 'Amazónico (Compartir)', mesa: 20.00, llevar: 20.00, desc: 'Porción gigante de chaufa de cecina con plátano maduro frito.', img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=400&auto=format&fit=crop' },
+  { id: 29, cat: 'compartir', nombre: 'Aeropuerto Amazónico (Compartir)', mesa: 20.00, llevar: 20.00, desc: 'Bandeja familiar de aeropuerto con trozos ahumados de cecina de la selva.', img: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=400&auto=format&fit=crop' },
+
+  // 3. BEBIDAS
+  { id: 30, cat: 'bebidas', nombre: 'Chicha 1L', mesa: 8.00, llevar: 8.00, desc: 'Jarra de chicha morada artesanal heladita con toques de piña y limón.', img: 'https://tofuu.getjusto.com/orioneat-local/resized2/Dq2a9m4rfFWNFDPuP-2400-x.webp' },
+  { id: 31, cat: 'bebidas', nombre: 'Chicha 1/2 L', mesa: 4.00, llevar: 4.00, desc: 'Medio litro de chicha morada artesanal muy helada.', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9T1qiLe8pWLGu8p51FZhs3WRfQRdKFBiUs7UY7PocH1gO_XQSGVS5TuA&s=10' },
+  { id: 32, cat: 'bebidas', nombre: 'Maracuyá 1L', mesa: 8.00, llevar: 8.00, desc: 'Refresco natural de pura pulpa de maracuyá helada de 1 Litro.', img: 'https://89acebichados.pe/55-large_default/1l-refresco-de-maracuya.jpg' },
+  { id: 33, cat: 'bebidas', nombre: 'Maracuyá 1/2 L', mesa: 4.00, llevar: 4.00, desc: 'Medio litro de refresco natural de maracuyá helado.', img: 'https://brasaycarbon.pe/wp-content/uploads/2020/12/bebida-limonada.jpg' },
+  { id: 34, cat: 'bebidas', nombre: 'Gaseosa Personal', mesa: 3.00, llevar: 3.00, desc: 'Gaseosa personal helada a elección (Inca Kola / Coca Cola).', img: 'https://www.luchoschiken.com/wp-content/uploads/2025/02/personal-gas-450x450.jpg' },
+  { id: 35, cat: 'bebidas', nombre: 'Gaseosa 1/2 L', mesa: 5.00, llevar: 5.00, desc: 'Botella de gaseosa de 500ml heladita.', img: 'https://www.luchoschiken.com/wp-content/uploads/2025/02/472001034_10160486343646297_4116197570323198730_n.jpg' },
+  { id: 36, cat: 'bebidas', nombre: 'Descartable 1/2 L', mesa: 4.50, llevar: 4.50, desc: 'Gaseosa de medio litro en envase descartable práctico.', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiBFMz87E6PPiKlCuvS0qtmuDyGWGLIxJvccV3I3EDGpKA5BMnyvpO7_Y&s=10' },
+  { id: 37, cat: 'bebidas', nombre: 'Gaseosa 1L', mesa: 7.00, llevar: 7.00, desc: 'Gaseosa de 1 Litro helada ideal para 2 o 3 personas.', img: 'https://bodegamiguelito.com/wp-content/uploads/2024/12/coca-cola-1L-retornable-1-scaled.jpg' },
+  { id: 38, cat: 'bebidas', nombre: 'Gaseosa 1.5L', mesa: 9.00, llevar: 9.00, desc: 'Gaseosa grande de 1.5 Litros helada.', img: 'https://bodegamiguelito.com/wp-content/uploads/2024/12/7801610231517_1.webp' },
+  { id: 39, cat: 'bebidas', nombre: 'Agua Personal', mesa: 2.00, llevar: 2.00, desc: 'Botella de agua mineral de 500ml sin gas.', img: 'https://wongfood.vtexassets.com/arquivos/ids/724665/113736002-01-4590.jpg?v=638621159557400000' },
+  { id: 40, cat: 'bebidas', nombre: 'Guaraná Personal', mesa: 2.50, llevar: 2.50, desc: 'Lata o botella de Guaraná helada personal.', img: 'https://plazavea.vteximg.com.br/arquivos/ids/6760540-450-450/20171726.jpg?v=637805496954900000' },
+  { id: 41, cat: 'bebidas', nombre: 'Sporade', mesa: 3.00, llevar: 3.00, desc: 'Bebida rehidratante Sporade helada.', img: 'https://dojiw2m9tvv09.cloudfront.net/53648/product/X_sintitulo5393.png?77&t=1779419926' },
+
+  // 4. EXTRAS
+  { id: 42, cat: 'extras', nombre: 'Huevo Frito', mesa: 2.00, llevar: 2.00, desc: 'Huevo de gallina frito con yema blanda o bien cocida.', img: 'https://cadenaser.com/resizer/v2/4IP2ZGKZ5FBUBACTKMXQWXYYQY.jpg?auth=e2b8ad0529c7ef63cb6839e0e346719136f7152237cdf58f29c29c5891e8c357&quality=70&width=650&height=487&smart=true' },
+  { id: 43, cat: 'extras', nombre: 'Plátano Frito', mesa: 6.00, llevar: 6.00, desc: 'Porción de plátanos maduros fritos caramelizados.', img: 'https://i.blogs.es/76517f/platano-frito/450_1000.jpeg' },
+  { id: 44, cat: 'extras', nombre: 'Pollo Frito', mesa: 8.00, llevar: 8.00, desc: 'Porción adicional de pollo broaster.', img: 'https://images.getrecipekit.com/20230327184729-CompactAF_ButtermilkFriedChicken.jpg?quality=90&' },
+  { id: 45, cat: 'extras', nombre: 'Huevo Sancochado', mesa: 2.00, llevar: 2.00, desc: 'Huevo sancochado de gallina.', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIph_hkc1_D5IiX8CS4wLvyk3dtq1dzQaqV3cspf1cByPkgOELWLjaFNOw&s=10' },
+  { id: 46, cat: 'extras', nombre: 'Presa de Caldo', mesa: 6.00, llevar: 6.00, desc: 'Presa adicional de pollo suave para caldo.', img: 'https://emofly.b-cdn.net/hbd_exvhac6ayb3ZKT/width:2048/plain/https%3A%2F%2Fstorage.googleapis.com%2Ftakeapp%2Fmedia%2Fcm3i7zt2j00000cjh7rdzelwd.jpg' },
+  { id: 47, cat: 'extras', nombre: 'Chorizo Frito', mesa: 4.00, llevar: 4.00, desc: 'Porción de chorizo ahumado frito al wok.', img: 'https://i.blogs.es/3a13ea/chorizo-frito-arguinano/1200_630.jpeg' }
+];
+
+let pedido = [];
+let categoriaActual = 'chifa';
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderMenu();
+  actualizarResumenHTML();
 });
 
-// Renderizar Botones de Categoría
-function renderCategorias() {
-  const categorias = ["Todos", ...new Set(PRODUCTOS.map(p => p.cat))];
-  const cont = document.getElementById("contenedorCategorias");
-  
-  cont.innerHTML = categorias.map(c => `
-    <button class="btn btn-sm ${c === categoriaActiva ? 'btn-danger' : 'btn-outline-secondary'} btn-cat text-nowrap" 
-            onclick="filtrarCategoria('${c}')">
-      ${c}
-    </button>
-  `).join("");
-}
+// Renderizar Menú
+function renderMenu() {
+  const contenedor = document.getElementById('contenedor-menu');
+  if (!contenedor) return;
 
-function filtrarCategoria(cat) {
-  categoriaActiva = cat;
-  renderCategorias();
-  filtrarProductos();
-}
+  const selectorMesa = document.getElementById('mesa');
+  const opcion = selectorMesa ? selectorMesa.value : '';
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
 
-// BUSCADOR EN TIEMPO REAL
-function filtrarProductos() {
-  const query = document.getElementById("inputBuscar").value.toLowerCase().trim();
-  
-  const filtrados = PRODUCTOS.filter(p => {
-    const coincideCat = (categoriaActiva === "Todos" || p.cat === categoriaActiva);
-    const coincideNombre = p.nombre.toLowerCase().includes(query);
-    return coincideCat && coincideNombre;
-  });
+  const productosFiltrados = productos.filter(p => p.cat === categoriaActual);
+  contenedor.innerHTML = '';
 
-  renderProductos(filtrados);
-}
+  productosFiltrados.forEach(p => {
+    const precio = esLlevarODelivery ? p.llevar : p.mesa;
+    const col = document.createElement('div');
+    col.className = 'col';
 
-// Renderizar Productos en Grid
-function renderProductos(lista = PRODUCTOS) {
-  const grid = document.getElementById("gridProductos");
-  const tipoServicio = document.getElementById("tipoServicio").value;
-
-  if (lista.length === 0) {
-    grid.innerHTML = `<div class="col-12 text-center text-muted py-4">No se encontraron productos.</div>`;
-    return;
-  }
-
-  grid.innerHTML = lista.map(p => {
-    const precio = (tipoServicio === "Mesa") ? p.precioMesa : p.precioLlevar;
-    return `
-      <div class="col">
-        <div class="card card-product h-100 p-2" onclick="agregarAComanda(${p.id})">
-          <div class="card-body p-2 d-flex flex-column justify-content-between">
-            <div>
-              <span class="badge bg-light text-dark mb-1 border" style="font-size:0.7rem;">${p.cat}</span>
-              <h6 class="fw-bold text-dark mb-1 fs-6">${p.nombre}</h6>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mt-2">
-              <span class="fw-bold text-danger fs-5">S/ ${precio.toFixed(2)}</span>
-              <button class="btn btn-sm btn-danger rounded-circle"><i class="bi bi-plus-lg"></i></button>
-            </div>
-          </div>
-        </div>
+    col.innerHTML = `
+      <div class="dish-card">
+        <div class="dish-name">${p.nombre}</div>
+        <img src="${p.img}" class="dish-img" alt="${p.nombre}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250?text=ANITA-WOK'">
+        <div class="dish-desc">${p.desc}</div>
+        <div class="dish-price">S/ ${precio.toFixed(2)} ${esLlevarODelivery ? '<small style="font-size:0.65rem;" class="text-danger">(Llevar/Deliv.)</small>' : ''}</div>
+        <button class="btn btn-add-dish" onclick="agregarAlPedido(${p.id})">
+          <i class="fa-solid fa-plus me-1"></i> Agregar
+        </button>
       </div>
     `;
-  }).join("");
+    contenedor.appendChild(col);
+  });
 }
 
-// AGREGAR PRODUCTO A COMANDA
-function agregarAComanda(id) {
-  const prod = PRODUCTOS.find(p => p.id === id);
+// Filtro por Categorías
+function verCategoria(cat, btnElement) {
+  categoriaActual = cat;
+  if (btnElement) {
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.classList.remove('btn-danger', 'active');
+      btn.classList.add('btn-outline-secondary');
+    });
+    btnElement.classList.remove('btn-outline-secondary');
+    btnElement.classList.add('btn-danger', 'active');
+  }
+  renderMenu();
+}
+
+// Opciones de Ubicación (Mesa 1-10 / Llevar / Delivery)
+function cambiarTipoPedido() {
+  const selectorMesa = document.getElementById('mesa');
+  if (!selectorMesa) return;
+  
+  const opcion = selectorMesa.value;
+  const contenedorDelivery = document.getElementById('contenedor-recargo-delivery');
+  const bloqueCliente = document.getElementById('bloque-datos-cliente');
+  const contDireccion = document.getElementById('contenedor-cliente-direccion');
+  const contReferencia = document.getElementById('contenedor-cliente-referencia');
+
+  if (opcion === 'Delivery') {
+    if (contenedorDelivery) contenedorDelivery.classList.remove('d-none');
+    if (bloqueCliente) bloqueCliente.classList.remove('d-none');
+    if (contDireccion) contDireccion.classList.remove('d-none');
+    if (contReferencia) contReferencia.classList.remove('d-none');
+  } else if (opcion === 'Llevar') {
+    if (contenedorDelivery) contenedorDelivery.classList.add('d-none');
+    if (bloqueCliente) bloqueCliente.classList.remove('d-none');
+    if (contDireccion) contDireccion.classList.add('d-none');
+    if (contReferencia) contReferencia.classList.add('d-none');
+  } else {
+    if (contenedorDelivery) contenedorDelivery.classList.add('d-none');
+    if (bloqueCliente) bloqueCliente.classList.add('d-none');
+  }
+
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
+  pedido.forEach(item => {
+    const prod = productos.find(p => p.id === item.id);
+    if (prod) {
+      item.precio = esLlevarODelivery ? prod.llevar : prod.mesa;
+    }
+  });
+
+  renderMenu();
+  actualizarResumenHTML();
+}
+
+// Buscador de Clientes
+function buscarCliente(query) {
+  const sugerencias = document.getElementById('lista-sugerencias');
+  if (!sugerencias) return;
+  
+  sugerencias.innerHTML = '';
+  if (query.trim().length < 2) { 
+    sugerencias.classList.add('d-none'); 
+    return; 
+  }
+
+  const coincidencias = baseClientes.filter(c => 
+    c.telefono.includes(query) || c.nombre.toLowerCase().includes(query.toLowerCase())
+  );
+
+  if (coincidencias.length === 0) { 
+    sugerencias.classList.add('d-none'); 
+    return; 
+  }
+
+  coincidencias.forEach(cliente => {
+    const item = document.createElement('div');
+    item.className = 'item-sugerencia border-bottom p-2 bg-light cursor-pointer';
+    item.style.cursor = 'pointer';
+    item.innerHTML = `<strong>${cliente.nombre}</strong> — <span class="text-muted">${cliente.telefono}</span>`;
+    item.onclick = () => seleccionarCliente(cliente);
+    sugerencias.appendChild(item);
+  });
+  
+  sugerencias.classList.remove('d-none');
+}
+
+function seleccionarCliente(cliente) {
+  const tel = document.getElementById('cliente-telefono');
+  const nom = document.getElementById('cliente-nombre');
+  const dir = document.getElementById('cliente-direccion');
+  const ref = document.getElementById('cliente-referencia');
+
+  if (tel) tel.value = cliente.telefono;
+  if (nom) nom.value = cliente.nombre;
+  if (dir) dir.value = cliente.direccion || '';
+  if (ref) ref.value = cliente.referencia || '';
+  
+  const sugerencias = document.getElementById('lista-sugerencias');
+  if (sugerencias) sugerencias.classList.add('d-none');
+}
+
+function guardarClienteNuevo(telefono, nombre, direccion, referencia) {
+  if (!telefono || !nombre) return;
+  const existe = baseClientes.find(c => c.telefono === telefono);
+  if (!existe) {
+    baseClientes.push({ telefono, nombre, direccion, referencia });
+    localStorage.setItem('anita_wok_clientes', JSON.stringify(baseClientes));
+  }
+}
+
+document.addEventListener('click', function(e) {
+  const sugerencias = document.getElementById('lista-sugerencias');
+  const inputTelefono = document.getElementById('cliente-telefono');
+  if (sugerencias && inputTelefono && e.target !== inputTelefono && !sugerencias.contains(e.target)) {
+    sugerencias.classList.add('d-none');
+  }
+});
+
+// Agregar Plato al Pedido
+function agregarAlPedido(idProd) {
+  const selectorMesa = document.getElementById('mesa');
+  const opcion = selectorMesa ? selectorMesa.value : '';
+  const esLlevarODelivery = (opcion === 'Llevar' || opcion === 'Delivery');
+
+  const prod = productos.find(p => p.id === idProd);
   if (!prod) return;
 
-  const exist = comandaActual.find(item => item.id === id);
-  if (exist) {
-    exist.cant++;
+  const precio = esLlevarODelivery ? prod.llevar : prod.mesa;
+  const itemExistente = pedido.find(p => p.id === idProd && !p.observacion);
+
+  if (itemExistente) {
+    itemExistente.cantidad += 1;
   } else {
-    comandaActual.push({
+    pedido.push({
       id: prod.id,
       nombre: prod.nombre,
-      precioMesa: prod.precioMesa,
-      precioLlevar: prod.precioLlevar,
-      cant: 1
+      precio: precio,
+      cantidad: 1,
+      observacion: ''
     });
   }
 
-  actualizarComandaUI();
+  actualizarResumenHTML();
 }
 
-// MODIFICAR CANTIDADES
-function cambiarCantidad(id, delta) {
-  const item = comandaActual.find(i => i.id === id);
-  if (!item) return;
-
-  item.cant += delta;
-  if (item.cant <= 0) {
-    comandaActual = comandaActual.filter(i => i.id !== id);
+function cambiarCantidad(index, cambio) {
+  if (pedido[index]) {
+    pedido[index].cantidad += cambio;
+    if (pedido[index].cantidad <= 0) {
+      pedido.splice(index, 1);
+    }
   }
-  actualizarComandaUI();
+  actualizarResumenHTML();
 }
 
-// VACIAR COMANDA
-function vaciarComanda() {
-  if (comandaActual.length === 0) return;
-  if (confirm("¿Deseas vaciar todos los platos de esta comanda?")) {
-    comandaActual = [];
-    document.getElementById("obsComanda").value = "";
-    actualizarComandaUI();
+function actualizarObservacion(index, texto) {
+  if (pedido[index]) {
+    pedido[index].observacion = texto;
   }
 }
 
-// ACTUALIZAR INTERFAZ DE COMANDA Y CÁLCULO DE TOTALES
-function actualizarComandaUI() {
-  const tbody = document.getElementById("bodyComanda");
-  const tipoServicio = document.getElementById("tipoServicio").value;
+// Actualizar Comanda Activa
+function actualizarResumenHTML() {
+  const contenedorResumen = document.getElementById('lista-pedido');
+  const badgeTotal = document.getElementById('badge-total-items');
+  const selectorMesa = document.getElementById('mesa');
+  const selectorDelivery = document.getElementById('recargo-delivery');
 
-  if (comandaActual.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No hay platos agregados.</td></tr>`;
-    document.getElementById("txtSubtotal").innerText = "S/ 0.00";
-    document.getElementById("txtRecargo").innerText = "S/ 0.00";
-    document.getElementById("txtTotal").innerText = "S/ 0.00";
+  if (!contenedorResumen) return;
+
+  const totalCantidad = pedido.reduce((sum, item) => sum + item.cantidad, 0);
+  if (badgeTotal) badgeTotal.textContent = `${totalCantidad} ítems`;
+
+  if (pedido.length === 0) {
+    contenedorResumen.innerHTML = '<p class="text-muted text-center py-4 my-0 small">No hay platos agregados</p>';
     return;
   }
 
-  let subtotal = 0;
+  let html = '<div class="d-flex flex-column gap-2">';
+  let subtotalPlatos = 0;
 
-  tbody.innerHTML = comandaActual.map(item => {
-    const precioUnit = (tipoServicio === "Mesa") ? item.precioMesa : item.precioLlevar;
-    const itemSubtotal = precioUnit * item.cant;
-    subtotal += itemSubtotal;
+  pedido.forEach((item, index) => {
+    const sub = item.precio * item.cantidad;
+    subtotalPlatos += sub;
 
-    return `
-      <tr>
-        <td class="fw-semibold small">${item.nombre}</td>
-        <td class="text-center">
-          <div class="btn-group btn-group-sm">
-            <button class="btn btn-outline-secondary px-1 py-0" onclick="cambiarCantidad(${item.id}, -1)">-</button>
-            <span class="px-2 fw-bold">${item.cant}</span>
-            <button class="btn btn-outline-secondary px-1 py-0" onclick="cambiarCantidad(${item.id}, 1)">+</button>
+    html += `
+      <div class="bg-white p-2 rounded border shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div style="flex: 1; padding-right: 5px;">
+            <div class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.1;">${item.nombre}</div>
+            <small class="text-danger fw-bold" style="font-size: 0.78rem;">S/ ${sub.toFixed(2)}</small>
           </div>
-        </td>
-        <td class="text-end fw-bold small">S/ ${itemSubtotal.toFixed(2)}</td>
-        <td class="text-center">
-          <button class="btn btn-sm text-danger p-0" onclick="cambiarCantidad(${item.id}, -${item.cant})">
-            <i class="bi bi-x-circle"></i>
-          </button>
-        </td>
-      </tr>
+          <div class="d-flex align-items-center gap-1">
+            <button class="btn btn-sm btn-outline-danger px-2 py-0" onclick="cambiarCantidad(${index}, -1)">-</button>
+            <span class="fw-bold px-1" style="font-size: 0.85rem;">${item.cantidad}</span>
+            <button class="btn btn-sm btn-outline-success px-2 py-0" onclick="cambiarCantidad(${index}, 1)">+</button>
+          </div>
+        </div>
+        <div class="mt-1">
+          <input type="text" class="form-control form-control-sm" style="font-size: 0.72rem; padding: 2px 6px;"
+                 placeholder="Espec. (ej: Sin china, sin frejol)" value="${item.observacion}" 
+                 onchange="actualizarObservacion(${index}, this.value)">
+        </div>
+      </div>
     `;
-  }).join("");
-
-  // Recargo por envase/delivery
-  let recargo = 0;
-  if (tipoServicio === "Llevar" || tipoServicio === "Delivery") {
-    recargo = 1.00;
-  }
-
-  const total = subtotal + recargo;
-
-  document.getElementById("txtSubtotal").innerText = `S/ ${subtotal.toFixed(2)}`;
-  document.getElementById("txtRecargo").innerText = `S/ ${recargo.toFixed(2)}`;
-  document.getElementById("txtTotal").innerText = `S/ ${total.toFixed(2)}`;
-}
-
-function actualizarPreciosYTotales() {
-  renderProductos();
-  actualizarComandaUI();
-}
-
-// REGISTRAR Y ENVIAR PEDIDO
-function enviarPedido() {
-  if (comandaActual.length === 0) {
-    alert("Por favor agrega al menos un producto a la comanda.");
-    return;
-  }
-
-  const tipo = document.getElementById("tipoServicio").value;
-  const numMesa = document.getElementById("numMesa").value;
-  const obs = document.getElementById("obsComanda").value.trim();
-  const metodo = document.querySelector('input[name="metodoPago"]:checked').value;
-
-  let subtotal = 0;
-  const itemsFormat = comandaActual.map(i => {
-    const pu = (tipo === "Mesa") ? i.precioMesa : i.precioLlevar;
-    subtotal += pu * i.cant;
-    return {
-      id: i.id,
-      nombre: i.nombre,
-      cant: i.cant,
-      precioUnit: pu,
-      subtotal: pu * i.cant
-    };
   });
 
-  const recargo = (tipo !== "Mesa") ? 1.00 : 0.00;
-  const total = subtotal + recargo;
+  const tipo = selectorMesa ? selectorMesa.value : '';
+  let recargoDelivery = 0;
 
-  const comanda = {
-    id: Date.now(),
-    fecha: new Date().toISOString(),
-    tipo: tipo,
-    mesa: tipo === "Mesa" ? numMesa : "-",
-    items: itemsFormat,
-    subtotal: subtotal,
-    recargo: recargo,
+  if (tipo === 'Delivery' && selectorDelivery) {
+    recargoDelivery = parseFloat(selectorDelivery.value) || 0;
+  }
+
+  const totalFinal = subtotalPlatos + recargoDelivery;
+
+  html += `</div>
+    <div class="border-top mt-3 pt-2">
+      <div class="d-flex justify-content-between small text-muted">
+        <span>Subtotal Platos:</span>
+        <span>S/ ${subtotalPlatos.toFixed(2)}</span>
+      </div>
+  `;
+
+  if (tipo === 'Delivery') {
+    html += `
+      <div class="d-flex justify-content-between small text-muted">
+        <span>Recargo Delivery:</span>
+        <span>S/ ${recargoDelivery.toFixed(2)}</span>
+      </div>
+    `;
+  }
+
+  html += `
+      <div class="d-flex justify-content-between fw-bold text-danger h6 mt-1 mb-0">
+        <span>TOTAL:</span>
+        <span>S/ ${totalFinal.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+
+  contenedorResumen.innerHTML = html;
+}
+
+// Enviar Comanda a Cocina
+function enviarComanda() {
+  if (pedido.length === 0) {
+    alert('Agrega al menos un plato antes de enviar la comanda.');
+    return;
+  }
+
+  const selectorMesa = document.getElementById('mesa');
+  const selectorDelivery = document.getElementById('recargo-delivery');
+  const selectorMetodo = document.getElementById('metodo-pago');
+
+  const mesa = selectorMesa ? selectorMesa.value : 'Mesa 1';
+  const metodoPago = selectorMetodo ? selectorMetodo.value : 'Efectivo';
+
+  let subtotal = pedido.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  let recargoDelivery = 0;
+
+  if (mesa === 'Delivery' && selectorDelivery) {
+    recargoDelivery = parseFloat(selectorDelivery.value) || 0;
+  }
+
+  const total = subtotal + recargoDelivery;
+
+  const tel = document.getElementById('cliente-telefono')?.value.trim() || '';
+  const nom = document.getElementById('cliente-nombre')?.value.trim() || '';
+  const dir = document.getElementById('cliente-direccion')?.value.trim() || '';
+  const ref = document.getElementById('cliente-referencia')?.value.trim() || '';
+
+  if ((mesa === 'Llevar' || mesa === 'Delivery') && tel && nom) {
+    guardarClienteNuevo(tel, nom, dir, ref);
+  }
+
+  const idCorrelativo = String(historialVentas.length + 1).padStart(6, '0');
+
+  const datosComanda = {
+    id: idCorrelativo,
+    mesa: mesa,
+    metodoPago: metodoPago,
+    cliente: { telefono: tel, nombre: nom, direccion: dir, referencia: ref },
+    items: [...pedido],
+    recargoDelivery: recargoDelivery,
     total: total,
-    metodoPago: metodo,
-    obs: obs,
-    estado: "Pendiente"
+    fecha: new Date().toLocaleDateString(),
+    hora: new Date().toLocaleTimeString('es-PE', { hour12: true })
   };
 
-  // 1. Guardar localmente para Cierre de Caja
-  historialVentas.push(comanda);
-  localStorage.setItem("anita_ventas_v2", JSON.stringify(historialVentas));
+  if (typeof socket !== 'undefined') {
+    socket.emit('nuevaComanda', datosComanda);
+  } else {
+    console.error('Socket no está disponible.');
+  }
 
-  // 2. Enviar a Servidor / Cocina mediante Socket.io
-  socket.emit("nuevaComanda", comanda);
+  historialVentas.push(datosComanda);
 
-  // 3. Imprimir Ticketera en Letra Grande
-  imprimirTicket(comanda);
+  alert(`¡Comanda #${idCorrelativo} enviada a Cocina! Ubicación: ${mesa} | Pago: ${metodoPago}`);
 
-  // Reset Formulario
-  comandaActual = [];
-  document.getElementById("obsComanda").value = "";
-  actualizarComandaUI();
-
-  alert(" Comanda N° " + comanda.id.toString().slice(-4) + " registrada con éxito.");
+  pedido = [];
+  actualizarResumenHTML();
 }
 
-// IMPRESIÓN DE TICKET TÉRMICO (LETRA GRANDE 18PX-22PX)
-function imprimirTicket(c) {
-  const ticketDiv = document.getElementById("ticketImpresion");
-  
-  const itemsTxt = c.items.map(it => `
-    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-      <span>${it.cant}x ${it.nombre}</span>
-      <span>S/ ${it.subtotal.toFixed(2)}</span>
-    </div>
-  `).join('');
+// Cerrar Caja y Mostrar Modal
+function cerrarCaja() {
+  const modalElem = document.getElementById('modalCaja');
+  const cuerpoModal = document.getElementById('cuerpo-modal-caja');
+  if (!modalElem || !cuerpoModal) return;
 
-  ticketDiv.innerHTML = `
-    <div style="text-align:center; padding:10px 0; border-bottom:2px dashed #000;">
-      <h2 style="margin:0; font-size:22px; font-weight:bold;">ANITA-WOK</h2>
-      <p style="margin:0; font-size:14px;">Chifa & Wok Gourmet</p>
-      <p style="margin:5px 0 0 0; font-size:16px;">TICKET N° #${c.id.toString().slice(-4)}</p>
-    </div>
-    
-    <div style="margin:10px 0; font-size:16px;">
-      <div>FECHA: ${new Date(c.fecha).toLocaleString()}</div>
-      <div>TIPO: <strong>${c.tipo} ${c.tipo === 'Mesa' ? 'MESA ' + c.mesa : ''}</strong></div>
-      <div>PAGO: ${c.metodoPago}</div>
-    </div>
+  if (historialVentas.length === 0) {
+    cuerpoModal.innerHTML = '<p class="text-muted text-center py-3 mb-0">No se registran ventas en el turno actual.</p>';
+  } else {
+    let totalGeneral = 0;
+    let porMetodo = { Efectivo: 0, Yape: 0, Plin: 0, Tarjeta: 0 };
 
-    <div style="border-top:1px dashed #000; border-bottom:1px dashed #000; padding:10px 0; margin:10px 0;">
-      ${itemsTxt}
-    </div>
+    let tablaHTML = `
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle" style="font-size:0.85rem;">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Hora</th>
+              <th>Mesa/Tipo</th>
+              <th>Método</th>
+              <th>Ítems</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
 
-    ${c.recargo > 0 ? `<div style="display:flex; justify-content:space-between;"><span>RECARGO/DELIVERY:</span><span>S/ ${c.recargo.toFixed(2)}</span></div>` : ''}
+    historialVentas.forEach(v => {
+      totalGeneral += v.total;
+      if (porMetodo[v.metodoPago] !== undefined) {
+        porMetodo[v.metodoPago] += v.total;
+      } else {
+        porMetodo[v.metodoPago] = v.total;
+      }
 
-    <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:bold; margin-top:8px; border-top:2px solid #000; padding-top:5px;">
-      <span>TOTAL:</span>
-      <span>S/ ${c.total.toFixed(2)}</span>
-    </div>
+      const resumenItems = v.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
 
-    ${c.obs ? `<div style="margin-top:10px; font-size:14px; border:1px solid #000; padding:4px;"><strong>OBS:</strong> ${c.obs}</div>` : ''}
+      tablaHTML += `
+        <tr>
+          <td><span class="fw-bold">#${v.id}</span></td>
+          <td>${v.hora || v.fecha}</td>
+          <td><span class="badge bg-secondary">${v.mesa}</span></td>
+          <td><span class="badge bg-info text-dark">${v.metodoPago}</span></td>
+          <td>${resumenItems}</td>
+          <td class="text-end fw-bold">S/ ${v.total.toFixed(2)}</td>
+        </tr>
+      `;
+    });
 
-    <div style="text-align:center; margin-top:15px; font-size:14px;">
-      ¡GRACIAS POR SU PREFERENCIA!
-    </div>
-  `;
-
-  window.print();
-}
-
-// CIERRE DE CAJA
-function abrirCierreCaja() {
-  const modal = new bootstrap.Modal(document.getElementById("modalCierre"));
-  const body = document.getElementById("bodyCierreCaja");
-
-  const totalVentas = historialVentas.reduce((sum, v) => sum + v.total, 0);
-  const efectivo = historialVentas.filter(v => v.metodoPago === "Efectivo").reduce((sum, v) => sum + v.total, 0);
-  const yape = historialVentas.filter(v => v.metodoPago === "Yape/Plin").reduce((sum, v) => sum + v.total, 0);
-  const tarjeta = historialVentas.filter(v => v.metodoPago === "Tarjeta").reduce((sum, v) => sum + v.total, 0);
-
-  body.innerHTML = `
-    <div class="alert alert-success text-center py-2">
-      <span class="small fw-bold">TOTAL RECAUDADO EN CAJA</span>
-      <h2 class="fw-bold my-1 text-success">S/ ${totalVentas.toFixed(2)}</h2>
-      <span class="small text-muted">${historialVentas.length} Pedidos Procesados</span>
-    </div>
-
-    <h6 class="fw-bold border-bottom pb-2">Desglose por Método de Pago:</h6>
-    <div class="list-group mb-3">
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <span> Efectivo</span>
-        <span class="fw-bold text-success">S/ ${efectivo.toFixed(2)}</span>
+    tablaHTML += `
+          </tbody>
+        </table>
       </div>
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <span> Yape / Plin</span>
-        <span class="fw-bold text-primary">S/ ${yape.toFixed(2)}</span>
-      </div>
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <span> Tarjeta Débito/Crédito</span>
-        <span class="fw-bold text-warning">S/ ${tarjeta.toFixed(2)}</span>
-      </div>
-    </div>
-  `;
 
+      <div class="row g-2 mt-2 pt-2 border-top">
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Efectivo</small>
+            <strong class="text-success">S/ ${(porMetodo.Efectivo || 0).toFixed(2)}</strong>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Yape</small>
+            <strong class="text-primary">S/ ${(porMetodo.Yape || 0).toFixed(2)}</strong>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Plin</small>
+            <strong class="text-info">S/ ${(porMetodo.Plin || 0).toFixed(2)}</strong>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="p-2 bg-light rounded text-center border">
+            <small class="text-muted d-block">Tarjeta</small>
+            <strong class="text-warning text-dark">S/ ${(porMetodo.Tarjeta || 0).toFixed(2)}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-danger mt-3 mb-0 d-flex justify-content-between align-items-center">
+        <strong class="h6 mb-0">TOTAL VENTAS TURNO:</strong>
+        <strong class="h5 mb-0">S/ ${totalGeneral.toFixed(2)}</strong>
+      </div>
+    `;
+
+    cuerpoModal.innerHTML = tablaHTML;
+  }
+
+  const modal = new bootstrap.Modal(modalElem);
   modal.show();
 }
 
-// EXPORTACIÓN A EXCEL / CSV DIRECTO Y SIN ERRORES (CON UTF-8 BOM)
-function exportarExcelCSV() {
+// Descargar Registro de Ventas en Formato CSV (Sin advertencias de Excel)
+function descargarExcelVentas() {
   if (historialVentas.length === 0) {
-    alert("No hay ventas registradas para exportar.");
+    alert('No hay ventas registradas para exportar.');
     return;
   }
 
-  // Encabezados limpios
-  let csvContent = "\uFEFFID Comanda,Fecha,Hora,Tipo Servicio,Mesa,Metodo Pago,Platos Pedidos,Subtotal,Recargo,Total\n";
+  let sumaTotalDia = 0;
+  
+  // Encabezados del CSV con BOM UTF-8 (\uFEFF) para abrir sin alertas y conservar tildes
+  let csvContent = "\uFEFF"; 
+  csvContent += "ID Comanda;Hora;Ubicación;Método de Pago;Cliente;Teléfono;Dirección;Pedidos;Delivery;Total del Pedido\n";
 
-  historialVentas.forEach(v => {
-    const f = new Date(v.fecha);
-    const fechaStr = f.toLocaleDateString('es-PE');
-    const horaStr = f.toLocaleTimeString('es-PE');
-    
-    // Concatenar ítems
-    const resumenItems = v.items.map(i => `${i.cant}x ${i.nombre}`).join(' | ').replace(/"/g, '""');
+  historialVentas.forEach((v) => {
+    const idCorrelativo = v.id;
+    const hora = v.hora || v.fecha;
+    const ubicacion = v.mesa || '';
+    const metodoPago = v.metodoPago || '';
+    const clienteNombre = (v.cliente && v.cliente.nombre) ? v.cliente.nombre : 'N/A';
+    const clienteTel = (v.cliente && v.cliente.telefono) ? v.cliente.telefono : 'N/A';
+    const clienteDir = (v.cliente && v.cliente.direccion) ? v.cliente.direccion : 'N/A';
 
-    csvContent += `"${v.id}","${fechaStr}","${horaStr}","${v.tipo}","${v.mesa}","${v.metodoPago}","${resumenItems}","${v.subtotal.toFixed(2)}","${v.recargo.toFixed(2)}","${v.total.toFixed(2)}"\n`;
+    const listaPedidos = v.items.map(i => {
+      let detalle = `${i.cantidad}x ${i.nombre}`;
+      if (i.observacion) detalle += ` (${i.observacion})`;
+      return detalle;
+    }).join(' + ').replace(/"/g, '""');
+
+    const delivery = (v.recargoDelivery || 0).toFixed(2);
+    const totalPedido = v.total.toFixed(2);
+
+    sumaTotalDia += v.total;
+
+    csvContent += `"${idCorrelativo}";"${hora}";"${ubicacion}";"${metodoPago}";"${clienteNombre}";"${clienteTel}";"${clienteDir}";"${listaPedidos}";"S/ ${delivery}";"S/ ${totalPedido}"\n`;
   });
 
-  // Generar Blob con codificación UTF-8
+  csvContent += `\n;;;;;;;;"TOTAL DÍA";"S/ ${sumaTotalDia.toFixed(2)}"\n`;
+
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `Cierre_Caja_ANITA_WOK_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute("download", `Reporte_Ventas_${new Date().toISOString().slice(0,10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
