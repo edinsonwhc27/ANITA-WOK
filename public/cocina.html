@@ -7,7 +7,6 @@
 
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -60,835 +59,287 @@
       border-radius: 5px;
     }
 
-    /* =====================================================
-       CONFIGURACIÓN DE IMPRESIÓN RED-Q80K
-       ===================================================== */
-
+    /* ESTILOS DE IMPRESIÓN IDÉNTICOS A TU SEGUNDA FOTO */
     @media print {
-
-      /* Ocultar todo excepto el ticket */
       body * {
         visibility: hidden !important;
       }
-
-      html,
-      body {
+      html, body {
         height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
       }
-
-      #ticket-impresion,
-      #ticket-impresion * {
+      #ticket-impresion, #ticket-impresion * {
         visibility: visible !important;
       }
-
-      /*
-       * IMPORTANTE:
-       * Sin padding superior para evitar el espacio
-       * blanco innecesario antes de ANITA-WOK.
-       */
       #ticket-impresion {
         position: absolute;
         left: 0;
         top: 0;
-        width: 76mm;
-        margin: 0 !important;
-        padding: 0 !important;
+        width: 76mm; /* Ajustado al ancho completo de 80mm */
+        padding: 10px !important;
         box-sizing: border-box !important;
-
         font-family: 'Courier New', Courier, monospace;
         color: #000;
         background-color: #fff;
-
-        line-height: 1.15;
       }
-
-      /*
-       * El navegador no debe agregar márgenes.
-       */
       @page {
         size: 80mm auto;
-        margin: 0 !important;
+        margin: 0;
       }
 
-      /*
-       * Quitamos el borde exterior para ahorrar
-       * espacio y papel.
-       */
       .caja-borde {
-        border: none !important;
-
-        /*
-         * Arriba = 0
-         * Laterales = 6px
-         * Abajo = 2px
-         */
-        padding: 0 6px 2px 6px !important;
-
-        margin: 0 !important;
-
+        border: 2px dashed #000;
+        padding: 12px 10px;
         width: 100%;
         box-sizing: border-box;
       }
 
-      /*
-       * Líneas separadoras más compactas.
-       */
       .linea-punteada {
         border-top: 2px dashed #000;
-        margin: 6px 0;
-        padding: 0;
-        height: 0;
-      }
-
-      /*
-       * Evitar espacios automáticos de títulos.
-       */
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      p {
-        margin-top: 0 !important;
+        margin: 12px 0;
       }
     }
   </style>
 </head>
-
 <body>
 
   <!-- Encabezado de Cocina -->
   <header class="brand-header d-flex justify-content-between align-items-center">
-
     <div class="d-flex align-items-center gap-2">
-      <h1 class="h4 mb-0 fw-bold text-danger">
-        <i class="fa-solid fa-utensils me-2"></i>
-        ANITA-WOK — COCINA
-      </h1>
+      <h1 class="h4 mb-0 fw-bold text-danger"><i class="fa-solid fa-utensils me-2"></i> ANITA-WOK — COCINA</h1>
     </div>
-
     <div class="d-flex align-items-center gap-2">
-
-      <button
-        id="btn-activar-sonido"
-        class="btn btn-warning btn-sm fw-bold"
-        onclick="activarAudio()">
-
-        <i class="fa-solid fa-volume-high me-1"></i>
-        Activar Sonido Alerta
-
+      <button id="btn-activar-sonido" class="btn btn-warning btn-sm fw-bold" onclick="activarAudio()">
+        <i class="fa-solid fa-volume-high me-1"></i> Activar Sonido Alerta
       </button>
-
-      <a
-        href="/index.html"
-        class="btn btn-outline-light btn-sm">
-
-        <i class="fa-solid fa-receipt me-1"></i>
-        Ir a Caja / Comandas
-
+      <a href="/index.html" class="btn btn-outline-light btn-sm">
+        <i class="fa-solid fa-receipt me-1"></i> Ir a Caja / Comandas
       </a>
-
     </div>
-
   </header>
 
-
-  <!-- Contenedor de comandas -->
   <div class="container-fluid p-3">
-
-    <div
-      class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3"
-      id="contenedor-comandas">
-
-      <div
-        class="col-12 text-center py-5 text-muted"
-        id="mensaje-vacio">
-
-        <h4>
-          <i class="fa-solid fa-clock me-2"></i>
-          Esperando nuevas comandas...
-        </h4>
-
+    <!-- Grid donde se cargan las comandas -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3" id="contenedor-comandas">
+      <div class="col-12 text-center py-5 text-muted" id="mensaje-vacio">
+        <h4><i class="fa-solid fa-clock me-2"></i> Esperando nuevas comandas...</h4>
       </div>
-
     </div>
-
   </div>
 
+  <!-- Contenedor oculto para armar el ticket a imprimir -->
+  <div id="ticket-impresion" style="display: none;"></div>
 
-  <!-- Contenedor oculto para impresión -->
-  <div
-    id="ticket-impresion"
-    style="display: none;">
-  </div>
-
-
-  <!-- Bootstrap -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
 
-
   <script>
-
     const socket = io();
-
     let audioPermitido = false;
 
-
-    /* =====================================================
-       LIMPIAR TILDES Y CARACTERES ESPECIALES
-       ===================================================== */
-
+    // Función para sanear caracteres especiales y tildes para la impresora
     function arreglarTextoImpresion(texto) {
-
       if (!texto) return '';
-
       return String(texto)
-
         .replace(/á/g, 'a')
         .replace(/Á/g, 'A')
-
         .replace(/é/g, 'e')
         .replace(/É/g, 'E')
-
         .replace(/í/g, 'i')
         .replace(/Í/g, 'I')
-
         .replace(/ó/g, 'o')
         .replace(/Ó/g, 'O')
-
         .replace(/ú/g, 'u')
         .replace(/Ú/g, 'U')
-
         .replace(/ñ/g, 'n')
         .replace(/Ñ/g, 'N');
     }
 
-
-    /* =====================================================
-       SONIDO
-       ===================================================== */
-
     function emitirPitido() {
-
       try {
-
-        const audioCtx =
-          new (window.AudioContext ||
-               window.webkitAudioContext)();
-
-        const oscillator =
-          audioCtx.createOscillator();
-
-        const gainNode =
-          audioCtx.createGain();
-
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
 
         oscillator.type = 'sine';
-
-        oscillator.frequency.setValueAtTime(
-          880,
-          audioCtx.currentTime
-        );
-
-
-        gainNode.gain.setValueAtTime(
-          0.3,
-          audioCtx.currentTime
-        );
-
-        gainNode.gain.exponentialRampToValueAtTime(
-          0.00001,
-          audioCtx.currentTime + 0.4
-        );
-
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
 
         oscillator.connect(gainNode);
-
         gainNode.connect(audioCtx.destination);
 
-
         oscillator.start();
-
-        oscillator.stop(
-          audioCtx.currentTime + 0.4
-        );
-
+        oscillator.stop(audioCtx.currentTime + 0.4);
 
         setTimeout(() => {
-
-          const osc2 =
-            audioCtx.createOscillator();
-
-          const gain2 =
-            audioCtx.createGain();
-
-
+          const osc2 = audioCtx.createOscillator();
+          const gain2 = audioCtx.createGain();
           osc2.type = 'sine';
-
-          osc2.frequency.setValueAtTime(
-            1046.50,
-            audioCtx.currentTime
-          );
-
-
-          gain2.gain.setValueAtTime(
-            0.3,
-            audioCtx.currentTime
-          );
-
-          gain2.gain.exponentialRampToValueAtTime(
-            0.00001,
-            audioCtx.currentTime + 0.5
-          );
-
-
+          osc2.frequency.setValueAtTime(1046.50, audioCtx.currentTime);
+          gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
           osc2.connect(gain2);
-
           gain2.connect(audioCtx.destination);
-
-
           osc2.start();
-
-          osc2.stop(
-            audioCtx.currentTime + 0.5
-          );
-
+          osc2.stop(audioCtx.currentTime + 0.5);
         }, 200);
 
-
       } catch (e) {
-
-        console.error(
-          "Error al reproducir el pitido:",
-          e
-        );
-
+        console.error("Error al reproducir el pitido:", e);
       }
-
     }
-
 
     function activarAudio() {
-
       audioPermitido = true;
-
       emitirPitido();
-
-
-      const btn =
-        document.getElementById(
-          'btn-activar-sonido'
-        );
-
-
+      const btn = document.getElementById('btn-activar-sonido');
       if (btn) {
-
-        btn.className =
-          "btn btn-success btn-sm fw-bold";
-
-        btn.innerHTML =
-          '<i class="fa-solid fa-check me-1"></i> Sonido Activado';
-
+        btn.className = "btn btn-success btn-sm fw-bold";
+        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Sonido Activado';
       }
-
     }
 
-
-    /* =====================================================
-       IMPRIMIR TICKET
-       ===================================================== */
-
+    // FORMATO DE IMPRESIÓN CORREGIDO
     function imprimirTicket(comanda) {
-
-      const ticketContainer =
-        document.getElementById(
-          'ticket-impresion'
-        );
-
-
+      const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
 
-
-      const listaPlatos =
-        comanda.items ||
-        comanda.platos ||
-        [];
-
-
+      const listaPlatos = comanda.items || comanda.platos || [];
       let filasPlatos = '';
 
-
       listaPlatos.forEach(item => {
-
-        const nombrePlato =
-          arreglarTextoImpresion(
-            item.nombre ||
-            item.titulo
-          );
-
-
-        const obsPlato =
-          arreglarTextoImpresion(
-            item.observacion
-          );
-
+        const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
+        const obsPlato = arreglarTextoImpresion(item.observacion);
 
         filasPlatos += `
-
-          <div
-            style="
-              font-size: 18px;
-              font-weight: bold;
-              margin: 0 0 6px 0;
-              padding: 0;
-              line-height: 1.15;
-            ">
-
+          <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
             ${item.cantidad || 1}x ${nombrePlato}
-
-            ${
-              obsPlato
-                ? `
-                  <div
-                    style="
-                      font-size: 15px;
-                      font-weight: bold;
-                      background: #000;
-                      color: #fff;
-                      padding: 2px 4px;
-                      margin-top: 2px;
-                      line-height: 1.1;
-                    ">
-
-                    * OBS: ${obsPlato}
-
-                  </div>
-                `
-                : ''
-            }
-
+            ${obsPlato ? `<div style="font-size: 15px; font-weight: bold; background: #000; color: #fff; padding: 2px 4px; margin-top: 3px;">* OBS: ${obsPlato}</div>` : ''}
           </div>
-
         `;
-
       });
 
-
-      const ubicacionLimpia =
-        arreglarTextoImpresion(
-          comanda.mesa
-            ? comanda.mesa
-            : 'Llevar'
-        );
-
+      const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
 
       ticketContainer.innerHTML = `
-
         <div class="caja-borde">
-
-          <!-- NOMBRE DEL NEGOCIO -->
-
-          <div
-            style="
-              text-align: center;
-              margin: 0;
-              padding: 0;
-            ">
-
-            <h1
-              style="
-                margin: 0 !important;
-                padding: 0 !important;
-                font-size: 26px;
-                line-height: 1;
-                font-weight: 900;
-                letter-spacing: 1px;
-              ">
-
-              ANITA-WOK
-
-            </h1>
-
+          <div style="text-align: center;">
+            <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">ANITA-WOK</h1>
           </div>
+          
+          <div class="linea-punteada"></div>
 
-
-          <!-- PRIMERA LÍNEA -->
+          <div style="font-size: 18px; font-weight: bold; line-height: 1.4;">
+            <div>Comanda: #${comanda.id}</div>
+            <div>Ubicacion: ${ubicacionLimpia}</div>
+            <div>Hora: ${comanda.hora || ''}</div>
+          </div>
 
           <div class="linea-punteada"></div>
 
-
-          <!-- DATOS DE LA COMANDA -->
-
-          <div
-            style="
-              font-size: 18px;
-              font-weight: bold;
-              line-height: 1.25;
-              margin: 0;
-              padding: 0;
-            ">
-
-            <div>
-              Comanda: #${comanda.id}
-            </div>
-
-            <div>
-              Ubicacion: ${ubicacionLimpia}
-            </div>
-
-            <div>
-              Hora: ${comanda.hora || ''}
-            </div>
-
-          </div>
-
-
-          <!-- SEGUNDA LÍNEA -->
-
-          <div class="linea-punteada"></div>
-
-
-          <!-- PLATOS -->
-
-          <div
-            style="
-              margin: 0;
-              padding: 0;
-            ">
-
+          <div>
             ${filasPlatos}
-
           </div>
-
-
-          <!-- TERCERA LÍNEA -->
 
           <div class="linea-punteada"></div>
 
-
-          <!-- TOTAL -->
-
-          <div
-            style="
-              text-align: right;
-              font-size: 20px;
-              font-weight: 900;
-              margin: 5px 0 0 0;
-              padding: 0;
-              line-height: 1.1;
-            ">
-
+          <div style="text-align: right; font-size: 20px; font-weight: 900; margin-top: 10px;">
             Total: S/ ${Number(comanda.total).toFixed(2)}
-
           </div>
-
         </div>
-
       `;
-
 
       ticketContainer.style.display = 'block';
-
-
+      
       setTimeout(() => {
-
         window.print();
-
         ticketContainer.style.display = 'none';
-
       }, 300);
-
     }
-
-
-    /* =====================================================
-       NUEVA COMANDA
-       ===================================================== */
 
     socket.on('nuevaComanda', (comanda) => {
-
-      console.log(
-        "Nueva comanda recibida:",
-        comanda
-      );
-
+      console.log("Nueva comanda recibida:", comanda);
 
       if (audioPermitido) {
-
         emitirPitido();
-
       }
 
+      const msgVacio = document.getElementById('mensaje-vacio');
+      if (msgVacio) msgVacio.style.display = 'none';
 
-      const msgVacio =
-        document.getElementById(
-          'mensaje-vacio'
-        );
-
-
-      if (msgVacio) {
-
-        msgVacio.style.display =
-          'none';
-
-      }
-
-
-      const contenedor =
-        document.getElementById(
-          'contenedor-comandas'
-        );
-
-
-      const col =
-        document.createElement('div');
-
-
+      const contenedor = document.getElementById('contenedor-comandas');
+      const col = document.createElement('div');
       col.className = 'col';
-
-      col.id =
-        `comanda-${comanda.id}`;
-
+      col.id = `comanda-${comanda.id}`;
 
       let itemsHTML = '';
-
-
-      const listaPlatos =
-        comanda.items ||
-        comanda.platos ||
-        [];
-
-
+      const listaPlatos = comanda.items || comanda.platos || [];
       listaPlatos.forEach(item => {
-
         itemsHTML += `
-
           <div class="item-plato">
-
-            <span
-              class="badge bg-danger text-white me-1">
-
-              ${item.cantidad || 1}x
-
-            </span>
-
-            ${item.nombre || item.titulo}
-
-            ${
-              item.observacion
-                ? `
-                  <span class="item-obs">
-
-                    <i class="fa-solid fa-comment-dots me-1"></i>
-
-                    ${item.observacion}
-
-                  </span>
-                `
-                : ''
-            }
-
+            <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
+            ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
           </div>
-
         `;
-
       });
 
-
       let datosCliente = '';
-
-
-      if (
-        comanda.cliente &&
-        comanda.cliente.nombre
-      ) {
-
+      if (comanda.cliente && comanda.cliente.nombre) {
         datosCliente = `
-
-          <div
-            class="small text-info mt-2 pt-1 border-top border-secondary">
-
-            <strong>
-
-              <i class="fa-solid fa-user me-1"></i>
-
-              ${comanda.cliente.nombre}
-
-            </strong>
-
-            ${
-              comanda.cliente.telefono
-                ? `(${comanda.cliente.telefono})`
-                : ''
-            }
-
-            <br>
-
-            ${
-              comanda.cliente.direccion
-                ? `
-                  <i class="fa-solid fa-location-dot me-1"></i>
-                  ${comanda.cliente.direccion}
-                `
-                : ''
-            }
-
+          <div class="small text-info mt-2 pt-1 border-top border-secondary">
+            <strong><i class="fa-solid fa-user me-1"></i>${comanda.cliente.nombre}</strong> 
+            ${comanda.cliente.telefono ? `(${comanda.cliente.telefono})` : ''}<br>
+            ${comanda.cliente.direccion ? `<i class="fa-solid fa-location-dot me-1"></i>${comanda.cliente.direccion}` : ''}
           </div>
-
         `;
-
       }
-
 
       col.innerHTML = `
-
         <div class="comanda-card">
-
-          <div
-            class="comanda-header d-flex justify-content-between align-items-center">
-
+          <div class="comanda-header d-flex justify-content-between align-items-center">
             <div>
-
-              <span
-                class="h5 fw-bold text-warning mb-0">
-
-                ${comanda.mesa}
-
-              </span>
-
-              <small
-                class="text-muted d-block">
-
-                ${
-                  comanda.hora ||
-                  comanda.fecha ||
-                  ''
-                }
-
-              </small>
-
+              <span class="h5 fw-bold text-warning mb-0">${comanda.mesa}</span>
+              <small class="text-muted d-block">${comanda.hora || comanda.fecha || ''}</small>
             </div>
-
-
-            <span class="badge-metodo">
-
-              ${
-                comanda.metodoPago ||
-                'Efectivo'
-              }
-
-            </span>
-
+            <span class="badge-metodo">${comanda.metodoPago || 'Efectivo'}</span>
           </div>
-
 
           <div class="comanda-body">
-
             ${itemsHTML}
-
             ${datosCliente}
-
           </div>
 
-
-          <div
-            class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-
-            <span
-              class="fw-bold text-white">
-
-              Total: S/
-              ${Number(comanda.total).toFixed(2)}
-
-            </span>
-
-
-            <button
-              class="btn btn-sm btn-success fw-bold"
-              onclick="despacharComanda('${comanda.id}')">
-
-              <i class="fa-solid fa-check me-1"></i>
-
-              Listo
-
+          <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-white">Total: S/ ${Number(comanda.total).toFixed(2)}</span>
+            <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
+              <i class="fa-solid fa-check me-1"></i> Listo
             </button>
-
           </div>
-
         </div>
-
       `;
 
-
-      contenedor.insertBefore(
-        col,
-        contenedor.firstChild
-      );
-
-
+      contenedor.insertBefore(col, contenedor.firstChild);
       imprimirTicket(comanda);
-
     });
 
-
-    /* =====================================================
-       DESPACHAR COMANDA
-       ===================================================== */
-
     function despacharComanda(id) {
-
-      const elem =
-        document.getElementById(
-          `comanda-${id}`
-        );
-
-
+      const elem = document.getElementById(`comanda-${id}`);
       if (elem) {
-
         elem.remove();
-
       }
 
-
-      const contenedor =
-        document.getElementById(
-          'contenedor-comandas'
-        );
-
-
-      const tarjetas =
-        contenedor.querySelectorAll(
-          '.col:not(#mensaje-vacio)'
-        );
-
-
+      const contenedor = document.getElementById('contenedor-comandas');
+      const tarjetas = contenedor.querySelectorAll('.col:not(#mensaje-vacio)');
       if (tarjetas.length === 0) {
-
-        const msgVacio =
-          document.getElementById(
-            'mensaje-vacio'
-          );
-
-
-        if (msgVacio) {
-
-          msgVacio.style.display =
-            'block';
-
-        }
-
+        const msgVacio = document.getElementById('mensaje-vacio');
+        if (msgVacio) msgVacio.style.display = 'block';
       }
-
     }
-
   </script>
-
 </body>
 </html>
