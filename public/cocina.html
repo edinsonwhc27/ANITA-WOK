@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* ESTILOS DE IMPRESIÓN CON LARGO DE HOJA DINÁMICO */
+    /* ESTILOS DE IMPRESIÓN IDÉNTICOS A TU SEGUNDA FOTO */
     @media print {
       body * {
         visibility: hidden !important;
@@ -68,6 +68,7 @@
         height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: #fff !important;
       }
       #ticket-impresion, #ticket-impresion * {
         visibility: visible !important;
@@ -76,16 +77,28 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 72mm;
-        padding: 2mm 1mm 35mm 1mm !important; /* Espacio extra para avance del cortador */
+        width: 76mm; /* Ajustado al ancho completo de 80mm */
+        padding: 10px !important;
         box-sizing: border-box !important;
-        font-family: 'Arial Black', 'Courier New', sans-serif;
+        font-family: 'Courier New', Courier, monospace;
         color: #000;
         background-color: #fff;
       }
       @page {
-        size: 80mm auto; /* La hoja crece automáticamente según los platos */
+        size: 80mm auto;
         margin: 0;
+      }
+
+      .caja-borde {
+        border: 2px dashed #000;
+        padding: 12px 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .linea-punteada {
+        border-top: 2px dashed #000;
+        margin: 12px 0;
       }
     }
   </style>
@@ -98,7 +111,6 @@
       <h1 class="h4 mb-0 fw-bold text-danger"><i class="fa-solid fa-utensils me-2"></i> ANITA-WOK — COCINA</h1>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <!-- BOTÓN PARA ACTIVAR/DESBLOQUEAR EL SONIDO EN EL NAVEGADOR -->
       <button id="btn-activar-sonido" class="btn btn-warning btn-sm fw-bold" onclick="activarAudio()">
         <i class="fa-solid fa-volume-high me-1"></i> Activar Sonido Alerta
       </button>
@@ -128,7 +140,6 @@
     const socket = io();
     let audioPermitido = false;
 
-    // Sintetizador Web Audio API para reproducir el pitido
     function emitirPitido() {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -165,7 +176,6 @@
       }
     }
 
-    // Función para activar el audio al hacer clic por primera vez
     function activarAudio() {
       audioPermitido = true;
       emitirPitido();
@@ -176,7 +186,7 @@
       }
     }
 
-    // FORMATO DE IMPRESIÓN DENSIDAD Y TAMAÑO MAXIMIZADO
+    // FORMATO DE IMPRESIÓN BASADO EN TU SEGUNDA FOTO
     function imprimirTicket(comanda) {
       const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
@@ -186,40 +196,37 @@
 
       listaPlatos.forEach(item => {
         filasPlatos += `
-          <div style="margin-top: 14px; font-size: 28px; font-weight: 900; line-height: 1.1; border-bottom: 2px dashed #000; padding-bottom: 8px;">
+          <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
             ${item.cantidad || 1}x ${item.nombre || item.titulo}
-            ${item.observacion ? `<div style="font-size: 20px; font-weight: 900; background-color: #000; color: #fff; padding: 4px; margin-top: 6px;">* OBS: ${item.observacion}</div>` : ''}
+            ${item.observacion ? `<div style="font-size: 15px; font-weight: bold; background: #000; color: #fff; padding: 2px 4px; margin-top: 3px;">* OBS: ${item.observacion}</div>` : ''}
           </div>
         `;
       });
 
       ticketContainer.innerHTML = `
-        <div style="text-align: center; border-bottom: 4px solid #000; padding-bottom: 10px;">
-          <h1 style="margin: 0; font-size: 30px; font-weight: 900; letter-spacing: 1px;">ANITA WOK</h1>
-          <div style="font-size: 22px; font-weight: 900; margin-top: 4px;">COMANDA #${comanda.id}</div>
-          
-          <!-- RECUADRO MESA GIGANTE -->
-          <div style="font-size: 32px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 8px 0; text-transform: uppercase;">
-            ${comanda.mesa ? comanda.mesa.toUpperCase() : 'MESA'}
+        <div class="caja-borde">
+          <div style="text-align: center;">
+            <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">ANITA-WOK</h1>
           </div>
           
-          <div style="font-size: 16px; margin-top: 6px; font-weight: 900;">
-            Hora: ${comanda.hora || ''} | Pago: ${comanda.metodoPago || 'Efectivo'}
-          </div>
-        </div>
-        
-        <div style="padding: 10px 0;">
-          ${filasPlatos}
-        </div>
+          <div class="linea-punteada"></div>
 
-        <div style="border-top: 4px solid #000; padding-top: 10px; margin-top: 14px;">
-          <div style="display: flex; justify-content: space-between; font-size: 24px; font-weight: 900;">
-            <span>TOTAL:</span>
-            <span>S/ ${Number(comanda.total).toFixed(2)}</span>
+          <div style="font-size: 18px; font-weight: bold; line-height: 1.4;">
+            <div>Comanda: #${comanda.id}</div>
+            <div>Ubicación: ${comanda.mesa ? comanda.mesa : 'Llevar'}</div>
+            <div>Hora: ${comanda.hora || ''}</div>
           </div>
-          
-          <div style="text-align: center; margin-top: 16px; font-size: 20px; font-weight: 900;">
-            *** COCINA ***
+
+          <div class="linea-punteada"></div>
+
+          <div>
+            ${filasPlatos}
+          </div>
+
+          <div class="linea-punteada"></div>
+
+          <div style="text-align: right; font-size: 20px; font-weight: 900; margin-top: 10px;">
+            Total: S/ ${Number(comanda.total).toFixed(2)}
           </div>
         </div>
       `;
@@ -232,7 +239,6 @@
       }, 300);
     }
 
-    // Escuchar la llegada de una nueva comanda desde el servidor
     socket.on('nuevaComanda', (comanda) => {
       console.log("Nueva comanda recibida:", comanda);
 
@@ -240,11 +246,9 @@
         emitirPitido();
       }
 
-      // Ocultar mensaje de espera
       const msgVacio = document.getElementById('mensaje-vacio');
       if (msgVacio) msgVacio.style.display = 'none';
 
-      // Construir tarjeta de comanda en pantalla
       const contenedor = document.getElementById('contenedor-comandas');
       const col = document.createElement('div');
       col.className = 'col';
@@ -296,14 +300,10 @@
         </div>
       `;
 
-      // Insertar la comanda al inicio
       contenedor.insertBefore(col, contenedor.firstChild);
-
-      // Disparar la impresión en la laptop conectada a la RED-Q80K
       imprimirTicket(comanda);
     });
 
-    // Función para marcar como despachada/lista la comanda
     function despacharComanda(id) {
       const elem = document.getElementById(`comanda-${id}`);
       if (elem) {
