@@ -58,6 +58,30 @@
       padding: 4px 8px;
       border-radius: 5px;
     }
+
+    /* ESTILOS DE IMPRESIÓN PARA TICKET TÉRMICO (RED-Q80K 80mm) */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #ticket-impresion, #ticket-impresion * {
+        visibility: visible;
+      }
+      #ticket-impresion {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 72mm;
+        font-family: monospace;
+        color: #000;
+        background-color: #fff;
+        padding: 5px;
+      }
+      @page {
+        size: 80mm auto;
+        margin: 0mm;
+      }
+    }
   </style>
 </head>
 <body>
@@ -86,6 +110,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Contenedor oculto para armar el ticket a imprimir -->
+  <div id="ticket-impresion" style="display: none;"></div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -143,6 +170,53 @@
       }
     }
 
+    // Función para generar e imprimir la comanda en la impresora de 80mm
+    function imprimirTicket(comanda) {
+      const ticketContainer = document.getElementById('ticket-impresion');
+      if (!ticketContainer) return;
+
+      const listaPlatos = comanda.items || comanda.platos || [];
+      let filasPlatos = '';
+
+      listaPlatos.forEach(item => {
+        filasPlatos += `
+          <div style="font-size: 14px; font-weight: bold; margin-top: 4px;">
+            ${item.cantidad || 1}x ${item.nombre || item.titulo}
+          </div>
+          ${item.observacion ? `<div style="font-size: 11px; padding-left: 10px;">* OBS: ${item.observacion}</div>` : ''}
+        `;
+      });
+
+      ticketContainer.innerHTML = `
+        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <h2 style="margin: 0; font-size: 18px;">ANITA WOK</h2>
+          <p style="margin: 2px 0; font-size: 12px;">COMANDA #${comanda.id}</p>
+          <p style="margin: 2px 0; font-size: 14px; font-weight: bold;">UBICACIÓN: ${comanda.mesa}</p>
+          <p style="margin: 2px 0; font-size: 11px;">Hora: ${comanda.hora || ''} - Pago: ${comanda.metodoPago || 'Efectivo'}</p>
+        </div>
+        
+        <div style="padding: 5px 0; border-bottom: 1px dashed #000;">
+          ${filasPlatos}
+        </div>
+
+        <div style="text-align: right; margin-top: 5px; font-size: 14px; font-weight: bold;">
+          TOTAL: S/ ${Number(comanda.total).toFixed(2)}
+        </div>
+        
+        <div style="text-align: center; margin-top: 10px; font-size: 10px;">
+          *** IMPRESO EN COCINA ***
+        </div>
+      `;
+
+      ticketContainer.style.display = 'block';
+      
+      // Llamar al diálogo de impresión
+      setTimeout(() => {
+        window.print();
+        ticketContainer.style.display = 'none';
+      }, 300);
+    }
+
     // Escuchar la llegada de una nueva comanda desde el servidor
     socket.on('nuevaComanda', (comanda) => {
       console.log("Nueva comanda recibida:", comanda);
@@ -155,7 +229,7 @@
       const msgVacio = document.getElementById('mensaje-vacio');
       if (msgVacio) msgVacio.style.display = 'none';
 
-      // Construir tarjeta de comanda
+      // Construir tarjeta de comanda en pantalla
       const contenedor = document.getElementById('contenedor-comandas');
       const col = document.createElement('div');
       col.className = 'col';
@@ -209,6 +283,9 @@
 
       // Insertar la comanda al inicio
       contenedor.insertBefore(col, contenedor.firstChild);
+
+      // Disparar la impresión en la laptop conectada a la RED-Q80K
+      imprimirTicket(comanda);
     });
 
     // Función para marcar como despachada/lista la comanda
