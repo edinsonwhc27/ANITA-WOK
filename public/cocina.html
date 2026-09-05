@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* ESTILOS DE IMPRESIÓN MÁXIMO TAMAÑO */
+    /* ESTILOS DE IMPRESIÓN CON LARGO DE HOJA DINÁMICO */
     @media print {
       body * {
         visibility: hidden !important;
@@ -77,14 +77,14 @@
         left: 0;
         top: 0;
         width: 72mm;
-        padding: 2mm 1mm 35mm 1mm !important; /* Espacio extra amplio al final para expulsión total */
+        padding: 2mm 1mm 35mm 1mm !important; /* Espacio extra para avance del cortador */
         box-sizing: border-box !important;
         font-family: 'Arial Black', 'Courier New', sans-serif;
         color: #000;
         background-color: #fff;
       }
       @page {
-        size: 80mm auto;
+        size: 80mm auto; /* La hoja crece automáticamente según los platos */
         margin: 0;
       }
     }
@@ -176,7 +176,7 @@
       }
     }
 
-    // FORMATO GIGANTE PARA COCINA
+    // FORMATO DE IMPRESIÓN DENSIDAD Y TAMAÑO MAXIMIZADO
     function imprimirTicket(comanda) {
       const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
