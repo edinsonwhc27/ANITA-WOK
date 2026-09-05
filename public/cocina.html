@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* ESTÁNDAR RESTAURANTE: ROLL CONTINUO DE 80MM CON MARGEN DE AVANCE DE CORTE */
+    /* ESTILOS DE IMPRESIÓN MÁXIMO TAMAÑO */
     @media print {
       body * {
         visibility: hidden !important;
@@ -77,14 +77,14 @@
         left: 0;
         top: 0;
         width: 72mm;
-        padding: 4mm 2mm 25mm 2mm !important; /* 25mm de padding inferior simula el avance de papel para corte fácil */
+        padding: 2mm 1mm 35mm 1mm !important; /* Espacio extra amplio al final para expulsión total */
         box-sizing: border-box !important;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: 'Arial Black', 'Courier New', sans-serif;
         color: #000;
         background-color: #fff;
       }
       @page {
-        size: 80mm auto; /* Tamaño continuo de impresora de ticket */
+        size: 80mm auto;
         margin: 0;
       }
     }
@@ -176,7 +176,7 @@
       }
     }
 
-    // FORMATO DE COMANDA TIPO RESTAURANTE DE ALTA VISIBILIDAD
+    // FORMATO GIGANTE PARA COCINA
     function imprimirTicket(comanda) {
       const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
@@ -186,24 +186,24 @@
 
       listaPlatos.forEach(item => {
         filasPlatos += `
-          <div style="margin-top: 10px; font-size: 22px; font-weight: 900; line-height: 1.2; border-bottom: 1px dashed #666; padding-bottom: 6px;">
+          <div style="margin-top: 14px; font-size: 28px; font-weight: 900; line-height: 1.1; border-bottom: 2px dashed #000; padding-bottom: 8px;">
             ${item.cantidad || 1}x ${item.nombre || item.titulo}
-            ${item.observacion ? `<div style="font-size: 16px; font-weight: bold; background-color: #000; color: #fff; padding: 2px 4px; margin-top: 4px;">* OBS: ${item.observacion}</div>` : ''}
+            ${item.observacion ? `<div style="font-size: 20px; font-weight: 900; background-color: #000; color: #fff; padding: 4px; margin-top: 6px;">* OBS: ${item.observacion}</div>` : ''}
           </div>
         `;
       });
 
       ticketContainer.innerHTML = `
-        <div style="text-align: center; border-bottom: 3px solid #000; padding-bottom: 8px;">
-          <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">ANITA WOK</h1>
-          <div style="font-size: 18px; font-weight: 900; margin-top: 2px;">COMANDA #${comanda.id}</div>
+        <div style="text-align: center; border-bottom: 4px solid #000; padding-bottom: 10px;">
+          <h1 style="margin: 0; font-size: 30px; font-weight: 900; letter-spacing: 1px;">ANITA WOK</h1>
+          <div style="font-size: 22px; font-weight: 900; margin-top: 4px;">COMANDA #${comanda.id}</div>
           
-          <!-- RECUADRO GRANDE DE MESA/UBICACIÓN -->
-          <div style="font-size: 24px; font-weight: 900; margin-top: 6px; background: #000; color: #fff; padding: 6px 0; text-transform: uppercase;">
+          <!-- RECUADRO MESA GIGANTE -->
+          <div style="font-size: 32px; font-weight: 900; margin-top: 8px; background: #000; color: #fff; padding: 8px 0; text-transform: uppercase;">
             ${comanda.mesa ? comanda.mesa.toUpperCase() : 'MESA'}
           </div>
           
-          <div style="font-size: 14px; margin-top: 6px; font-weight: bold;">
+          <div style="font-size: 16px; margin-top: 6px; font-weight: 900;">
             Hora: ${comanda.hora || ''} | Pago: ${comanda.metodoPago || 'Efectivo'}
           </div>
         </div>
@@ -212,14 +212,14 @@
           ${filasPlatos}
         </div>
 
-        <div style="border-top: 3px solid #000; padding-top: 8px; margin-top: 10px;">
-          <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 900;">
+        <div style="border-top: 4px solid #000; padding-top: 10px; margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 24px; font-weight: 900;">
             <span>TOTAL:</span>
             <span>S/ ${Number(comanda.total).toFixed(2)}</span>
           </div>
           
-          <div style="text-align: center; margin-top: 12px; font-size: 16px; font-weight: 900;">
-            *** IMPRESO EN COCINA ***
+          <div style="text-align: center; margin-top: 16px; font-size: 20px; font-weight: 900;">
+            *** COCINA ***
           </div>
         </div>
       `;
