@@ -59,16 +59,15 @@
       border-radius: 5px;
     }
 
-    /* ESTILOS DE IMPRESIÓN CON LARGO ADECUADO PARA AVANCE DE PAPEL (120mm) */
+    /* ESTÁNDAR RESTAURANTE: ROLL CONTINUO DE 80MM CON MARGEN DE AVANCE DE CORTE */
     @media print {
       body * {
         visibility: hidden !important;
       }
       html, body {
-        height: 120mm !important;
+        height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: hidden !important;
       }
       #ticket-impresion, #ticket-impresion * {
         visibility: visible !important;
@@ -78,21 +77,14 @@
         left: 0;
         top: 0;
         width: 72mm;
-        height: 120mm !important;
-        padding-top: 10mm !important;
-        padding-bottom: 25mm !important; /* Espacio extra para que sobresalga de la boca de la impresora */
-        padding-left: 2mm !important;
-        padding-right: 2mm !important;
+        padding: 4mm 2mm 25mm 2mm !important; /* 25mm de padding inferior simula el avance de papel para corte fácil */
         box-sizing: border-box !important;
         font-family: 'Courier New', Courier, monospace;
         color: #000;
         background-color: #fff;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: flex-start !important;
       }
       @page {
-        size: 80mm 120mm;
+        size: 80mm auto; /* Tamaño continuo de impresora de ticket */
         margin: 0;
       }
     }
@@ -184,7 +176,7 @@
       }
     }
 
-    // Función para generar e imprimir la comanda con margen de avance
+    // FORMATO DE COMANDA TIPO RESTAURANTE DE ALTA VISIBILIDAD
     function imprimirTicket(comanda) {
       const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
@@ -194,42 +186,45 @@
 
       listaPlatos.forEach(item => {
         filasPlatos += `
-          <div style="margin-top: 6px; font-size: 19px; font-weight: 900; line-height: 1.2;">
+          <div style="margin-top: 10px; font-size: 22px; font-weight: 900; line-height: 1.2; border-bottom: 1px dashed #666; padding-bottom: 6px;">
             ${item.cantidad || 1}x ${item.nombre || item.titulo}
+            ${item.observacion ? `<div style="font-size: 16px; font-weight: bold; background-color: #000; color: #fff; padding: 2px 4px; margin-top: 4px;">* OBS: ${item.observacion}</div>` : ''}
           </div>
-          ${item.observacion ? `<div style="font-size: 15px; font-weight: bold; font-style: italic; padding-left: 10px; margin-top: 2px;">* OBS: ${item.observacion}</div>` : ''}
         `;
       });
 
       ticketContainer.innerHTML = `
-        <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px;">
-          <h2 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px;">ANITA WOK</h2>
-          <div style="font-size: 16px; font-weight: bold; margin-top: 2px;">COMANDA #${comanda.id}</div>
-          <div style="font-size: 20px; font-weight: 900; margin-top: 4px; background: #000; color: #fff; padding: 4px 0;">
+        <div style="text-align: center; border-bottom: 3px solid #000; padding-bottom: 8px;">
+          <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">ANITA WOK</h1>
+          <div style="font-size: 18px; font-weight: 900; margin-top: 2px;">COMANDA #${comanda.id}</div>
+          
+          <!-- RECUADRO GRANDE DE MESA/UBICACIÓN -->
+          <div style="font-size: 24px; font-weight: 900; margin-top: 6px; background: #000; color: #fff; padding: 6px 0; text-transform: uppercase;">
             ${comanda.mesa ? comanda.mesa.toUpperCase() : 'MESA'}
           </div>
-          <div style="font-size: 13px; margin-top: 4px; font-weight: bold;">
+          
+          <div style="font-size: 14px; margin-top: 6px; font-weight: bold;">
             Hora: ${comanda.hora || ''} | Pago: ${comanda.metodoPago || 'Efectivo'}
           </div>
         </div>
         
-        <div style="padding: 8px 0; border-bottom: 2px dashed #000;">
+        <div style="padding: 10px 0;">
           ${filasPlatos}
         </div>
 
-        <div style="margin-top: 8px;">
-          <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 900;">
+        <div style="border-top: 3px solid #000; padding-top: 8px; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 900;">
             <span>TOTAL:</span>
             <span>S/ ${Number(comanda.total).toFixed(2)}</span>
           </div>
           
-          <div style="text-align: center; margin-top: 8px; font-size: 13px; font-weight: bold;">
-            *** COCINA ***
+          <div style="text-align: center; margin-top: 12px; font-size: 16px; font-weight: 900;">
+            *** IMPRESO EN COCINA ***
           </div>
         </div>
       `;
 
-      ticketContainer.style.display = 'flex';
+      ticketContainer.style.display = 'block';
       
       setTimeout(() => {
         window.print();
