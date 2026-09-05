@@ -59,27 +59,33 @@
       border-radius: 5px;
     }
 
-    /* ESTILOS DE IMPRESIÓN PARA TICKET TÉRMICO (RED-Q80K 80mm) */
+    /* ESTILOS DE IMPRESIÓN OPTIMIZADOS PARA RED-Q80K (80mm) */
     @media print {
       body * {
-        visibility: hidden;
+        visibility: hidden !important;
+      }
+      html, body {
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       #ticket-impresion, #ticket-impresion * {
-        visibility: visible;
+        visibility: visible !important;
       }
       #ticket-impresion {
         position: absolute;
         left: 0;
         top: 0;
         width: 72mm;
-        font-family: monospace;
+        font-family: 'Courier New', Courier, monospace;
         color: #000;
         background-color: #fff;
-        padding: 5px;
+        padding: 2mm;
+        box-sizing: border-box;
       }
       @page {
         size: 80mm auto;
-        margin: 0mm;
+        margin: 0;
       }
     }
   </style>
@@ -97,7 +103,7 @@
         <i class="fa-solid fa-volume-high me-1"></i> Activar Sonido Alerta
       </button>
       <a href="/index.html" class="btn btn-outline-light btn-sm">
-        <i class="fa-solid fa-receipt me-1"></i> Ir a Caza / Comandas
+        <i class="fa-solid fa-receipt me-1"></i> Ir a Caja / Comandas
       </a>
     </div>
   </header>
@@ -180,37 +186,41 @@
 
       listaPlatos.forEach(item => {
         filasPlatos += `
-          <div style="font-size: 14px; font-weight: bold; margin-top: 4px;">
+          <div style="margin-top: 6px; font-size: 15px; font-weight: bold; line-height: 1.2;">
             ${item.cantidad || 1}x ${item.nombre || item.titulo}
           </div>
-          ${item.observacion ? `<div style="font-size: 11px; padding-left: 10px;">* OBS: ${item.observacion}</div>` : ''}
+          ${item.observacion ? `<div style="font-size: 12px; font-weight: normal; font-style: italic; padding-left: 10px; margin-top: 2px;">* OBS: ${item.observacion}</div>` : ''}
         `;
       });
 
       ticketContainer.innerHTML = `
-        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px;">
-          <h2 style="margin: 0; font-size: 18px;">ANITA WOK</h2>
-          <p style="margin: 2px 0; font-size: 12px;">COMANDA #${comanda.id}</p>
-          <p style="margin: 2px 0; font-size: 14px; font-weight: bold;">UBICACIÓN: ${comanda.mesa}</p>
-          <p style="margin: 2px 0; font-size: 11px;">Hora: ${comanda.hora || ''} - Pago: ${comanda.metodoPago || 'Efectivo'}</p>
+        <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px;">
+          <h2 style="margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">ANITA WOK</h2>
+          <div style="font-size: 13px; font-weight: bold; margin-top: 2px;">COMANDA #${comanda.id}</div>
+          <div style="font-size: 16px; font-weight: 900; margin-top: 4px; background: #000; color: #fff; padding: 2px 0;">
+            ${comanda.mesa ? comanda.mesa.toUpperCase() : 'MESA'}
+          </div>
+          <div style="font-size: 11px; margin-top: 4px;">
+            Hora: ${comanda.hora || ''} | Pago: ${comanda.metodoPago || 'Efectivo'}
+          </div>
         </div>
         
-        <div style="padding: 5px 0; border-bottom: 1px dashed #000;">
+        <div style="padding: 6px 0; border-bottom: 2px dashed #000;">
           ${filasPlatos}
         </div>
 
-        <div style="text-align: right; margin-top: 5px; font-size: 14px; font-weight: bold;">
-          TOTAL: S/ ${Number(comanda.total).toFixed(2)}
+        <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 15px; font-weight: bold;">
+          <span>TOTAL:</span>
+          <span>S/ ${Number(comanda.total).toFixed(2)}</span>
         </div>
         
-        <div style="text-align: center; margin-top: 10px; font-size: 10px;">
-          *** IMPRESO EN COCINA ***
+        <div style="text-align: center; margin-top: 10px; padding-bottom: 5px; font-size: 11px; font-weight: bold;">
+          *** COCINA ***
         </div>
       `;
 
       ticketContainer.style.display = 'block';
       
-      // Llamar al diálogo de impresión
       setTimeout(() => {
         window.print();
         ticketContainer.style.display = 'none';
