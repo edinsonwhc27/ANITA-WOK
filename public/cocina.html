@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* CONFIGURACIÓN DE IMPRESIÓN (CON MARGEN EXTRA AL FINAL PARA CORTE AUTOMÁTICO) */
+    /* CONFIGURACIÓN DE IMPRESIÓN (MÁXIMA LEGIBILIDAD Y CERO DESPERDICIO DE PAPEL) */
     @media print {
       body * {
         visibility: hidden !important;
@@ -77,8 +77,8 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 76mm; /* Ocupa el ancho de la ticketera */
-        padding: 2px 2px 40px 2px !important; /* El 40px abajo añade ~4cm de papel extra */
+        width: 76mm; /* Ocupa el ancho completo de 80mm */
+        padding: 2px !important;
         margin: 0 !important;
         box-sizing: border-box !important;
         font-family: 'Courier New', Courier, monospace;
@@ -86,8 +86,8 @@
         background-color: #fff;
       }
       @page {
-        size: 80mm auto;
-        margin: 0;
+        size: 80mm auto; /* Altura dinámica para detener la impresión al terminar */
+        margin: 0;       /* Elimina los márgenes del navegador */
       }
 
       .caja-borde {
@@ -100,13 +100,6 @@
       .linea-punteada {
         border-top: 2px dashed #000;
         margin: 8px 0;
-      }
-
-      /* Espaciador invisible para forzar avance de papel antes del corte de la guillotina */
-      .espacio-corte {
-        height: 40px; 
-        display: block;
-        content: " ";
       }
     }
   </style>
@@ -212,13 +205,10 @@
       }
     }
 
-    // FORMATO DE IMPRESIÓN CON AVANCE DE PAPEL PARA CORTE COMPLETO
+    // FORMATO DE IMPRESIÓN CON LETRA GIGANTE Y TAMAÑO COMPACTO
     function imprimirTicket(comanda) {
       const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
-
-      // 1. Vaciado preventivo inmediato
-      ticketContainer.innerHTML = '';
 
       const listaPlatos = comanda.items || comanda.platos || [];
       let filasPlatos = '';
@@ -226,34 +216,17 @@
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
         const obsPlato = arreglarTextoImpresion(item.observacion);
-        
-        // Obtención flexible del precio por plato
-        const valorPrecio = item.precio !== undefined ? item.precio 
-                          : item.precioUnitario !== undefined ? item.precioUnitario 
-                          : item.subtotal !== undefined ? item.subtotal 
-                          : item.costo !== undefined ? item.costo 
-                          : item.monto !== undefined ? item.monto 
-                          : item.price !== undefined ? item.price : 0;
-
-        const precioPlato = Number(valorPrecio || 0).toFixed(2);
 
         filasPlatos += `
-          <div style="margin-bottom: 10px;">
-            <div style="font-size: 22px; font-weight: 900; line-height: 1.1;">
-              ${item.cantidad || 1}x ${nombrePlato}
-            </div>
-            <div style="font-size: 20px; font-weight: bold; text-align: right; margin-top: 2px;">
-              S/ ${precioPlato}
-            </div>
+          <div style="font-size: 24px; font-weight: 900; line-height: 1.2; margin-bottom: 10px;">
+            ${item.cantidad || 1}x ${nombrePlato}
             ${obsPlato ? `<div style="font-size: 18px; font-weight: bold; background: #000; color: #fff; padding: 3px 5px; margin-top: 4px;">* OBS: ${obsPlato}</div>` : ''}
           </div>
         `;
       });
 
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
-      const totalSeguro = Number(comanda.total || 0).toFixed(2);
 
-      // 2. Inyección de HTML incluyendo el div invisible espacio-corte al final
       ticketContainer.innerHTML = `
         <div class="caja-borde">
           <div style="text-align: center;">
@@ -277,23 +250,16 @@
           <div class="linea-punteada"></div>
 
           <div style="text-align: right; font-size: 22px; font-weight: 900; margin-top: 6px;">
-            Total: S/ ${totalSeguro}
+            Total: S/ ${Number(comanda.total).toFixed(2)}
           </div>
         </div>
-        <!-- Avance de papel para que la guillotina no corte el texto final -->
-        <div class="espacio-corte"></div>
       `;
 
       ticketContainer.style.display = 'block';
       
-      // 3. Impresión y limpieza garantizada
       setTimeout(() => {
         window.print();
-        
-        setTimeout(() => {
-          ticketContainer.style.display = 'none';
-          ticketContainer.innerHTML = '';
-        }, 500);
+        ticketContainer.style.display = 'none';
       }, 300);
     }
 
@@ -315,22 +281,10 @@
       let itemsHTML = '';
       const listaPlatos = comanda.items || comanda.platos || [];
       listaPlatos.forEach(item => {
-        const valorPrecio = item.precio !== undefined ? item.precio 
-                          : item.precioUnitario !== undefined ? item.precioUnitario 
-                          : item.subtotal !== undefined ? item.subtotal 
-                          : item.costo !== undefined ? item.costo 
-                          : item.monto !== undefined ? item.monto 
-                          : item.price !== undefined ? item.price : 0;
-
-        const precioPlatoTarjeta = Number(valorPrecio || 0).toFixed(2);
-
         itemsHTML += `
-          <div class="item-plato d-flex justify-content-between align-items-center">
-            <div>
-              <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
-              ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
-            </div>
-            <span class="fw-bold text-light ms-2">S/ ${precioPlatoTarjeta}</span>
+          <div class="item-plato">
+            <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
+            ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
           </div>
         `;
       });
@@ -345,8 +299,6 @@
           </div>
         `;
       }
-
-      const totalTarjeta = Number(comanda.total || 0).toFixed(2);
 
       col.innerHTML = `
         <div class="comanda-card">
@@ -364,7 +316,7 @@
           </div>
 
           <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-white">Total: S/ ${totalTarjeta}</span>
+            <span class="fw-bold text-white">Total: S/ ${Number(comanda.total).toFixed(2)}</span>
             <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
               <i class="fa-solid fa-check me-1"></i> Listo
             </button>
