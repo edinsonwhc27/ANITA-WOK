@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* CSS ULTRA-COMPACTO DE IMPRESIÓN (SIN MÁRGENES MUERTOS NI ESPACIOS) */
+    /* CSS ULTRA-COMPACTO DE IMPRESIÓN (SIN MÁRGENES DILATADOS POR MÚLTIPLES PLATOS) */
     @media print {
       @page {
         margin: 0 !important;
@@ -83,6 +83,14 @@
         width: 100%;
         padding: 0 !important;
         margin: 0 !important;
+      }
+      .tabla-platos {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .tabla-platos td {
+        padding: 1px 0 !important;
+        vertical-align: top;
       }
       .renglon-fantasma {
         font-size: 8px;
@@ -210,13 +218,16 @@
         acumuladoTotal += subtotal;
 
         filasPlatos += `
-          <div style="font-size: 19px; font-weight: 900; line-height: 1.1; margin-bottom: 4px;">
-            <div style="display: flex; justify-content: space-between;">
-              <span>${cantidad}x ${nombrePlato}</span>
-              ${subtotal > 0 ? `<span>S/ ${subtotal.toFixed(2)}</span>` : ''}
-            </div>
-            ${obsPlato ? `<div style="font-size: 15px; font-weight: bold; background: #000; color: #fff; padding: 1px 3px; margin-top: 2px;">* OBS: ${obsPlato}</div>` : ''}
-          </div>
+          <tr>
+            <td style="font-size: 16px; font-weight: 900; width: 30px; text-align: left;">${cantidad}x</td>
+            <td style="font-size: 16px; font-weight: 800; text-align: left;">
+              ${nombrePlato}
+              ${obsPlato ? `<div style="font-size: 13px; font-weight: bold; background: #000; color: #fff; padding: 0 3px; margin-top: 1px; display: inline-block;">* OBS: ${obsPlato}</div>` : ''}
+            </td>
+            <td style="font-size: 16px; font-weight: 900; text-align: right; width: 85px;">
+              ${subtotal > 0 ? `S/ ${subtotal.toFixed(2)}` : ''}
+            </td>
+          </tr>
         `;
       });
 
@@ -228,31 +239,33 @@
       ticketContainer.innerHTML = `
         <div style="padding: 0; margin: 0; font-family: monospace; color: #000; background: #fff;">
           <div style="text-align: center;">
-            <h1 style="margin: 0; padding: 0; font-size: 26px; font-weight: 900;">ANITA-WOK</h1>
+            <h1 style="margin: 0; padding: 0; font-size: 22px; font-weight: 900;">ANITA-WOK</h1>
           </div>
           
-          <hr style="border-top: 1px dashed #000; margin: 4px 0;">
+          <hr style="border-top: 1px dashed #000; margin: 3px 0;">
 
-          <div style="font-size: 18px; font-weight: bold; line-height: 1.2;">
+          <div style="font-size: 15px; font-weight: bold; line-height: 1.1;">
             <div>Comanda: #${comanda.id}</div>
             <div>Ubicacion: ${ubicacionLimpia}</div>
             <div>Hora: ${comanda.hora || ''}</div>
           </div>
 
-          <hr style="border-top: 1px dashed #000; margin: 4px 0;">
+          <hr style="border-top: 1px dashed #000; margin: 3px 0;">
 
-          <div>
-            ${filasPlatos}
-          </div>
+          <table class="tabla-platos">
+            <tbody>
+              ${filasPlatos}
+            </tbody>
+          </table>
 
-          <hr style="border-top: 1px dashed #000; margin: 4px 0;">
+          <hr style="border-top: 1px dashed #000; margin: 3px 0;">
 
-          <div style="font-size: 20px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 2px;">
+          <div style="font-size: 18px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 1px;">
             <span>TOTAL:</span>
             <span>S/ ${totalFinal.toFixed(2)}</span>
           </div>
 
-          <!-- Renglón transparente mínimo -->
+          <!-- Renglón transparente mínimo para vaciado de búfer -->
           <div class="renglon-fantasma">&nbsp;</div>
         </div>
       `;
