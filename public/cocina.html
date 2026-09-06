@@ -205,10 +205,13 @@
       }
     }
 
-    // FORMATO DE IMPRESIÓN CON LETRA GIGANTE Y TAMAÑO COMPACTO
+    // FORMATO DE IMPRESIÓN CON PRECIOS INDIVIDUALES Y LIMPIEZA DE DATOS
     function imprimirTicket(comanda) {
       const ticketContainer = document.getElementById('ticket-impresion');
       if (!ticketContainer) return;
+
+      // 1. Limpieza preventiva del contenedor
+      ticketContainer.innerHTML = '';
 
       const listaPlatos = comanda.items || comanda.platos || [];
       let filasPlatos = '';
@@ -216,17 +219,25 @@
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
         const obsPlato = arreglarTextoImpresion(item.observacion);
+        
+        // Obtener el precio del plato (unitario o total por plato)
+        const precioPlato = Number(item.precio || item.costo || 0).toFixed(2);
 
         filasPlatos += `
           <div style="font-size: 24px; font-weight: 900; line-height: 1.2; margin-bottom: 10px;">
-            ${item.cantidad || 1}x ${nombrePlato}
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <span>${item.cantidad || 1}x ${nombrePlato}</span>
+              <span style="font-size: 20px; font-weight: bold; margin-left: 8px;">S/ ${precioPlato}</span>
+            </div>
             ${obsPlato ? `<div style="font-size: 18px; font-weight: bold; background: #000; color: #fff; padding: 3px 5px; margin-top: 4px;">* OBS: ${obsPlato}</div>` : ''}
           </div>
         `;
       });
 
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
+      const totalSeguro = Number(comanda.total || 0).toFixed(2);
 
+      // 2. Cargar HTML fresco
       ticketContainer.innerHTML = `
         <div class="caja-borde">
           <div style="text-align: center;">
@@ -250,7 +261,7 @@
           <div class="linea-punteada"></div>
 
           <div style="text-align: right; font-size: 22px; font-weight: 900; margin-top: 6px;">
-            Total: S/ ${Number(comanda.total).toFixed(2)}
+            Total: S/ ${totalSeguro}
           </div>
         </div>
       `;
@@ -260,6 +271,9 @@
       setTimeout(() => {
         window.print();
         ticketContainer.style.display = 'none';
+        
+        // 3. Limpieza posterior al trabajo de impresión
+        ticketContainer.innerHTML = '';
       }, 300);
     }
 
@@ -281,10 +295,14 @@
       let itemsHTML = '';
       const listaPlatos = comanda.items || comanda.platos || [];
       listaPlatos.forEach(item => {
+        const precioPlatoTarjeta = Number(item.precio || item.costo || 0).toFixed(2);
         itemsHTML += `
-          <div class="item-plato">
-            <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
-            ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
+          <div class="item-plato d-flex justify-content-between align-items-center">
+            <div>
+              <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
+              ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
+            </div>
+            <span class="fw-bold text-light ms-2">S/ ${precioPlatoTarjeta}</span>
           </div>
         `;
       });
@@ -299,6 +317,8 @@
           </div>
         `;
       }
+
+      const totalTarjeta = Number(comanda.total || 0).toFixed(2);
 
       col.innerHTML = `
         <div class="comanda-card">
@@ -316,7 +336,7 @@
           </div>
 
           <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-white">Total: S/ ${Number(comanda.total).toFixed(2)}</span>
+            <span class="fw-bold text-white">Total: S/ ${totalTarjeta}</span>
             <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
               <i class="fa-solid fa-check me-1"></i> Listo
             </button>
