@@ -58,6 +58,27 @@
       padding: 4px 8px;
       border-radius: 5px;
     }
+
+    /* ESTILOS DE IMPRESIÓN ORIGINALES */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #ticket-impresion, #ticket-impresion * {
+        visibility: visible !important;
+      }
+      #ticket-impresion {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      @page {
+        margin: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -86,6 +107,9 @@
     </div>
   </div>
 
+  <!-- Contenedor para la impresión -->
+  <div id="ticket-impresion" style="display: none;"></div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
@@ -94,7 +118,6 @@
     const socket = io();
     let audioPermitido = false;
 
-    // Función para sanear caracteres especiales y tildes para la impresora
     function arreglarTextoImpresion(texto) {
       if (!texto) return '';
       return String(texto)
@@ -158,24 +181,10 @@
       }
     }
 
-    // IMPRESIÓN AISLADA Y LIMPIA VÍA IFRAME DEDICADO
+    // ESTRUCTURA ORIGINAL DE IMPRESIÓN
     function imprimirTicket(comanda) {
-      // 1. Eliminar cualquier iframe de impresión viejo si existe
-      const iframeViejo = document.getElementById('iframe-impresion');
-      if (iframeViejo) iframeViejo.remove();
-
-      // 2. Crear un marco invisible independiente para este ticket en particular
-      const iframe = document.createElement('iframe');
-      iframe.id = 'iframe-impresion';
-      iframe.style.position = 'fixed';
-      iframe.style.right = '0';
-      iframe.style.bottom = '0';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
-      iframe.style.border = '0';
-      document.body.appendChild(iframe);
-
-      const doc = iframe.contentWindow.document;
+      const ticketContainer = document.getElementById('ticket-impresion');
+      if (!ticketContainer) return;
 
       const listaPlatos = comanda.items || comanda.platos || [];
       let filasPlatos = '';
@@ -183,113 +192,44 @@
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
         const obsPlato = arreglarTextoImpresion(item.observacion);
-        
-        const valorPrecio = item.precio !== undefined ? item.precio 
-                          : item.precioUnitario !== undefined ? item.precioUnitario 
-                          : item.subtotal !== undefined ? item.subtotal 
-                          : item.costo !== undefined ? item.costo 
-                          : item.monto !== undefined ? item.monto 
-                          : item.price !== undefined ? item.price : 0;
-
-        const precioPlato = Number(valorPrecio || 0).toFixed(2);
 
         filasPlatos += `
-          <div style="margin-bottom: 10px;">
-            <div style="font-size: 22px; font-weight: 900; line-height: 1.1;">
-              ${item.cantidad || 1}x ${nombrePlato}
-            </div>
-            <div style="font-size: 20px; font-weight: bold; text-align: right; margin-top: 2px;">
-              S/ ${precioPlato}
-            </div>
+          <div style="font-size: 24px; font-weight: 900; line-height: 1.2; margin-bottom: 10px;">
+            <div>${item.cantidad || 1}x ${nombrePlato}</div>
             ${obsPlato ? `<div style="font-size: 18px; font-weight: bold; background: #000; color: #fff; padding: 3px 5px; margin-top: 4px;">* OBS: ${obsPlato}</div>` : ''}
           </div>
         `;
       });
 
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
-      const totalSeguro = Number(comanda.total || 0).toFixed(2);
 
-      // 3. Escribir el documento desde cero
-      doc.open();
-      doc.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            @media print {
-              html, body {
-                height: auto !important;
-                margin: 0 !important;
-                padding: 0 !important;
-              }
-              @page {
-                size: 80mm auto;
-                margin: 0;
-              }
-            }
-            body {
-              width: 76mm;
-              padding: 2px 2px 40px 2px;
-              margin: 0;
-              font-family: 'Courier New', Courier, monospace;
-              color: #000;
-              background-color: #fff;
-              box-sizing: border-box;
-            }
-            .caja-borde {
-              border: 3px dashed #000;
-              padding: 8px;
-              width: 100%;
-              box-sizing: border-box;
-            }
-            .linea-punteada {
-              border-top: 2px dashed #000;
-              margin: 8px 0;
-            }
-            .espacio-corte {
-              height: 45px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="caja-borde">
-            <div style="text-align: center;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">ANITA-WOK</h1>
-            </div>
-            
-            <div class="linea-punteada"></div>
-
-            <div style="font-size: 20px; font-weight: bold; line-height: 1.3;">
-              <div>Comanda: #${comanda.id}</div>
-              <div>Ubicacion: ${ubicacionLimpia}</div>
-              <div>Hora: ${comanda.hora || ''}</div>
-            </div>
-
-            <div class="linea-punteada"></div>
-
-            <div>
-              ${filasPlatos}
-            </div>
-
-            <div class="linea-punteada"></div>
-
-            <div style="text-align: right; font-size: 22px; font-weight: 900; margin-top: 6px;">
-              Total: S/ ${totalSeguro}
-            </div>
+      ticketContainer.innerHTML = `
+        <div style="border: 3px dashed #000; padding: 10px; font-family: monospace; color: #000; background: #fff;">
+          <div style="text-align: center;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 900;">ANITA-WOK</h1>
           </div>
-          <div class="espacio-corte"></div>
-        </body>
-        </html>
-      `);
-      doc.close();
+          
+          <hr style="border-top: 2px dashed #000; margin: 8px 0;">
 
-      // 4. Imprimir el iframe aislado y destruirlo
+          <div style="font-size: 20px; font-weight: bold; line-height: 1.3;">
+            <div>Comanda: #${comanda.id}</div>
+            <div>Ubicacion: ${ubicacionLimpia}</div>
+            <div>Hora: ${comanda.hora || ''}</div>
+          </div>
+
+          <hr style="border-top: 2px dashed #000; margin: 8px 0;">
+
+          <div>
+            ${filasPlatos}
+          </div>
+        </div>
+      `;
+
+      ticketContainer.style.display = 'block';
+      
       setTimeout(() => {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        setTimeout(() => {
-          iframe.remove();
-        }, 1000);
+        window.print();
+        ticketContainer.style.display = 'none';
       }, 300);
     }
 
@@ -311,22 +251,12 @@
       let itemsHTML = '';
       const listaPlatos = comanda.items || comanda.platos || [];
       listaPlatos.forEach(item => {
-        const valorPrecio = item.precio !== undefined ? item.precio 
-                          : item.precioUnitario !== undefined ? item.precioUnitario 
-                          : item.subtotal !== undefined ? item.subtotal 
-                          : item.costo !== undefined ? item.costo 
-                          : item.monto !== undefined ? item.monto 
-                          : item.price !== undefined ? item.price : 0;
-
-        const precioPlatoTarjeta = Number(valorPrecio || 0).toFixed(2);
-
         itemsHTML += `
           <div class="item-plato d-flex justify-content-between align-items-center">
             <div>
               <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
               ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
             </div>
-            <span class="fw-bold text-light ms-2">S/ ${precioPlatoTarjeta}</span>
           </div>
         `;
       });
@@ -341,8 +271,6 @@
           </div>
         `;
       }
-
-      const totalTarjeta = Number(comanda.total || 0).toFixed(2);
 
       col.innerHTML = `
         <div class="comanda-card">
@@ -359,8 +287,7 @@
             ${datosCliente}
           </div>
 
-          <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-white">Total: S/ ${totalTarjeta}</span>
+          <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-end align-items-center">
             <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
               <i class="fa-solid fa-check me-1"></i> Listo
             </button>
