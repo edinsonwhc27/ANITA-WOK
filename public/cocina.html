@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* ESTILOS DE IMPRESIÓN */
+    /* ESTILOS DE IMPRESIÓN COMPACTOS CON PRECIOS Y TOTAL */
     @media print {
       body * {
         visibility: hidden !important;
@@ -193,22 +193,30 @@
 
       const listaPlatos = comanda.items || comanda.platos || [];
       let filasPlatos = '';
+      let acumuladoTotal = 0;
 
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
         const obsPlato = arreglarTextoImpresion(item.observacion);
+        const cantidad = Number(item.cantidad || 1);
+        const precioUnitario = Number(item.precio || item.costo || 0);
+        const subtotal = cantidad * precioUnitario;
+        acumuladoTotal += subtotal;
 
         filasPlatos += `
-          <div style="font-size: 24px; font-weight: 900; line-height: 1.2; margin-bottom: 10px;">
-            <div>${item.cantidad || 1}x ${nombrePlato}</div>
-            ${obsPlato ? `<div style="font-size: 18px; font-weight: bold; background: #000; color: #fff; padding: 3px 5px; margin-top: 4px;">* OBS: ${obsPlato}</div>` : ''}
+          <div style="font-size: 20px; font-weight: 900; line-height: 1.2; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>${cantidad}x ${nombrePlato}</span>
+              ${subtotal > 0 ? `<span>S/ ${subtotal.toFixed(2)}</span>` : ''}
+            </div>
+            ${obsPlato ? `<div style="font-size: 16px; font-weight: bold; background: #000; color: #fff; padding: 2px 4px; margin-top: 2px;">* OBS: ${obsPlato}</div>` : ''}
           </div>
         `;
       });
 
+      const totalFinal = comanda.total ? Number(comanda.total) : acumuladoTotal;
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
 
-      // Limpiamos contenido previo antes de inyectar la comanda actual
       ticketContainer.innerHTML = '';
 
       ticketContainer.innerHTML = `
@@ -231,6 +239,13 @@
             ${filasPlatos}
           </div>
 
+          <hr style="border-top: 2px dashed #000; margin: 8px 0;">
+
+          <div style="font-size: 22px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 6px;">
+            <span>TOTAL:</span>
+            <span>S/ ${totalFinal.toFixed(2)}</span>
+          </div>
+
           <!-- Renglones invisibles al final para asegurar el vaciado del búfer -->
           <div class="renglon-fantasma">&nbsp;</div>
           <div class="renglon-fantasma">&nbsp;</div>
@@ -239,7 +254,6 @@
 
       ticketContainer.style.display = 'block';
       
-      // Aumentamos el retraso a 600ms para asegurar que el navegador haya redibujado el DOM antes de enviar la orden de impresión
       setTimeout(() => {
         window.print();
         setTimeout(() => {
@@ -264,17 +278,27 @@
       col.id = `comanda-${comanda.id}`;
 
       let itemsHTML = '';
+      let totalTarjeta = 0;
       const listaPlatos = comanda.items || comanda.platos || [];
+      
       listaPlatos.forEach(item => {
+        const cantidad = Number(item.cantidad || 1);
+        const precioUnitario = Number(item.precio || item.costo || 0);
+        const subtotal = cantidad * precioUnitario;
+        totalTarjeta += subtotal;
+
         itemsHTML += `
           <div class="item-plato d-flex justify-content-between align-items-center">
             <div>
-              <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
+              <span class="badge bg-danger text-white me-1">${cantidad}x</span> ${item.nombre || item.titulo}
               ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
             </div>
+            ${subtotal > 0 ? `<span class="fw-bold text-success small ms-2">S/ ${subtotal.toFixed(2)}</span>` : ''}
           </div>
         `;
       });
+
+      const totalMostrar = comanda.total ? Number(comanda.total) : totalTarjeta;
 
       let datosCliente = '';
       if (comanda.cliente && comanda.cliente.nombre) {
@@ -302,7 +326,8 @@
             ${datosCliente}
           </div>
 
-          <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-end align-items-center">
+          <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
+            <span class="h6 mb-0 text-white fw-bold">Total: <span class="text-success">S/ ${totalMostrar.toFixed(2)}</span></span>
             <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
               <i class="fa-solid fa-check me-1"></i> Listo
             </button>
