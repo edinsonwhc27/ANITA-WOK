@@ -58,50 +58,6 @@
       padding: 4px 8px;
       border-radius: 5px;
     }
-
-    /* CONFIGURACIÓN DE IMPRESIÓN (MÁXIMA LEGIBILIDAD Y CERO DESPERDICIO DE PAPEL) */
-    @media print {
-      body * {
-        visibility: hidden !important;
-      }
-      html, body {
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-      }
-      #ticket-impresion, #ticket-impresion * {
-        visibility: visible !important;
-      }
-      #ticket-impresion {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 76mm; /* Ocupa el ancho completo de 80mm */
-        padding: 2px !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-        font-family: 'Courier New', Courier, monospace;
-        color: #000;
-        background-color: #fff;
-      }
-      @page {
-        size: 80mm auto; /* Altura dinámica para detener la impresión al terminar */
-        margin: 0;       /* Elimina los márgenes del navegador */
-      }
-
-      .caja-borde {
-        border: 3px dashed #000;
-        padding: 8px;
-        width: 100%;
-        box-sizing: border-box;
-      }
-
-      .linea-punteada {
-        border-top: 2px dashed #000;
-        margin: 8px 0;
-      }
-    }
   </style>
 </head>
 <body>
@@ -129,9 +85,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Contenedor oculto para armar el ticket a imprimir -->
-  <div id="ticket-impresion" style="display: none;"></div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -205,10 +158,24 @@
       }
     }
 
-    // FORMATO DE IMPRESIÓN CON LETRA GIGANTE Y TAMAÑO COMPACTO
+    // IMPRESIÓN AISLADA Y LIMPIA VÍA IFRAME DEDICADO
     function imprimirTicket(comanda) {
-      const ticketContainer = document.getElementById('ticket-impresion');
-      if (!ticketContainer) return;
+      // 1. Eliminar cualquier iframe de impresión viejo si existe
+      const iframeViejo = document.getElementById('iframe-impresion');
+      if (iframeViejo) iframeViejo.remove();
+
+      // 2. Crear un marco invisible independiente para este ticket en particular
+      const iframe = document.createElement('iframe');
+      iframe.id = 'iframe-impresion';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow.document;
 
       const listaPlatos = comanda.items || comanda.platos || [];
       let filasPlatos = '';
@@ -216,50 +183,113 @@
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
         const obsPlato = arreglarTextoImpresion(item.observacion);
+        
+        const valorPrecio = item.precio !== undefined ? item.precio 
+                          : item.precioUnitario !== undefined ? item.precioUnitario 
+                          : item.subtotal !== undefined ? item.subtotal 
+                          : item.costo !== undefined ? item.costo 
+                          : item.monto !== undefined ? item.monto 
+                          : item.price !== undefined ? item.price : 0;
+
+        const precioPlato = Number(valorPrecio || 0).toFixed(2);
 
         filasPlatos += `
-          <div style="font-size: 24px; font-weight: 900; line-height: 1.2; margin-bottom: 10px;">
-            ${item.cantidad || 1}x ${nombrePlato}
+          <div style="margin-bottom: 10px;">
+            <div style="font-size: 22px; font-weight: 900; line-height: 1.1;">
+              ${item.cantidad || 1}x ${nombrePlato}
+            </div>
+            <div style="font-size: 20px; font-weight: bold; text-align: right; margin-top: 2px;">
+              S/ ${precioPlato}
+            </div>
             ${obsPlato ? `<div style="font-size: 18px; font-weight: bold; background: #000; color: #fff; padding: 3px 5px; margin-top: 4px;">* OBS: ${obsPlato}</div>` : ''}
           </div>
         `;
       });
 
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
+      const totalSeguro = Number(comanda.total || 0).toFixed(2);
 
-      ticketContainer.innerHTML = `
-        <div class="caja-borde">
-          <div style="text-align: center;">
-            <h1 style="margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">ANITA-WOK</h1>
+      // 3. Escribir el documento desde cero
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            @media print {
+              html, body {
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              @page {
+                size: 80mm auto;
+                margin: 0;
+              }
+            }
+            body {
+              width: 76mm;
+              padding: 2px 2px 40px 2px;
+              margin: 0;
+              font-family: 'Courier New', Courier, monospace;
+              color: #000;
+              background-color: #fff;
+              box-sizing: border-box;
+            }
+            .caja-borde {
+              border: 3px dashed #000;
+              padding: 8px;
+              width: 100%;
+              box-sizing: border-box;
+            }
+            .linea-punteada {
+              border-top: 2px dashed #000;
+              margin: 8px 0;
+            }
+            .espacio-corte {
+              height: 45px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="caja-borde">
+            <div style="text-align: center;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">ANITA-WOK</h1>
+            </div>
+            
+            <div class="linea-punteada"></div>
+
+            <div style="font-size: 20px; font-weight: bold; line-height: 1.3;">
+              <div>Comanda: #${comanda.id}</div>
+              <div>Ubicacion: ${ubicacionLimpia}</div>
+              <div>Hora: ${comanda.hora || ''}</div>
+            </div>
+
+            <div class="linea-punteada"></div>
+
+            <div>
+              ${filasPlatos}
+            </div>
+
+            <div class="linea-punteada"></div>
+
+            <div style="text-align: right; font-size: 22px; font-weight: 900; margin-top: 6px;">
+              Total: S/ ${totalSeguro}
+            </div>
           </div>
-          
-          <div class="linea-punteada"></div>
+          <div class="espacio-corte"></div>
+        </body>
+        </html>
+      `);
+      doc.close();
 
-          <div style="font-size: 20px; font-weight: bold; line-height: 1.3;">
-            <div>Comanda: #${comanda.id}</div>
-            <div>Ubicacion: ${ubicacionLimpia}</div>
-            <div>Hora: ${comanda.hora || ''}</div>
-          </div>
-
-          <div class="linea-punteada"></div>
-
-          <div>
-            ${filasPlatos}
-          </div>
-
-          <div class="linea-punteada"></div>
-
-          <div style="text-align: right; font-size: 22px; font-weight: 900; margin-top: 6px;">
-            Total: S/ ${Number(comanda.total).toFixed(2)}
-          </div>
-        </div>
-      `;
-
-      ticketContainer.style.display = 'block';
-      
+      // 4. Imprimir el iframe aislado y destruirlo
       setTimeout(() => {
-        window.print();
-        ticketContainer.style.display = 'none';
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        setTimeout(() => {
+          iframe.remove();
+        }, 1000);
       }, 300);
     }
 
@@ -281,10 +311,22 @@
       let itemsHTML = '';
       const listaPlatos = comanda.items || comanda.platos || [];
       listaPlatos.forEach(item => {
+        const valorPrecio = item.precio !== undefined ? item.precio 
+                          : item.precioUnitario !== undefined ? item.precioUnitario 
+                          : item.subtotal !== undefined ? item.subtotal 
+                          : item.costo !== undefined ? item.costo 
+                          : item.monto !== undefined ? item.monto 
+                          : item.price !== undefined ? item.price : 0;
+
+        const precioPlatoTarjeta = Number(valorPrecio || 0).toFixed(2);
+
         itemsHTML += `
-          <div class="item-plato">
-            <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
-            ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
+          <div class="item-plato d-flex justify-content-between align-items-center">
+            <div>
+              <span class="badge bg-danger text-white me-1">${item.cantidad || 1}x</span> ${item.nombre || item.titulo}
+              ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
+            </div>
+            <span class="fw-bold text-light ms-2">S/ ${precioPlatoTarjeta}</span>
           </div>
         `;
       });
@@ -299,6 +341,8 @@
           </div>
         `;
       }
+
+      const totalTarjeta = Number(comanda.total || 0).toFixed(2);
 
       col.innerHTML = `
         <div class="comanda-card">
@@ -316,7 +360,7 @@
           </div>
 
           <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-white">Total: S/ ${Number(comanda.total).toFixed(2)}</span>
+            <span class="fw-bold text-white">Total: S/ ${totalTarjeta}</span>
             <button class="btn btn-sm btn-success fw-bold" onclick="despacharComanda('${comanda.id}')">
               <i class="fa-solid fa-check me-1"></i> Listo
             </button>
