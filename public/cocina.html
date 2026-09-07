@@ -234,8 +234,6 @@
       const totalFinal = comanda.total ? Number(comanda.total) : acumuladoTotal;
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
 
-      ticketContainer.innerHTML = '';
-
       ticketContainer.innerHTML = `
         <div style="padding: 0; margin: 0; font-family: monospace; color: #000; background: #fff;">
           <div style="text-align: center;">
@@ -272,12 +270,13 @@
 
       ticketContainer.style.display = 'block';
       
+      // Llamada directa al diálogo nativo de impresión de Chrome
       setTimeout(() => {
         window.print();
         setTimeout(() => {
           ticketContainer.style.display = 'none';
-        }, 300);
-      }, 500);
+        }, 500);
+      }, 300);
     }
 
     socket.on('nuevaComanda', (comanda) => {
