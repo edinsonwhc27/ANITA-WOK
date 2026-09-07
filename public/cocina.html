@@ -59,7 +59,7 @@
       border-radius: 5px;
     }
 
-    /* CSS ULTRA-COMPACTO DE IMPRESIÓN (SIN MÁRGENES DILATADOS POR MÚLTIPLES PLATOS) */
+    /* CSS AJUSTADO PARA ELIMINAR EL SOBRANTE DE PAPEL */
     @media print {
       @page {
         margin: 0 !important;
@@ -91,12 +91,6 @@
       .tabla-platos td {
         padding: 1px 0 !important;
         vertical-align: top;
-      }
-      .renglon-fantasma {
-        font-size: 8px;
-        line-height: 1;
-        color: transparent !important;
-        user-select: none;
       }
     }
   </style>
@@ -258,19 +252,15 @@
 
           <hr style="border-top: 1px dashed #000; margin: 3px 0;">
 
-          <div style="font-size: 18px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 1px;">
+          <div style="font-size: 18px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 1px; padding-bottom: 0;">
             <span>TOTAL:</span>
             <span>S/ ${totalFinal.toFixed(2)}</span>
           </div>
-
-          <!-- Renglón transparente mínimo para vaciado de búfer -->
-          <div class="renglon-fantasma">&nbsp;</div>
         </div>
       `;
 
       ticketContainer.style.display = 'block';
       
-      // Llamada directa al diálogo nativo de impresión de Chrome
       setTimeout(() => {
         window.print();
         setTimeout(() => {
