@@ -45,7 +45,7 @@
     }
 
     .item-obs {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: #ffca28;
       font-weight: bold;
       display: block;
@@ -60,7 +60,7 @@
       border-radius: 5px;
     }
 
-    /* CSS CORREGIDO PARA SELLO Y CORTE CONTINUO */
+    /* CSS CORREGIDO PARA SELLO Y CORTE CONTINUO CON MÁXIMO CONTRASTE */
     @media print {
       @page {
         margin: 0 !important;
@@ -71,6 +71,7 @@
         padding: 0 !important;
         background: #fff !important;
         height: auto !important;
+        color: #000 !important;
       }
       body * {
         visibility: hidden !important;
@@ -201,7 +202,7 @@
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo || item.descripcion);
         
-        // Búsqueda profunda de cualquier variación en el campo de observación
+        // Búsqueda profunda de variaciones del campo observación
         const obsTexto = item.observacion || item.observaciones || item.obs || item.espec || item.nota || item.comentario || '';
         const obsPlato = arreglarTextoImpresion(obsTexto);
         
@@ -212,13 +213,15 @@
 
         filasPlatos += `
           <tr>
-            <td style="font-size: 13px; font-weight: 900; width: 25px; text-align: left; vertical-align: top; padding: 1px 0;">${cantidad}x</td>
-            <td style="font-size: 13px; font-weight: 800; text-align: left; padding: 1px 0;">
-              <div>${nombrePlato}</div>
-              ${obsPlato ? `<div style="font-size: 12px; font-weight: 900; color: #000 !important; margin-top: 1px; text-transform: uppercase;">>> OBS: ${obsPlato}</div>` : ''}
+            <td style="font-size: 13px; font-weight: 900; width: 25px; text-align: left; vertical-align: top; padding: 1px 0; color: #000 !important;">
+              <strong>${cantidad}x</strong>
             </td>
-            <td style="font-size: 13px; font-weight: 900; text-align: right; width: 70px; vertical-align: top; padding: 1px 0;">
-              ${subtotal > 0 ? `S/ ${subtotal.toFixed(2)}` : ''}
+            <td style="font-size: 13px; font-weight: 900; text-align: left; padding: 1px 0; color: #000 !important;">
+              <div><strong>${nombrePlato}</strong></div>
+              ${obsPlato ? `<div style="font-size: 12px; font-weight: 900; color: #000 !important; margin-top: 1px; text-transform: uppercase; line-height: 1.1;"><strong>>> OBS: ${obsPlato}</strong></div>` : ''}
+            </td>
+            <td style="font-size: 13px; font-weight: 900; text-align: right; width: 70px; vertical-align: top; padding: 1px 0; color: #000 !important;">
+              ${subtotal > 0 ? `<strong>S/ ${subtotal.toFixed(2)}</strong>` : ''}
             </td>
           </tr>
         `;
@@ -230,15 +233,15 @@
       ticketContainer.innerHTML = `
         <div style="width: 100%; padding: 0; margin: 0; font-family: monospace; color: #000 !important; background: #fff; line-height: 1.15; font-size: 12px;">
           <div style="text-align: center;">
-            <h1 style="margin: 0; padding: 0; font-size: 16px; font-weight: 900;">ANITA-WOK</h1>
+            <h1 style="margin: 0; padding: 0; font-size: 16px; font-weight: 900; color: #000 !important;"><strong>ANITA-WOK</strong></h1>
           </div>
           
           <div style="border-bottom: 1px dashed #000; margin: 2px 0;"></div>
 
-          <div style="font-size: 12px; font-weight: bold;">
-            <div>Comanda: #${comanda.id}</div>
-            <div>Ubicacion: ${ubicacionLimpia}</div>
-            <div>Hora: ${comanda.hora || ''}</div>
+          <div style="font-size: 12px; font-weight: 900; color: #000 !important;">
+            <div><strong>Comanda: #${comanda.id}</strong></div>
+            <div><strong>Ubicacion: ${ubicacionLimpia}</strong></div>
+            <div><strong>Hora: ${comanda.hora || ''}</strong></div>
           </div>
 
           <div style="border-bottom: 1px dashed #000; margin: 2px 0;"></div>
@@ -251,9 +254,9 @@
 
           <div style="border-bottom: 1px dashed #000; margin: 2px 0;"></div>
 
-          <div style="font-size: 15px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 2px; padding-bottom: 2px;">
-            <span>TOTAL:</span>
-            <span>S/ ${totalFinal.toFixed(2)}</span>
+          <div style="font-size: 15px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 2px; padding-bottom: 2px; color: #000 !important;">
+            <span><strong>TOTAL:</strong></span>
+            <span><strong>S/ ${totalFinal.toFixed(2)}</strong></span>
           </div>
         </div>
       `;
@@ -276,15 +279,15 @@
 
       ticketContainer.innerHTML = `
         <div style="width: 100%; padding: 0; margin: 0; font-family: monospace; color: #000 !important; background: #fff; text-align: center; line-height: 1.15;">
-          <h1 style="margin: 0; padding: 0; font-size: 16px; font-weight: 900;">*** ANULADO ***</h1>
+          <h1 style="margin: 0; padding: 0; font-size: 16px; font-weight: 900; color: #000 !important;"><strong>*** ANULADO ***</strong></h1>
           <div style="border-bottom: 2px solid #000; margin: 2px 0;"></div>
-          <div style="font-size: 13px; font-weight: 900;">
-            <div>COMANDA: #${comanda.id}</div>
-            <div>UBICACION: ${ubicacionLimpia}</div>
+          <div style="font-size: 13px; font-weight: 900; color: #000 !important;">
+            <div><strong>COMANDA: #${comanda.id}</strong></div>
+            <div><strong>UBICACION: ${ubicacionLimpia}</strong></div>
           </div>
           <div style="border-bottom: 2px solid #000; margin: 2px 0;"></div>
-          <div style="font-size: 15px; font-weight: 900; margin: 4px 0;">
-            ¡NO PREPARAR ESTE PEDIDO!
+          <div style="font-size: 15px; font-weight: 900; margin: 4px 0; color: #000 !important;">
+            <strong>¡NO PREPARAR ESTE PEDIDO!</strong>
           </div>
           <div style="border-bottom: 2px solid #000; margin: 2px 0;"></div>
         </div>
