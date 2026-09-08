@@ -60,7 +60,7 @@
       border-radius: 5px;
     }
 
-    /* CSS CORREGIDO CON MARGEN EXTRA PARA AVANCE DE PAPEL */
+    /* CSS DE IMPRESIÓN CORREGIDO PARA EVITAR QUE EL TOTAL QUEDE EN LA SIGUIENTE COMANDA */
     @media print {
       @page {
         margin: 0 !important;
@@ -86,9 +86,10 @@
         width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
-        padding-bottom: 35mm !important; /* Margen amplio de avance */
-        page-break-after: avoid !important;
-        break-after: avoid !important;
+        
+        /* CORRECCIÓN CRÍTICA: */
+        page-break-after: always !important; /* Fuerza el cierre de página en el driver */
+        break-after: page !important;
         page-break-inside: avoid !important;
       }
       .tabla-platos {
@@ -206,7 +207,6 @@
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo || item.descripcion);
         
-        // Búsqueda profunda de variaciones del campo observación
         const obsTexto = item.observacion || item.observaciones || item.obs || item.espec || item.nota || item.comentario || '';
         const obsPlato = arreglarTextoImpresion(obsTexto);
         
@@ -263,8 +263,8 @@
             <span><strong>S/ ${totalFinal.toFixed(2)}</strong></span>
           </div>
 
-          <!-- ESPACIO EXTRA DE AVANCE (SALTOS DE LÍNEA) -->
-          <br><br><br><br><br><br>
+          <!-- PADDING / SALTO FISICO PARA RECORRER EL PAPEL PASANDO LA CUCHILLA -->
+          <div style="height: 120px; width: 100%; display: block;"></div>
         </div>
       `;
 
@@ -298,8 +298,8 @@
           </div>
           <div style="border-bottom: 2px solid #000; margin: 2px 0;"></div>
 
-          <!-- ESPACIO EXTRA DE AVANCE -->
-          <br><br><br><br><br><br>
+          <!-- PADDING DE ARRASTRE -->
+          <div style="height: 120px; width: 100%; display: block;"></div>
         </div>
       `;
 
