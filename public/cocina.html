@@ -45,10 +45,11 @@
     }
 
     .item-obs {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #ffca28;
-      font-weight: normal;
+      font-weight: bold;
       display: block;
+      margin-top: 2px;
     }
 
     .badge-metodo {
@@ -59,16 +60,18 @@
       border-radius: 5px;
     }
 
-    /* CSS AJUSTADO PARA ELIMINAR EL SOBRANTE DE PAPEL */
+    /* CSS CORREGIDO PARA EVITAR SALTO DE PÁGINA EN LA ÚLTIMA LÍNEA */
     @media print {
       @page {
-        margin: 0 !important;
+        margin: 0mm !important;
         size: auto;
       }
       html, body {
         margin: 0 !important;
         padding: 0 !important;
         background: #fff !important;
+        height: auto !important;
+        overflow: hidden !important;
       }
       body * {
         visibility: hidden !important;
@@ -83,6 +86,7 @@
         width: 100%;
         padding: 0 !important;
         margin: 0 !important;
+        page-break-inside: avoid !important;
       }
       .tabla-platos {
         width: 100%;
@@ -135,18 +139,12 @@
     function arreglarTextoImpresion(texto) {
       if (!texto) return '';
       return String(texto)
-        .replace(/á/g, 'a')
-        .replace(/Á/g, 'A')
-        .replace(/é/g, 'e')
-        .replace(/É/g, 'E')
-        .replace(/í/g, 'i')
-        .replace(/Í/g, 'I')
-        .replace(/ó/g, 'o')
-        .replace(/Ó/g, 'O')
-        .replace(/ú/g, 'u')
-        .replace(/Ú/g, 'U')
-        .replace(/ñ/g, 'n')
-        .replace(/Ñ/g, 'N');
+        .replace(/á/g, 'a').replace(/Á/g, 'A')
+        .replace(/é/g, 'e').replace(/É/g, 'E')
+        .replace(/í/g, 'i').replace(/Í/g, 'I')
+        .replace(/ó/g, 'o').replace(/Ó/g, 'O')
+        .replace(/ú/g, 'u').replace(/Ú/g, 'U')
+        .replace(/ñ/g, 'n').replace(/Ñ/g, 'N');
     }
 
     function emitirPitido() {
@@ -157,7 +155,6 @@
 
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-        
         gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
 
@@ -205,7 +202,9 @@
 
       listaPlatos.forEach(item => {
         const nombrePlato = arreglarTextoImpresion(item.nombre || item.titulo);
-        const obsPlato = arreglarTextoImpresion(item.observacion);
+        const obsTexto = item.observacion || item.obs || item.espec || item.nota || '';
+        const obsPlato = arreglarTextoImpresion(obsTexto);
+        
         const cantidad = Number(item.cantidad || 1);
         const precioUnitario = Number(item.precio || item.costo || 0);
         const subtotal = cantidad * precioUnitario;
@@ -213,12 +212,12 @@
 
         filasPlatos += `
           <tr>
-            <td style="font-size: 16px; font-weight: 900; width: 30px; text-align: left;">${cantidad}x</td>
-            <td style="font-size: 16px; font-weight: 800; text-align: left;">
+            <td style="font-size: 14px; font-weight: 900; width: 25px; text-align: left; vertical-align: top;">${cantidad}x</td>
+            <td style="font-size: 14px; font-weight: 800; text-align: left;">
               ${nombrePlato}
-              ${obsPlato ? `<div style="font-size: 13px; font-weight: bold; background: #000; color: #fff; padding: 0 3px; margin-top: 1px; display: inline-block;">* OBS: ${obsPlato}</div>` : ''}
+              ${obsPlato ? `<div style="font-size: 12px; font-weight: 900; color: #000; margin-top: 1px; text-transform: uppercase;">>> OBS: ${obsPlato}</div>` : ''}
             </td>
-            <td style="font-size: 16px; font-weight: 900; text-align: right; width: 85px;">
+            <td style="font-size: 14px; font-weight: 900; text-align: right; width: 75px; vertical-align: top;">
               ${subtotal > 0 ? `S/ ${subtotal.toFixed(2)}` : ''}
             </td>
           </tr>
@@ -229,20 +228,20 @@
       const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
 
       ticketContainer.innerHTML = `
-        <div style="padding: 0; margin: 0; font-family: monospace; color: #000; background: #fff;">
+        <div style="padding: 0; margin: 0; font-family: monospace; color: #000; background: #fff; line-height: 1.15;">
           <div style="text-align: center;">
-            <h1 style="margin: 0; padding: 0; font-size: 22px; font-weight: 900;">ANITA-WOK</h1>
+            <h1 style="margin: 0; padding: 0; font-size: 18px; font-weight: 900;">ANITA-WOK</h1>
           </div>
           
-          <hr style="border-top: 1px dashed #000; margin: 3px 0;">
+          <hr style="border-top: 1px dashed #000; margin: 2px 0;">
 
-          <div style="font-size: 15px; font-weight: bold; line-height: 1.1;">
+          <div style="font-size: 13px; font-weight: bold; line-height: 1.1;">
             <div>Comanda: #${comanda.id}</div>
             <div>Ubicacion: ${ubicacionLimpia}</div>
             <div>Hora: ${comanda.hora || ''}</div>
           </div>
 
-          <hr style="border-top: 1px dashed #000; margin: 3px 0;">
+          <hr style="border-top: 1px dashed #000; margin: 2px 0;">
 
           <table class="tabla-platos">
             <tbody>
@@ -250,12 +249,44 @@
             </tbody>
           </table>
 
-          <hr style="border-top: 1px dashed #000; margin: 3px 0;">
+          <hr style="border-top: 1px dashed #000; margin: 2px 0;">
 
-          <div style="font-size: 18px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 1px; padding-bottom: 0;">
+          <div style="font-size: 16px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 1px; padding-bottom: 0;">
             <span>TOTAL:</span>
             <span>S/ ${totalFinal.toFixed(2)}</span>
           </div>
+        </div>
+      `;
+
+      ticketContainer.style.display = 'block';
+      
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          ticketContainer.style.display = 'none';
+        }, 500);
+      }, 300);
+    }
+
+    function imprimirTicketAnulacion(comanda) {
+      const ticketContainer = document.getElementById('ticket-impresion');
+      if (!ticketContainer) return;
+
+      const ubicacionLimpia = arreglarTextoImpresion(comanda.mesa ? comanda.mesa : 'Llevar');
+
+      ticketContainer.innerHTML = `
+        <div style="padding: 0; margin: 0; font-family: monospace; color: #000; background: #fff; text-align: center; line-height: 1.15;">
+          <h1 style="margin: 0; padding: 0; font-size: 18px; font-weight: 900;">*** ANULADO ***</h1>
+          <hr style="border-top: 2px solid #000; margin: 2px 0;">
+          <div style="font-size: 14px; font-weight: 900;">
+            <div>COMANDA: #${comanda.id}</div>
+            <div>UBICACION: ${ubicacionLimpia}</div>
+          </div>
+          <hr style="border-top: 2px solid #000; margin: 2px 0;">
+          <div style="font-size: 16px; font-weight: 900; margin: 4px 0;">
+            ¡NO PREPARAR ESTE PEDIDO!
+          </div>
+          <hr style="border-top: 2px solid #000; margin: 2px 0;">
         </div>
       `;
 
@@ -294,11 +325,13 @@
         const subtotal = cantidad * precioUnitario;
         totalTarjeta += subtotal;
 
+        const obsTexto = item.observacion || item.obs || item.espec || item.nota || '';
+
         itemsHTML += `
           <div class="item-plato d-flex justify-content-between align-items-center">
             <div>
               <span class="badge bg-danger text-white me-1">${cantidad}x</span> ${item.nombre || item.titulo}
-              ${item.observacion ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>${item.observacion}</span>` : ''}
+              ${obsTexto ? `<span class="item-obs"><i class="fa-solid fa-comment-dots me-1"></i>OBS: ${obsTexto}</span>` : ''}
             </div>
             ${subtotal > 0 ? `<span class="fw-bold text-success small ms-2">S/ ${subtotal.toFixed(2)}</span>` : ''}
           </div>
@@ -344,6 +377,29 @@
 
       contenedor.insertBefore(col, contenedor.firstChild);
       imprimirTicket(comanda);
+    });
+
+    socket.on('comandaAnulada', (comanda) => {
+      console.log("Comanda anulada:", comanda);
+
+      if (audioPermitido) {
+        emitirPitido();
+      }
+
+      imprimirTicketAnulacion(comanda);
+
+      const elem = document.getElementById(`comanda-${comanda.id}`);
+      if (elem) {
+        elem.innerHTML = `
+          <div class="comanda-card border-danger bg-danger bg-opacity-25 text-center py-4">
+            <h4 class="text-danger fw-bold"><i class="fa-solid fa-ban me-2"></i> ANULADO</h4>
+            <p class="mb-0 fw-bold">Comanda #${comanda.id}</p>
+          </div>
+        `;
+        setTimeout(() => {
+          despacharComanda(comanda.id);
+        }, 4000);
+      }
     });
 
     function despacharComanda(id) {
