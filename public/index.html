@@ -4,8 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ANITA-WOK - Sistema de Comandas</title>
+  
+  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Librería para generar Excel (.xlsx) real con múltiples pestañas -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Librería para Renderizar Gráficos Estadísticos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
       --brand-red: #be123c;
@@ -261,7 +270,7 @@
               <i class="fa-solid fa-paper-plane me-1"></i> ENVIAR A COCINA
             </button>
             
-            <button class="btn btn-warning w-100 fw-bold text-dark shadow-sm" style="font-size: 0.8rem; border-radius: 8px;" onclick="cerrarCaja()">
+            <button class="btn btn-warning w-100 fw-bold text-dark shadow-sm" style="font-size: 0.8rem; border-radius: 8px;" onclick="abrirModalCierreCaja()">
               <i class="fa-solid fa-box-archive me-1"></i> CERRAR CAJA Y DESCARGAR EXCEL
             </button>
           </div>
@@ -271,19 +280,63 @@
     </div>
   </div>
 
-  <!-- MODAL DE CIERRE DE CAJA -->
+  <!-- MODAL DE CIERRE DE CAJA Y ESTADÍSTICAS -->
   <div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
         <div class="modal-header text-white" style="background-color: var(--brand-red);">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-calculator me-2"></i>Resumen de Cierre de Caja</h5>
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-chart-pie me-2"></i>Cierre de Caja y Métricas del Día</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="cuerpo-modal-caja"></div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" style="border-radius: 6px;" data-bs-dismiss="modal">Cerrar</button>
+        <div class="modal-body p-4" id="cuerpo-modal-caja">
+          
+          <!-- RESUMEN EN TARJETAS DE MÉTRICA CLAVE -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded border text-center">
+                <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Generado</span>
+                <h3 class="fw-bold text-success mb-0" id="stat-total-dinero">S/ 0.00</h3>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded border text-center">
+                <span class="text-muted small fw-bold text-uppercase d-block mb-1">Pedidos Atendidos</span>
+                <h3 class="fw-bold text-dark mb-0" id="stat-total-pedidos">0</h3>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3 bg-light rounded border text-center">
+                <span class="text-muted small fw-bold text-uppercase d-block mb-1">Plato Estrella</span>
+                <h6 class="fw-bold text-danger mb-0 text-truncate" id="stat-plato-top">-</h6>
+              </div>
+            </div>
+          </div>
+
+          <!-- GRÁFICOS ESTADÍSTICOS -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-7">
+              <div class="border rounded p-3 h-100 bg-white">
+                <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-fire me-2 text-danger"></i>Top 5 Platos Más Vendidos</h6>
+                <div style="position: relative; height: 220px;">
+                  <canvas id="chartPlatosTop"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="border rounded p-3 h-100 bg-white">
+                <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-wallet me-2 text-primary"></i>Métodos de Pago</h6>
+                <div style="position: relative; height: 220px;" class="d-flex justify-content-center">
+                  <canvas id="chartMetodosPago"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" style="border-radius: 6px;" data-bs-dismiss="modal">Cerrar Ventana</button>
           <button type="button" class="btn btn-success fw-bold" style="border-radius: 6px;" onclick="descargarExcelVentas()">
-            <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel (.csv)
+            <i class="fa-solid fa-file-excel me-1"></i> Descargar Reporte (.xlsx)
           </button>
         </div>
       </div>
@@ -294,5 +347,195 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="app.js" onerror="this.onerror=null; this.src='/js/app.js';"></script>
 
+  <!-- LÓGICA DE CIERRE DE CAJA, EXCEL Y GRÁFICOS -->
+  <script>
+    // Almacenamiento local de comanda para garantizar que el cierre capture todos los pedidos de la sesión
+    window.ventasDelDia = JSON.parse(localStorage.getItem('ventas_anita_wok') || '[]');
+
+    let chartPlatosInstance = null;
+    let chartPagosInstance = null;
+
+    // Lógica al presionar "CERRAR CAJA Y DESCARGAR EXCEL"
+    function abrirModalCierreCaja() {
+      const historial = window.ventasDelDia || [];
+
+      if (historial.length === 0) {
+        alert("No hay pedidos ni ventas registradas en la jornada actual.");
+        return;
+      }
+
+      let totalDinero = 0;
+      let metodosPago = { Efectivo: 0, Yape: 0, Plin: 0, Tarjeta: 0 };
+      let conteoPlatos = {};
+
+      historial.forEach(comanda => {
+        const total = Number(comanda.total || 0);
+        totalDinero += total;
+
+        // Metodo de pago
+        const m = comanda.metodoPago || 'Efectivo';
+        if (metodosPago[m] !== undefined) metodosPago[m] += total;
+        else metodosPago['Efectivo'] += total;
+
+        // Platos
+        const items = comanda.items || comanda.platos || [];
+        items.forEach(it => {
+          const nombre = it.nombre || it.titulo || 'Producto';
+          const cant = Number(it.cantidad || 1);
+          conteoPlatos[nombre] = (conteoPlatos[nombre] || 0) + cant;
+        });
+      });
+
+      // Actualizar tarjetas de métricas
+      document.getElementById('stat-total-dinero').innerText = `S/ ${totalDinero.toFixed(2)}`;
+      document.getElementById('stat-total-pedidos').innerText = historial.length;
+
+      // Determinar Plato Estrella
+      const platosOrdenados = Object.keys(conteoPlatos).sort((a, b) => conteoPlatos[b] - conteoPlatos[a]);
+      const platoTop = platosOrdenados[0] ? `${platosOrdenados[0]} (${conteoPlatos[platosOrdenados[0]]})` : '-';
+      document.getElementById('stat-plato-top').innerText = platoTop;
+
+      // Generar o actualizar Gráficos (Chart.js)
+      renderizarGraficos(conteoPlatos, metodosPago);
+
+      // Abrir Modal
+      const modal = new bootstrap.Modal(document.getElementById('modalCaja'));
+      modal.show();
+    }
+
+    function renderizarGraficos(conteoPlatos, metodosPago) {
+      // Destruir instancias previas si existen
+      if (chartPlatosInstance) chartPlatosInstance.destroy();
+      if (chartPagosInstance) chartPagosInstance.destroy();
+
+      // Top 5 Platos
+      const topPlatosNombres = Object.keys(conteoPlatos).sort((a, b) => conteoPlatos[b] - conteoPlatos[a]).slice(0, 5);
+      const topPlatosCantidades = topPlatosNombres.map(n => conteoPlatos[n]);
+
+      const ctxPlatos = document.getElementById('chartPlatosTop').getContext('2d');
+      chartPlatosInstance = new Chart(ctxPlatos, {
+        type: 'bar',
+        data: {
+          labels: topPlatosNombres,
+          datasets: [{
+            label: 'Unidades Vendidas',
+            data: topPlatosCantidades,
+            backgroundColor: '#be123c',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+      });
+
+      // Métodos de Pago
+      const ctxPagos = document.getElementById('chartMetodosPago').getContext('2d');
+      chartPagosInstance = new Chart(ctxPagos, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(metodosPago),
+          datasets: [{
+            data: Object.values(metodosPago),
+            backgroundColor: ['#10b981', '#7c3aed', '#0284c7', '#f59e0b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    // Generar y descargar el Excel multishoet (.xlsx)
+    function descargarExcelVentas() {
+      const historial = window.ventasDelDia || [];
+
+      if (historial.length === 0) {
+        alert("No hay ventas para exportar.");
+        return;
+      }
+
+      let totalGeneral = 0;
+      let resumenPagos = { Efectivo: 0, Yape: 0, Plin: 0, Tarjeta: 0 };
+      let resumenPlatos = {};
+      let detalleFilas = [];
+
+      historial.forEach(comanda => {
+        const total = Number(comanda.total || 0);
+        totalGeneral += total;
+
+        const m = comanda.metodoPago || 'Efectivo';
+        if (resumenPagos[m] !== undefined) resumenPagos[m] += total;
+        else resumenPagos['Efectivo'] += total;
+
+        const items = comanda.items || comanda.platos || [];
+        items.forEach(p => {
+          const nombre = p.nombre || p.titulo || 'Producto';
+          const cant = Number(p.cantidad || 1);
+          const precio = Number(p.precio || 0);
+          const subtotal = cant * precio;
+
+          if (!resumenPlatos[nombre]) {
+            resumenPlatos[nombre] = { cantidad: 0, subtotal: 0 };
+          }
+          resumenPlatos[nombre].cantidad += cant;
+          resumenPlatos[nombre].subtotal += subtotal;
+        });
+
+        detalleFilas.push({
+          "N° Comanda": `#${comanda.id}`,
+          "Hora": comanda.hora || '',
+          "Ubicación / Mesa": comanda.mesa || 'Llevar',
+          "Método Pago": comanda.metodoPago || 'Efectivo',
+          "Total (S/)": total.toFixed(2)
+        });
+      });
+
+      // Hoja 1: Resumen General
+      const datosResumen = [
+        { "Métrica": "Fecha de Cierre", "Valor": new Date().toLocaleString() },
+        { "Métrica": "Total Recaudado", "Valor": `S/ ${totalGeneral.toFixed(2)}` },
+        { "Métrica": "Total Comandas Atendidas", "Valor": historial.length },
+        { "Métrica": "Efectivo", "Valor": `S/ ${resumenPagos.Efectivo.toFixed(2)}` },
+        { "Métrica": "Yape", "Valor": `S/ ${resumenPagos.Yape.toFixed(2)}` },
+        { "Métrica": "Plin", "Valor": `S/ ${resumenPagos.Plin.toFixed(2)}` },
+        { "Métrica": "Tarjeta", "Valor": `S/ ${resumenPagos.Tarjeta.toFixed(2)}` }
+      ];
+
+      // Hoja 2: Conteo de Platos
+      const datosPlatos = Object.keys(resumenPlatos).map(nombre => ({
+        "Plato / Producto": nombre,
+        "Cantidad Vendida": resumenPlatos[nombre].cantidad,
+        "Total Recaudado (S/)": resumenPlatos[nombre].subtotal.toFixed(2)
+      })).sort((a, b) => b["Cantidad Vendida"] - a["Cantidad Vendida"]);
+
+      // Construcción del libro
+      const wb = XLSX.utils.book_new();
+      const wsResumen = XLSX.utils.json_to_sheet(datosResumen);
+      const wsPlatos = XLSX.utils.json_to_sheet(datosPlatos);
+      const wsDetalle = XLSX.utils.json_to_sheet(detalleFilas);
+
+      XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen Cierre");
+      XLSX.utils.book_append_sheet(wb, wsPlatos, "Platos Vendidos");
+      XLSX.utils.book_append_sheet(wb, wsDetalle, "Detalle Comandas");
+
+      // Descargar archivo
+      const fecha = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `Cierre_Caja_ANITA_WOK_${fecha}.xlsx`);
+    }
+
+    // Escuchar socket para guardar pedidos completados automáticamente
+    if (typeof socket !== 'undefined') {
+      socket.on('nuevaComanda', (comanda) => {
+        window.ventasDelDia.push(comanda);
+        localStorage.setItem('ventas_anita_wok', JSON.stringify(window.ventasDelDia));
+      });
+    }
+  </script>
 </body>
 </html>
