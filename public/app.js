@@ -4,7 +4,8 @@
 
 const socket = typeof io !== 'undefined' ? io() : null;
 
-let historialVentas = [];
+// Cargar ventas guardadas en disco duro (localStorage) o iniciar array vacío
+let historialVentas = JSON.parse(localStorage.getItem('ventas_anita_wok') || '[]');
 let textoBusqueda = '';
 let categoriaActual = 'chifa';
 let pedido = [];
@@ -320,7 +321,9 @@ function enviarComanda() {
     socket.emit('nuevaComanda', datosComanda);
   }
 
+  // Guardar en array y en el almacenamiento permanente del navegador (localStorage)
   historialVentas.push(datosComanda);
+  localStorage.setItem('ventas_anita_wok', JSON.stringify(historialVentas));
 
   alert(`¡Comanda #${idCorrelativo} enviada a Cocina! Ubicación: ${mesa} | Pago: ${metodoPago}`);
 
@@ -456,6 +459,16 @@ function descargarExcelVentas() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// REINICIAR CAJA PARA UN NUEVO DÍA
+function reiniciarTurnoDiario() {
+  if (confirm('¿Estás seguro de iniciar un NUEVO DÍA?\n\nSe borrarán los registros del turno actual de la pantalla. Asegúrate de haber descargado el reporte en Excel primero.')) {
+    localStorage.removeItem('ventas_anita_wok');
+    historialVentas = [];
+    alert('¡Caja reiniciada con éxito! Lista para el nuevo turno.');
+    location.reload();
+  }
 }
 
 // Inicialización
