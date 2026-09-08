@@ -270,8 +270,13 @@
               <i class="fa-solid fa-paper-plane me-1"></i> ENVIAR A COCINA
             </button>
             
-            <button class="btn btn-warning w-100 fw-bold text-dark shadow-sm" style="font-size: 0.8rem; border-radius: 8px;" onclick="abrirModalCierreCaja()">
+            <button class="btn btn-warning w-100 fw-bold text-dark shadow-sm mb-2" style="font-size: 0.8rem; border-radius: 8px;" onclick="abrirModalCierreCaja()">
               <i class="fa-solid fa-box-archive me-1"></i> CERRAR CAJA Y DESCARGAR EXCEL
+            </button>
+
+            <!-- BOTÓN PARA REINICIAR CAJA E INICIAR UN NUEVO DÍA -->
+            <button class="btn btn-outline-danger w-100 fw-bold shadow-sm" style="font-size: 0.78rem; border-radius: 8px;" onclick="reiniciarTurnoDiario()">
+              <i class="fa-solid fa-rotate-left me-1"></i> NUEVO DÍA (REINICIAR)
             </button>
           </div>
         </div>
@@ -349,15 +354,13 @@
 
   <!-- LÓGICA DE CIERRE DE CAJA, EXCEL Y GRÁFICOS -->
   <script>
-    // Almacenamiento local de comanda para garantizar que el cierre capture todos los pedidos de la sesión
-    window.ventasDelDia = JSON.parse(localStorage.getItem('ventas_anita_wok') || '[]');
-
     let chartPlatosInstance = null;
     let chartPagosInstance = null;
 
     // Lógica al presionar "CERRAR CAJA Y DESCARGAR EXCEL"
     function abrirModalCierreCaja() {
-      const historial = window.ventasDelDia || [];
+      // Sincronizar directamente con las ventas guardadas en localStorage/app.js
+      const historial = typeof historialVentas !== 'undefined' ? historialVentas : JSON.parse(localStorage.getItem('ventas_anita_wok') || '[]');
 
       if (historial.length === 0) {
         alert("No hay pedidos ni ventas registradas en la jornada actual.");
@@ -372,7 +375,7 @@
         const total = Number(comanda.total || 0);
         totalDinero += total;
 
-        // Metodo de pago
+        // Método de pago
         const m = comanda.metodoPago || 'Efectivo';
         if (metodosPago[m] !== undefined) metodosPago[m] += total;
         else metodosPago['Efectivo'] += total;
@@ -451,9 +454,9 @@
       });
     }
 
-    // Generar y descargar el Excel multishoet (.xlsx)
+    // Generar y descargar el Excel multisheet (.xlsx)
     function descargarExcelVentas() {
-      const historial = window.ventasDelDia || [];
+      const historial = typeof historialVentas !== 'undefined' ? historialVentas : JSON.parse(localStorage.getItem('ventas_anita_wok') || '[]');
 
       if (historial.length === 0) {
         alert("No hay ventas para exportar.");
@@ -527,14 +530,6 @@
       // Descargar archivo
       const fecha = new Date().toISOString().split('T')[0];
       XLSX.writeFile(wb, `Cierre_Caja_ANITA_WOK_${fecha}.xlsx`);
-    }
-
-    // Escuchar socket para guardar pedidos completados automáticamente
-    if (typeof socket !== 'undefined') {
-      socket.on('nuevaComanda', (comanda) => {
-        window.ventasDelDia.push(comanda);
-        localStorage.setItem('ventas_anita_wok', JSON.stringify(window.ventasDelDia));
-      });
     }
   </script>
 </body>
