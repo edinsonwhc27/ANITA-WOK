@@ -60,7 +60,7 @@
       border-radius: 5px;
     }
 
-    /* CSS DE IMPRESIÓN CORREGIDO PARA EVITAR QUE EL TOTAL QUEDE EN LA SIGUIENTE COMANDA */
+    /* REGLAS DE IMPRESIÓN COMPATIBLES CON MODO KIOSK */
     @media print {
       @page {
         margin: 0 !important;
@@ -86,11 +86,8 @@
         width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
-        
-        /* CORRECCIÓN CRÍTICA: */
-        page-break-after: always !important; /* Fuerza el cierre de página en el driver */
+        page-break-after: always !important;
         break-after: page !important;
-        page-break-inside: avoid !important;
       }
       .tabla-platos {
         width: 100%;
@@ -99,6 +96,11 @@
       .tabla-platos td {
         padding: 1px 0 !important;
         vertical-align: top;
+      }
+      .bloque-avance-papel {
+        height: 180px !important;
+        display: block !important;
+        clear: both !important;
       }
     }
   </style>
@@ -258,13 +260,17 @@
 
           <div style="border-bottom: 1px dashed #000; margin: 2px 0;"></div>
 
-          <div style="font-size: 15px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 2px; padding-bottom: 2px; color: #000 !important;">
+          <div style="font-size: 15px; font-weight: 900; display: flex; justify-content: space-between; margin-top: 4px; padding-bottom: 5px; color: #000 !important;">
             <span><strong>TOTAL:</strong></span>
             <span><strong>S/ ${totalFinal.toFixed(2)}</strong></span>
           </div>
 
-          <!-- PADDING / SALTO FISICO PARA RECORRER EL PAPEL PASANDO LA CUCHILLA -->
-          <div style="height: 120px; width: 100%; display: block;"></div>
+          <div style="border-bottom: 1px dashed #000; margin: 4px 0 10px 0;"></div>
+
+          <!-- BLOQUE DE ARRASTRE OBLIGATORIO PARA LA GUILLOTINA EN MODO KIOSK -->
+          <div class="bloque-avance-papel" style="height: 180px; width: 100%; display: block; clear: both;">
+            &nbsp;
+          </div>
         </div>
       `;
 
@@ -298,8 +304,10 @@
           </div>
           <div style="border-bottom: 2px solid #000; margin: 2px 0;"></div>
 
-          <!-- PADDING DE ARRASTRE -->
-          <div style="height: 120px; width: 100%; display: block;"></div>
+          <!-- BLOQUE DE ARRASTRE DE PAPEL -->
+          <div class="bloque-avance-papel" style="height: 180px; width: 100%; display: block; clear: both;">
+            &nbsp;
+          </div>
         </div>
       `;
 
